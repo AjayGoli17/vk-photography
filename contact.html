@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact | Premium Portfolio</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/contact.css">
+</head>
+<body>
+
+    <header class="hero">
+        <h1>Get in touch</h1>
+        <p>Let's talk about your next project</p>
+    </header>
+
+    <main class="contact-container">
+
+        <section class="form-panel">
+            <h2 class="reveal">Book your shoot</h2>
+            <form id="bookingForm">
+                <div class="field-row">
+                    <div class="field reveal">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" placeholder="Your full name" required>
+                    </div>
+                    <div class="field reveal">
+                        <label for="phone">Phone number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="+91 00000 00000" required>
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field reveal">
+                        <label for="service">Service</label>
+                        <select id="service" name="service" required>
+                            <option value="" disabled selected>Select a service</option>
+                            <option>Wedding & Pre Wedding Shoots</option>
+                            <option>Haldi Shoots</option>
+                            <option>Birthday Parties</option>
+                            <option>Anniversary Reels</option>
+                            <option>Couple Shoots</option>
+                            <option>House Warming</option>
+                            <option>Naming Ceremony</option>
+                        </select>
+                    </div>
+                    <div class="field reveal">
+                        <label for="event-date">Event date</label>
+                        <input type="date" id="event-date" name="event-date" required>
+                    </div>
+                </div>
+                <div class="field reveal">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" placeholder="Venue / city" required>
+                </div>
+                <div class="field reveal">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" placeholder="Describe your vision..."></textarea>
+                </div>
+                <button type="submit" class="submit-button reveal">
+                    <span class="btn-spinner"></span>
+                    <span class="btn-label">Book your shoot</span>
+                </button>
+            </form>
+        </section>
+
+        <aside class="info-panel">
+            <div class="info-block reveal">
+                <h3>Contact</h3>
+                <div class="info-line">
+                    <span>Email</span>
+                    <a href="mailto:ajaygoli9347@gmail.com">ajaygoli9347@gmail.com</a>
+                </div>
+                <div class="info-line">
+                    <span>Phone</span>
+                    <a href="tel:+10000000000">+1 (000) 000-0000</a>
+                </div>
+                <div class="info-line">
+                    <span>Studio</span>
+                    <span style="color: var(--text-main); text-transform: none; letter-spacing: normal;">VK Colour Lab Digital Photo Studio, Hyderabad</span>
+                </div>
+            </div>
+
+            <div class="info-block reveal">
+                <h3>Location</h3>
+                <div class="map-embed reveal-scale">
+                    <iframe
+                        src="https://maps.google.com/maps?q=17.4669297,78.6434547&ll=17.4669297,78.6434547&z=16&ie=UTF8&output=embed"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="Map showing VK Colour Lab Digital Photo Studio, Hyderabad">
+                    </iframe>
+                </div>
+                <a href="https://maps.app.goo.gl/WDdD4DcbSuLkeShe7" target="_blank" rel="noopener" style="display: inline-block; margin-top: 1rem; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 2px; transition: color 0.4s ease, border-color 0.4s ease;" onmouseover="this.style.color='var(--text-main)'; this.style.borderColor='var(--text-main)';" onmouseout="this.style.color='var(--text-muted)'; this.style.borderColor='rgba(255,255,255,0.15)';">View on Google Maps</a>
+            </div>
+
+            <div class="info-block reveal">
+                <h3>Follow</h3>
+                <div class="social-row">
+                    <a href="https://instagram.com/" aria-label="Instagram" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="5"></rect>
+                            <circle cx="12" cy="12" r="4.2"></circle>
+                            <circle cx="17.2" cy="6.8" r="1"></circle>
+                        </svg>
+                    </a>
+                    <a href="https://wa.me/918978367995" aria-label="WhatsApp" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M4 20l1.3-3.9A8 8 0 1 1 8.9 19.7L4 20z"></path>
+                            <path d="M8.7 9.6c.2 2.6 2.4 4.8 5 5 0.9.1 1-.6 1-1.1v-1l-2-.5-.6.9c-1.1-.5-2-1.4-2.5-2.5l.9-.6-.5-2h-1c-.5 0-1.2.1-1.1 1z" fill="currentColor" stroke="none"></path>
+                        </svg>
+                    </a>
+                    <a href="https://youtube.com/" aria-label="YouTube" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="2.5" y="6" width="19" height="12" rx="3"></rect>
+                            <path d="M10.5 9.5l5 2.5-5 2.5v-5z" fill="currentColor" stroke="none"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+    </main>
+
+    <footer class="reveal">
+        © <span id="current-year"></span> Crafted with Precision.
+    </footer>
+
+    <script src="js/contact.js"></script>
+</body>
+</html>

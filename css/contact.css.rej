@@ -1,0 +1,20 @@
+diff a/css/contact.css b/css/contact.css	(rejected hunks)
+@@ -391,18 +391,6 @@ a {
+     transform: translateY(-4px) scale(1.06);
+ }
+ 
+-/* --- Footer --- */
+-footer {
+-    padding: 3rem 2rem;
+-    text-align: center;
+-    font-size: 0.85rem;
+-    color: #555;
+-    letter-spacing: 2px;
+-    text-transform: uppercase;
+-    background: #030303;
+-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+-}
+-
+ /* --- Responsive --- */
+ @media (max-width: 860px) {
+     .contact-container {

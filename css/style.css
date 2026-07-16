@@ -26,7 +26,7 @@
     a { color: inherit; text-decoration: none; }
   
     /* ---------- NAV ---------- */
-    header {
+    .site-header {
       position: fixed;
       top: 0; left: 0; right: 0;
       height: var(--nav-h);
@@ -395,7 +395,7 @@
   
     /* ---------- RESPONSIVE ---------- */
     @media (max-width: 900px) {
-      header { padding: 0 24px; }
+      .site-header { padding: 0 24px; }
       nav.links { display: none; }
       .menu-btn { display: flex; }
   

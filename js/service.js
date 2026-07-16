@@ -3,17 +3,17 @@
 // ═══════════════════════════════════════════════
 (() => {
     let lastScrollTop = 0;
-    const header = document.getElementById('mainHeader');
-    const menuToggle = document.getElementById('menuToggle');
-    const closeSidebar = document.getElementById('closeSidebar');
+    const header = document.querySelector('.site-header');
+    const menuToggle = document.getElementById('menuBtn');
+    const closeSidebar = document.getElementById('sidebarClose');
     const sidebar = document.getElementById('sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
   
     window.addEventListener('scroll', () => {
       let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      if (scrollTop > lastScrollTop && scrollTop > header.offsetHeight && !sidebar.classList.contains('active')) {
+      if (header && scrollTop > lastScrollTop && scrollTop > header.offsetHeight && !sidebar.classList.contains('active')) {
         header.classList.add('nav-up');
-      } else {
+      } else if (header) {
         header.classList.remove('nav-up');
       }
       lastScrollTop = scrollTop;
@@ -24,9 +24,9 @@
       sidebarOverlay.classList.toggle('active');
       document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
     }
-    menuToggle.addEventListener('click', toggleSidebar);
-    closeSidebar.addEventListener('click', toggleSidebar);
-    sidebarOverlay.addEventListener('click', toggleSidebar);
+    if (menuToggle) menuToggle.addEventListener('click', toggleSidebar);
+    if (closeSidebar) closeSidebar.addEventListener('click', toggleSidebar);
+    if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
     document.querySelectorAll('.sidebar-links a, .sidebar-btn').forEach(link => {
       link.addEventListener('click', () => { if(sidebar.classList.contains('active')) toggleSidebar(); });
     });
@@ -36,7 +36,7 @@
   // SAM SHOOT FOOTER OBSERVER LOGIC
   // ═══════════════════════════════════════════════
   (() => {
-    const footerEl = document.getElementById('siteFooter');
+    const footerEl = document.querySelector('.site-footer');
     if(footerEl) {
       const footerObs = new IntersectionObserver((entries) => {
         entries.forEach(entry => {

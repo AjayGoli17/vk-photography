@@ -6,20 +6,20 @@
 }
 
 :root {
-    --bg-color: #000000;
-    --bg-nav: #0d0d0c;
-    --text-main: #ffffff;
-    --text-muted: #8e8e8e;
-    --accent-gold: #ffffff;
+    --bg-color: #FFFDF4;
+    --bg-nav: #FFFDF4;
+    --text-main: #2B2620;
+    --text-muted: #7A7566;
+    --accent-gold: #B08D57;
     --font-heading: 'Playfair Display', serif;
     --font-body: 'Inter', sans-serif;
     /* Index nav/footer variables */
-    --bg: #15120f;
-    --ink: #f3ece2;
-    --line: #3a342e;
-    --muted: #9a8f82;
-    --accent: #ffffff;
-    --black: #050505;
+    --bg: #FFFDF4;
+    --ink: #2B2620;
+    --line: #EDE7D6;
+    --muted: #7A7566;
+    --accent: #B08D57;
+    --black: #0F0D0A;
 }
 
 body {
@@ -219,7 +219,7 @@ a {
     width: 100%;
     overflow: hidden;
     border-radius: 2px;
-    background-color: #141414;
+    background-color: #D7D2CA;
     margin-bottom: 8px;
 }
 
@@ -292,8 +292,8 @@ a {
 /* CTA Section & Buttons */
 .cta-section {
     padding: 100px 0;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-top: 1px solid rgba(43,38,32,0.08);
+    border-bottom: 1px solid rgba(43,38,32,0.08);
     margin: 80px 0;
 }
 
@@ -353,7 +353,7 @@ a {
 }
 
 .btn:hover {
-    color: #000000;
+    color: var(--text-main);
 }
 
 .btn:hover::before {

@@ -6,10 +6,25 @@
    ========================================================= */
 
    :root {
-    --cream: #0a0a0a;
-    --ink: #f4f1e9;
-    --gray: #a8a299;
-    --line: rgba(244,241,233,0.22);
+    /* Warm Ivory Photography Theme */
+    --cream: #FFFDF4;        /* main background */
+    --ink: #2B2620;          /* primary text / dark elements */
+    --gray: #7A7566;         /* secondary text */
+    --line: rgba(43,38,32,0.14);
+    --card: #FFFFFF;
+    --accent-bg-light: #F4EFDF;
+    --accent-bg-deep: #D7D2CA;
+    --border-subtle: #F2EDDD;
+    --border-default: #EDE7D6;
+    --border-strong: #E2DBC5;
+    --accent-gold: #B08D57;
+    --accent-gold-hover: #8F7145;
+    --accent-light-bg: #F5EEDD;
+    --btn-hover: #1A1712;
+    --btn-active: #0F0D0A;
+    --btn-disabled: #B8B0A0;
+    --success: #7A8B6F;
+    --error: #B85C4A;
     --nav-h: 84px;
   }
   
@@ -93,7 +108,7 @@
     .sidebar-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(29,26,22,0.45);
+      background: rgba(43,38,32,0.45);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.35s ease;
@@ -118,12 +133,12 @@
       padding: 24px 28px 40px;
       transform: translateX(100%);
       transition: transform 0.45s cubic-bezier(.2,.8,.2,1);
-      box-shadow: -20px 0 50px rgba(29,26,22,0);
+      box-shadow: -20px 0 50px rgba(43,38,32,0);
     }
   
     .sidebar.is-open {
       transform: translateX(0);
-      box-shadow: -20px 0 50px rgba(29,26,22,0.18);
+      box-shadow: -20px 0 50px rgba(43,38,32,0.18);
     }
   
     .sidebar-top {

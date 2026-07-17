@@ -90,6 +90,21 @@
        clone.setAttribute('aria-hidden', 'true');
        track.appendChild(clone);
      });
+
+     // Scroll-reveal for service cards: fade in / slide up the first time
+     // each card enters the viewport. Only the real cards are observed
+     // (not the aria-hidden clones), and each unobserves itself after
+     // revealing once, same pattern as the portfolio tiles above.
+     const cardObserver = new IntersectionObserver((entries) => {
+       entries.forEach((entry) => {
+         if (entry.isIntersecting) {
+           entry.target.classList.add('in-view');
+           cardObserver.unobserve(entry.target);
+         }
+       });
+     }, { threshold: 0.2 });
+
+     originalCards.forEach(card => cardObserver.observe(card));
  
      let pos = 0;
      let speed = 0.35;
@@ -271,7 +286,7 @@
  /* -----------------------------------------------------------
     Footer year + newsletter form
     ----------------------------------------------------------- */
-   (() => {
+   (() => { 
      const yearEl = document.getElementById('footerYear');
      if (yearEl) yearEl.textContent = new Date().getFullYear();
  

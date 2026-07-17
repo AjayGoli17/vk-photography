@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Request Quotation | VK Photography</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css"/>
+<link rel="stylesheet" href="css/quotation.css"/>
+</head>
+<body>
+<header>
+<div class="header-inner">
+<a class="logo" href="#">VK Photography</a>
+</div>
+</header>
+<main>
+<section class="hero">
+<h1>Request Your Photography Quotation</h1>
+<p>Tell us about your story. We specialize in capturing the quiet, luxurious moments that define your most significant celebrations.</p>
+</section>
+<form id="quotation-form">
+<!-- Section 1: Customer Details -->
+<div class="soft-card">
+<div class="card-header">
+<span class="icon">
+<svg fill="none" height="20" stroke="#1b1c1c" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" viewbox="0 0 24 24" width="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+</span>
+<h2>Customer Details</h2>
+</div>
+<div class="field-grid cols-2">
+<div class="field">
+<label>Full Name</label>
+<input class="input-field" id="customer-name" placeholder="Johnathan Doe" required type="text"/>
+</div>
+<div class="field">
+<label>Phone Number</label>
+<input class="input-field" id="customer-phone" placeholder="+1 (555) 000-0000" required type="tel"/>
+</div>
+<div class="field span-2">
+<label>Email Address (Optional)</label>
+<input class="input-field" id="customer-email" placeholder="john@example.com" type="email"/>
+</div>
+</div>
+</div>
+<!-- Section 2: Event Details -->
+<div class="soft-card">
+<div class="card-header">
+<span class="icon">
+<svg fill="none" height="20" stroke="#1b1c1c" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" viewbox="0 0 24 24" width="20"><rect height="16" rx="2" width="18" x="3" y="5"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg>
+</span>
+<h2>Event Details</h2>
+</div>
+<div class="field-grid cols-4">
+<div class="field">
+<label>Category</label>
+<select class="input-field" id="event-category">
+<option>Wedding Photography</option>
+<option>Baby Photography</option>
+<option>Corporate Photography</option>
+</select>
+</div>
+<div class="field">
+<label>Date</label>
+<input class="input-field" id="event-date" type="date"/>
+</div>
+<div class="field">
+<label>Location</label>
+<input class="input-field" id="event-location" placeholder="City/Venue" type="text"/>
+</div>
+<div class="field">
+<label>Guests</label>
+<input class="input-field" id="event-guests" placeholder="150" type="number"/>
+</div>
+</div>
+</div>
+<!-- Section 3: Service Selection -->
+<div>
+<h2 class="section-title">SELECT SERVICES</h2>
+<div class="split-panel">
+<div class="stage-panel">
+<h3>Event Stages</h3>
+<div id="stages-list"></div>
+</div>
+<div class="services-panel">
+<div class="services-panel-header">
+<h3 id="current-stage-title">Pre Wedding Services</h3>
+</div>
+<div id="services-grid"></div>
+<div class="save-row">
+<button class="btn-save" id="save-selection-btn" type="button">Save Selection</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 4: Additional Services -->
+<div>
+<h2 class="addons-heading">Additional Add-ons</h2>
+<div id="addons-grid"></div>
+</div>
+<!-- Section 5: Special Requirements -->
+<div class="soft-card">
+<div class="card-header">
+<span class="icon">
+<svg fill="none" height="20" stroke="#1b1c1c" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" viewbox="0 0 24 24" width="20"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+</span>
+<h2>Special Requirements</h2>
+</div>
+<textarea class="input-field" id="special-requirements" placeholder="Tell us more about any specific traditions, surprise elements, or themes you are planning..."></textarea>
+</div>
+<!-- Section 6: Request Summary -->
+<div class="summary-wrap">
+<div class="soft-card summary-card">
+<div class="summary-top">
+<div>
+<h3>Quotation Summary</h3>
+<p>Real-time package estimation</p>
+</div>
+<span class="badge">Active Draft</span>
+</div>
+<div class="summary-row">
+<span>Selected Category:</span>
+<span id="summary-category">Wedding Photography</span>
+</div>
+<div class="summary-block">
+<span>Services Breakdown:</span>
+<div class="summary-list" id="summary-services">
+<div class="summary-empty">No services selected yet</div>
+</div>
+</div>
+<div class="summary-block" id="summary-addons-wrap" style="display:none;">
+<span>Add-ons:</span>
+<div class="summary-list" id="summary-addons"></div>
+</div>
+<div class="summary-total-row">
+<span>Estimated Total:</span>
+<span id="summary-total">₹0</span>
+</div>
+</div>
+</div>
+<!-- Final CTA -->
+<div class="cta-wrap">
+<button class="btn-whatsapp" type="submit">
+<svg viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.284l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.768-5.764-5.768zm3.393 8.221c-.146.413-.731.758-1.006.804-.244.041-.56.071-1.63-.374-1.365-.567-2.245-1.953-2.314-2.044-.069-.091-.563-.748-.563-1.423 0-.675.353-1.007.48-1.144.127-.136.277-.17.37-.17.092 0 .185.001.266.005.085.004.2.022.304.274.108.258.37.905.402.969.032.064.053.139.011.224-.042.085-.063.138-.126.213-.063.074-.133.166-.19.224-.063.064-.129.134-.056.26.073.127.324.535.696.867.48.427.883.56 1.01.622.127.063.201.053.276-.032.075-.085.319-.371.404-.499.084-.127.17-.106.286-.064.117.042.742.35.869.414.127.064.212.096.243.15.032.053.032.308-.114.721z"></path></svg>
+                REQUEST QUOTATION
+            </button>
+<p>Direct inquiry to our curation team for faster response.</p>
+</div>
+</form>
+</main>
+<script src="js/quotation.js"></script>
+</body>
+</html>

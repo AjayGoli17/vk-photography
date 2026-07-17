@@ -1,6 +1,6 @@
 :root {
     --primary: #7b5900;
-    --primary-container: #c89b3c;
+    --primary-container: #000000;
     --background: #FFFDF4;
     --surface: #ffffff;
     --on-surface: #1b1c1c;
@@ -137,7 +137,7 @@ form { display: flex; flex-direction: column; gap: 40px; }
 }
 .input-field:focus {
     outline: none;
-    border-color: #C89B3C;
+    border-color: #000000;
     box-shadow: 0 0 0 2px rgba(200, 155, 60, 0.1);
 }
 select.input-field { background-color: #fff; }
@@ -201,7 +201,7 @@ textarea.input-field { resize: none; min-height: 150px; }
 }
 .stage-btn:hover { background-color: white; }
 .stage-btn.active {
-    background-color: #C89B3C;
+    background-color: #000000;
     color: white;
 }
 
@@ -240,7 +240,7 @@ textarea.input-field { resize: none; min-height: 150px; }
 }
 .service-card:hover { border-color: rgba(123, 89, 0, 0.5); }
 .service-card.selected {
-    border: 2px solid #C89B3C;
+    border: 2px solid #000000;
     background-color: #FFFDF4;
 }
 .service-card .icon { color: var(--primary); display: inline-flex; flex-shrink: 0; }
@@ -294,7 +294,7 @@ textarea.input-field { resize: none; min-height: 150px; }
 }
 .addon-card:hover { border-color: rgba(123, 89, 0, 0.2); }
 .addon-card.selected {
-    border-color: #C89B3C;
+    border-color: #000000;
     background-color: #FFFDF4;
 }
 .addon-card .icon { color: var(--primary); display: inline-flex; }

@@ -4,33 +4,52 @@
 (() => {
     let lastScrollTop = 0;
     const header = document.querySelector('.site-header');
-    const menuToggle = document.getElementById('menuBtn');
-    const closeSidebar = document.getElementById('sidebarClose');
     const sidebar = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
   
     window.addEventListener('scroll', () => {
       let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      if (header && scrollTop > lastScrollTop && scrollTop > header.offsetHeight && !sidebar.classList.contains('active')) {
+      if (header && scrollTop > lastScrollTop && scrollTop > header.offsetHeight && !(sidebar && sidebar.classList.contains('is-open'))) {
         header.classList.add('nav-up');
       } else if (header) {
         header.classList.remove('nav-up');
       }
       lastScrollTop = scrollTop;
     });
-  
-    function toggleSidebar() {
-      sidebar.classList.toggle('active');
-      sidebarOverlay.classList.toggle('active');
-      document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
-    }
-    if (menuToggle) menuToggle.addEventListener('click', toggleSidebar);
-    if (closeSidebar) closeSidebar.addEventListener('click', toggleSidebar);
-    if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
-    document.querySelectorAll('.sidebar-links a, .sidebar-btn').forEach(link => {
-      link.addEventListener('click', () => { if(sidebar.classList.contains('active')) toggleSidebar(); });
-    });
   })();
+
+// Mobile sidebar: opens from the side when the hamburger button is
+// tapped, closes via the X button, the overlay, Escape, or picking a link
+(() => {
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const closeBtn = document.getElementById('sidebarClose');
+  if (!menuBtn || !sidebar || !overlay) return;
+
+  function openSidebar() {
+    sidebar.classList.add('is-open');
+    overlay.classList.add('is-open');
+    document.body.classList.add('no-scroll');
+    menuBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('is-open');
+    overlay.classList.remove('is-open');
+    document.body.classList.remove('no-scroll');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  menuBtn.addEventListener('click', openSidebar);
+  closeBtn.addEventListener('click', closeSidebar);
+  overlay.addEventListener('click', closeSidebar);
+  sidebar.querySelectorAll('.sidebar-links a').forEach(link => {
+    link.addEventListener('click', closeSidebar);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSidebar();
+  });
+})();
   
   // ═══════════════════════════════════════════════
   // SAM SHOOT FOOTER OBSERVER LOGIC

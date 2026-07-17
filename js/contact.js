@@ -73,3 +73,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 500);
     });
 });
+// Mobile sidebar: opens from the side when the hamburger button is
+// tapped, closes via the X button, the overlay, Escape, or picking a link
+(() => {
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const closeBtn = document.getElementById('sidebarClose');
+  if (!menuBtn || !sidebar || !overlay) return;
+
+  function openSidebar() {
+    sidebar.classList.add('is-open');
+    overlay.classList.add('is-open');
+    document.body.classList.add('no-scroll');
+    menuBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('is-open');
+    overlay.classList.remove('is-open');
+    document.body.classList.remove('no-scroll');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  menuBtn.addEventListener('click', openSidebar);
+  closeBtn.addEventListener('click', closeSidebar);
+  overlay.addEventListener('click', closeSidebar);
+  sidebar.querySelectorAll('.sidebar-links a').forEach(link => {
+    link.addEventListener('click', closeSidebar);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSidebar();
+  });
+})();

@@ -1,4 +1,4 @@
- /* CSS Reset & Base Styles */
+/* CSS Reset & Base Styles */
 * {
     margin: 0;
     padding: 0;
@@ -142,7 +142,7 @@ a {
 .section-title-huge {
     font-family: var(--font-heading);
     font-size: 8vw;
-    color: #ffffff; /* Changed to white so it is clearly visible over the background */
+    color: #000000; /* Changed to black, kept subtle via low opacity */
     text-align: center;
     letter-spacing: 5px;
     margin: 60px 0 0px;
@@ -152,7 +152,7 @@ a {
 }
 
 .section-title-huge.in-view {
-    opacity: 0.5;
+    opacity: 0.12;
 }
 
 .section-underline {
@@ -257,12 +257,12 @@ a {
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    color: var(--accent-gold);
-    font-weight: 500;
+    color: #000000;
+    font-weight: 700;
     margin-top: 6px;
     display: inline-flex;
     align-items: center;
-    border-left: 2px solid var(--accent-gold);
+    border-left: 3px solid #000000;
     padding-left: 10px;
     text-align: left;
     border-left-color: transparent;
@@ -271,7 +271,7 @@ a {
 }
 
 .price-tag.in-view {
-    border-left-color: var(--accent-gold);
+    border-left-color: #000000;
 }
 
 .btn-small {
@@ -292,9 +292,29 @@ a {
 /* CTA Section & Buttons */
 .cta-section {
     padding: 100px 0;
-    border-top: 1px solid rgba(43,38,32,0.08);
-    border-bottom: 1px solid rgba(43,38,32,0.08);
+    border-top: none;
+    border-bottom: none;
     margin: 80px 0;
+    position: relative;
+}
+
+.cta-section::before,
+.cta-section::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 1px;
+    background-color: rgba(43,38,32,0.35);
+}
+
+.cta-section::before {
+    top: 0;
+}
+
+.cta-section::after {
+    bottom: 0;
 }
 
 .cta-section h3 {
@@ -316,8 +336,9 @@ a {
 .btn {
     display: inline-block;
     padding: 12px 30px;
-    border: 1px solid var(--accent-gold);
-    color: var(--accent-gold);
+    border: 2px solid #000000;
+    color: #000000;
+    font-weight: 700;
     text-transform: uppercase;
     font-size: 0.8rem;
     letter-spacing: 2px;
@@ -347,13 +368,13 @@ a {
     left: 0;
     width: 0%;
     height: 100%;
-    background-color: var(--accent-gold);
+    background-color: #000000;
     z-index: -1;
     transition: width 0.45s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .btn:hover {
-    color: var(--text-main);
+    color: #ffffff;
 }
 
 .btn:hover::before {

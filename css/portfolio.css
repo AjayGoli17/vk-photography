@@ -42,9 +42,10 @@ h1, h2, h3 {
 }
 
 .hero h1 {
-    font-size: clamp(3rem, 8vw, 6rem);
+    font-size: clamp(1.4rem, 7vw, 6rem);
     letter-spacing: -1px;
-    margin-bottom: 0.3rem; 
+    margin-bottom: 1.2rem;
+    white-space: nowrap;
     opacity: 0;
     transform: translateY(40px);
     animation: cinematicReveal 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -170,10 +171,24 @@ h1, h2, h3 {
 .cta-section {
     padding: 12rem 2rem;
     text-align: center;
-    background: #F4EFDF;
-    border-top: 1px solid rgba(43, 38, 32, 0.08);
     position: relative;
     overflow: hidden;
+}
+
+.cta-divider {
+    width: 80px;
+    height: 1px;
+    background-color: var(--text-main);
+    margin: 0 auto;
+    opacity: 0.9;
+}
+
+.cta-divider.divider-top {
+    margin-bottom: 4rem;
+}
+
+.cta-divider.divider-bottom {
+    margin-top: 4rem;
 }
 
 .cta-section h2 {
@@ -188,6 +203,13 @@ h1, h2, h3 {
 .cta-section h2.is-visible {
     opacity: 0.9;
     transform: translateY(0);
+}
+
+.cta-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
 }
 
 .cta-button {
@@ -215,6 +237,12 @@ h1, h2, h3 {
 .cta-button.is-visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+.cta-button-secondary {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    transition-delay: 0.15s;
 }
 
 .cta-button:hover {
@@ -258,10 +286,11 @@ h1, h2, h3 {
         top: 0;
     }
     .gallery-container {
-        padding: 2rem 1rem 3rem 1rem;
+        padding: 0.5rem 1rem 3rem 1rem;
     }
     .hero {
-        height: 50vh; /* Even tighter on mobile */
+        height: 32vh; /* Even tighter on mobile */
+        min-height: 260px;
     }
 }
 

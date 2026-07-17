@@ -107,6 +107,14 @@ a {
 }
 
 /* --- Form --- */
+.form-panel {
+    background-color: #F4EFDF;
+    border: 1px solid rgba(43, 38, 32, 0.08);
+    border-radius: 6px;
+    padding: 3rem;
+    box-shadow: 0 20px 50px -20px rgba(43, 38, 32, 0.15);
+}
+
 .form-panel h2 {
     font-size: clamp(1.8rem, 3vw, 2.5rem);
     margin-bottom: 2.5rem;
@@ -244,7 +252,7 @@ a {
     left: -120%;
     width: 60%;
     height: 100%;
-    background: rgba(212, 175, 55, 0.35);
+    background: rgba(0, 0, 0, 0.12);
     transform: skewX(-20deg);
     transition: left 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -256,7 +264,7 @@ a {
 .submit-button:hover {
     background-color: transparent;
     color: var(--text-main);
-    box-shadow: 0 0 30px rgba(176, 141, 87, 0.25);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
 }
 
 .submit-button:active {
@@ -309,7 +317,7 @@ a {
 }
 
 .info-line:hover {
-    border-left-color: var(--accent);
+    border-left-color: #000000;
     padding-left: 1.2rem;
 }
 
@@ -327,7 +335,7 @@ a {
 }
 
 .info-line a:hover {
-    color: var(--accent);
+    color: #000000;
 }
 
 .map-embed {
@@ -367,7 +375,7 @@ a {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-main);
+    color: #000000;
     text-decoration: none;
     opacity: 0;
     transform: translateY(16px) scale(0.8);
@@ -386,8 +394,8 @@ a {
 .social-row.is-visible a:nth-child(3) { transition-delay: 0.25s; }
 
 .social-row a:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+    border-color: #000000;
+    color: #000000;
     transform: translateY(-4px) scale(1.06);
 }
 
@@ -402,6 +410,10 @@ a {
     .field-row {
         grid-template-columns: 1fr;
         gap: 0;
+    }
+
+    .form-panel {
+        padding: 2rem 1.5rem;
     }
 
     .hero {

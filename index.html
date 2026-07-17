@@ -77,16 +77,14 @@
   <div class="col-left">
     <p class="overline" data-su>Since 2015 — Aperture &amp; Co.</p>
     <h1 class="main-heading">
-      <span class="about-line-mask"><span class="about-line-inner nowrap">We don't just</span></span>
-      <span class="about-line-mask"><span class="about-line-inner nowrap">take photos.</span></span>
-      <span class="about-line-mask"><span class="about-line-inner">We capture</span></span>
-      <span class="about-line-mask"><span class="about-line-inner">your story.</span></span>
+      <span class="about-line-mask"><span class="about-line-inner nowrap">Capturing Moments That Last</span></span>
+      <span class="about-line-mask"><span class="about-line-inner nowrap">Forever</span></span>
     </h1>
   </div>
   <div class="col-right">
     <p class="description">
-      <span data-su style="transition-delay:0.3s">This studio began as one photographer with a single camera, building relationships with the couples, families, and brands who trusted us with their moments.</span>
-      <span data-su style="transition-delay:0.55s">No forced poses, no cookie-cutter setups — just good light, patience, and whatever the moment gave us.</span>
+      <span data-su style="transition-delay:0.3s">At VK Photography, we believe every moment has a story worth preserving. Through our lens, we capture genuine emotions, natural expressions, and unforgettable memories with creativity and passion. From weddings and portraits to special celebrations, our goal is to create timeless photographs that you'll cherish for a lifetime.</span>
+
     </p>
   </div>
 </section>
@@ -95,20 +93,21 @@
 
 <section class="services" id="services">
   <div class="services-head">
-    <div>
+    <div class="services-head-left">
       <p class="overline">What We Do</p>
-      <h2>Six ways we bring your vision to life.</h2>
-    </div>
-    <div class="services-head-right">
-      <p>From first contact to the final print, every service is built around trust, not templates.</p>
-      <div class="slider-nav">
-        <button type="button" data-nav="prev" aria-label="Previous">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        </button>
-        <button type="button" data-nav="next" aria-label="Next">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-        </button>
+      <h2>Exceptional photography for every occasion.
+      </h2>
+      <div class="services-head-right">
+        <button type="button" class="services-cta">View services</button>
       </div>
+    </div>
+    <div class="slider-nav">
+      <button type="button" data-nav="prev" aria-label="Previous">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      </button>
+      <button type="button" data-nav="next" aria-label="Next">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </button>
     </div>
   </div>
 
@@ -165,18 +164,17 @@
     </div>
   </div>
 
-  <div class="slider-nav slider-nav-mobile">
-    <button type="button" data-nav="prev" aria-label="Previous">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-    </button>
-    <button type="button" data-nav="next" aria-label="Next">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-    </button>
+  <div class="mobile-progress" id="mobileProgress">
+    <div class="mobile-progress-dots" id="mobileProgressDots"></div>
+    <div class="mobile-progress-count" id="mobileProgressCount">01 / 06</div>
   </div>
 </section>
 
 <section class="testimonials-section" id="testimonials">
-  <h2 class="tc-sr-only">Client testimonials carousel for the photo studio</h2>
+  <div class="tc-head">
+    <p class="overline">Testimonials</p>
+    <h2>What our clients are saying</h2>
+  </div>
 
   <div class="tc-wrap" id="tcW" aria-live="polite"></div>
 
@@ -273,5 +271,56 @@
 </footer>
 
 <script src="js/home.js"></script>
+<script>
+(function () {
+  var mq = window.matchMedia('(max-width: 640px)');
+  var track = document.getElementById('sliderTrack');
+  var viewport = track ? track.closest('.slider-viewport') : null;
+  var dotsWrap = document.getElementById('mobileProgressDots');
+  var countEl = document.getElementById('mobileProgressCount');
+  if (!track || !viewport || !dotsWrap || !countEl) return;
+
+  var cards = Array.prototype.slice.call(track.children);
+  var total = cards.length;
+
+  cards.forEach(function (card, i) {
+    var dot = document.createElement('span');
+    dot.className = 'mobile-progress-dot';
+    dot.setAttribute('role', 'button');
+    dot.setAttribute('aria-label', 'Go to service ' + (i + 1) + ' of ' + total);
+    dot.addEventListener('click', function () {
+      card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    });
+    dotsWrap.appendChild(dot);
+  });
+  var dots = Array.prototype.slice.call(dotsWrap.children);
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function update() {
+    if (!mq.matches) return;
+    var center = viewport.scrollLeft + viewport.clientWidth / 2;
+    var closest = 0;
+    var closestDist = Infinity;
+    cards.forEach(function (card, i) {
+      var cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      var dist = Math.abs(cardCenter - center);
+      if (dist < closestDist) { closestDist = dist; closest = i; }
+    });
+    dots.forEach(function (d, i) { d.classList.toggle('active', i === closest); });
+    countEl.textContent = pad(closest + 1) + ' / ' + pad(total);
+  }
+
+  var ticking = false;
+  viewport.addEventListener('scroll', function () {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(function () { update(); ticking = false; });
+  }, { passive: true });
+
+  window.addEventListener('resize', update);
+  update();
+})();
+</script>
 </body>
 </html>

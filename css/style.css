@@ -7,19 +7,19 @@
 
    :root {
     /* Warm Ivory Photography Theme */
-    --cream: #FFFDF4;        /* main background */
+    --cream: #FFFFFF;        /* main background */
     --ink: #2B2620;          /* primary text / dark elements */
     --gray: #7A7566;         /* secondary text */
     --line: rgba(43,38,32,0.14);
     --card: #FFFFFF;
-    --accent-bg-light: #F4EFDF;
+    --accent-bg-light: #FFFFFF;
     --accent-bg-deep: #D7D2CA;
     --border-subtle: #F2EDDD;
     --border-default: #EDE7D6;
     --border-strong: #E2DBC5;
     --accent-gold: #B08D57;
     --accent-gold-hover: #8F7145;
-    --accent-light-bg: #F5EEDD;
+    --accent-light-bg: #FFFFFF;
     --btn-hover: #1A1712;
     --btn-active: #0F0D0A;
     --btn-disabled: #B8B0A0;

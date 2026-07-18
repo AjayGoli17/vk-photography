@@ -6,15 +6,15 @@
 }
 
 :root {
-    --bg-color: #FFFDF4;
-    --bg-nav: #FFFDF4;
+    --bg-color: #FFFFFF;
+    --bg-nav: #FFFFFF;
     --text-main: #2B2620;
     --text-muted: #7A7566;
     --accent-gold: #B08D57;
     --font-heading: 'Playfair Display', serif;
     --font-body: 'Inter', sans-serif;
     /* Index nav/footer variables */
-    --bg: #FFFDF4;
+    --bg: #FFFFFF;
     --ink: #2B2620;
     --line: #EDE7D6;
     --muted: #7A7566;

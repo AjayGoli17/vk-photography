@@ -1,7 +1,7 @@
 :root {
     --primary: #7b5900;
     --primary-container: #000000;
-    --background: #FFFDF4;
+    --background: #FFFFFF;
     --surface: #ffffff;
     --on-surface: #1b1c1c;
     --on-surface-variant: #4e4637;
@@ -241,7 +241,7 @@ textarea.input-field { resize: none; min-height: 150px; }
 .service-card:hover { border-color: rgba(123, 89, 0, 0.5); }
 .service-card.selected {
     border: 2px solid #000000;
-    background-color: #FFFDF4;
+    background-color: #FFFFFF;
 }
 .service-card .icon { color: var(--primary); display: inline-flex; flex-shrink: 0; }
 .service-card .icon svg { display: block; }
@@ -295,7 +295,7 @@ textarea.input-field { resize: none; min-height: 150px; }
 .addon-card:hover { border-color: rgba(123, 89, 0, 0.2); }
 .addon-card.selected {
     border-color: #000000;
-    background-color: #FFFDF4;
+    background-color: #FFFFFF;
 }
 .addon-card .icon { color: var(--primary); display: inline-flex; }
 .addon-card .icon svg { display: block; width: 28px; height: 28px; }

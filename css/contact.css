@@ -5,7 +5,7 @@
 }
 
 :root {
-    --bg-color: #FFFDF4;
+    --bg-color: #FFFFFF;
     --text-main: #2B2620;
     --text-muted: #7A7566;
     --accent: #B08D57;
@@ -39,7 +39,7 @@ a {
     align-items: center;
     text-align: center;
     padding: 0 2rem;
-    background: radial-gradient(circle at center, #F4EFDF 0%, #FFFDF4 70%);
+    background: radial-gradient(circle at center, #FFFFFF 0%, #FFFFFF 70%);
 }
 
 .hero h1 {
@@ -108,7 +108,7 @@ a {
 
 /* --- Form --- */
 .form-panel {
-    background-color: #F4EFDF;
+    background-color: #FFFFFF;
     border: 1px solid rgba(43, 38, 32, 0.08);
     border-radius: 6px;
     padding: 3rem;
@@ -342,7 +342,7 @@ a {
     aspect-ratio: 4 / 3;
     border: 1px solid rgba(43, 38, 32, 0.12);
     overflow: hidden;
-    background: #F4EFDF;
+    background: #FFFFFF;
 }
 
 .map-embed iframe {

@@ -6,7 +6,7 @@
 }
 
 :root {
-    --bg-color: #FFFDF4;
+    --bg-color: #FFFFFF;
     --text-main: #2B2620;
     --text-muted: #7A7566;
     --accent: #B08D57; /* Warm gold/bronze */
@@ -38,7 +38,7 @@ h1, h2, h3 {
     text-align: center;
     padding: 0 2rem;
     position: relative;
-    background: radial-gradient(circle at center, #F4EFDF 0%, #FFFDF4 70%);
+    background: radial-gradient(circle at center, #FFFFFF 0%, #FFFFFF 70%);
 }
 
 .hero h1 {

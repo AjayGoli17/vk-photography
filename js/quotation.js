@@ -164,6 +164,12 @@ const summaryServices = document.getElementById('summary-services');
 const summaryAddonsWrap = document.getElementById('summary-addons-wrap');
 const summaryAddons = document.getElementById('summary-addons');
 const summaryTotal = document.getElementById('summary-total');
+const summaryCustomerWrap = document.getElementById('summary-customer-wrap');
+const summaryCustomer = document.getElementById('summary-customer');
+const summaryEventWrap = document.getElementById('summary-event-wrap');
+const summaryEvent = document.getElementById('summary-event');
+const summaryRequirementsWrap = document.getElementById('summary-requirements-wrap');
+const summaryRequirements = document.getElementById('summary-requirements');
 const saveBtn = document.getElementById('save-selection-btn');
 
 function renderStagesList() {
@@ -243,9 +249,48 @@ function renderAddons() {
     });
 }
 
+// Builds a row for a labeled field inside a summary-list block.
+function summaryRow(label, value) {
+    const row = document.createElement('div');
+    row.className = 'summary-item';
+    row.innerHTML = `<span class="label">${label}</span><span class="value">${value}</span>`;
+    return row;
+}
+
 // Summary aggregates selections across ALL stages/categories, not just the
 // currently active one — so switching categories keeps prior picks in the total.
 function updateSummary() {
+    // Customer details
+    const custName = document.getElementById('customer-name').value.trim();
+    const custPhone = document.getElementById('customer-phone').value.trim();
+    const custEmail = document.getElementById('customer-email').value.trim();
+    summaryCustomer.innerHTML = '';
+    let anyCustomer = false;
+    if (custName) { summaryCustomer.appendChild(summaryRow('Name', custName)); anyCustomer = true; }
+    if (custPhone) { summaryCustomer.appendChild(summaryRow('Phone', custPhone)); anyCustomer = true; }
+    if (custEmail) { summaryCustomer.appendChild(summaryRow('Email', custEmail)); anyCustomer = true; }
+    summaryCustomerWrap.style.display = anyCustomer ? '' : 'none';
+
+    // Event details
+    const evtDate = document.getElementById('event-date').value.trim();
+    const evtLocation = document.getElementById('event-location').value.trim();
+    const evtGuests = document.getElementById('event-guests').value.trim();
+    summaryEvent.innerHTML = '';
+    let anyEvent = false;
+    if (evtDate) { summaryEvent.appendChild(summaryRow('Date', evtDate)); anyEvent = true; }
+    if (evtLocation) { summaryEvent.appendChild(summaryRow('Location', evtLocation)); anyEvent = true; }
+    if (evtGuests) { summaryEvent.appendChild(summaryRow('Guests', evtGuests)); anyEvent = true; }
+    summaryEventWrap.style.display = anyEvent ? '' : 'none';
+
+    // Special requirements
+    const requirements = document.getElementById('special-requirements').value.trim();
+    if (requirements) {
+        summaryRequirements.textContent = requirements;
+        summaryRequirementsWrap.style.display = '';
+    } else {
+        summaryRequirementsWrap.style.display = 'none';
+    }
+
     summaryServices.innerHTML = '';
     let total = 0;
     let anyService = false;
@@ -261,7 +306,11 @@ function updateSummary() {
         });
         const row = document.createElement('div');
         row.className = 'summary-item';
-        row.innerHTML = `<span class="label">${stageData[stageKey].label}</span><span class="value">${chosen.join(', ')}</span>`;
+        const serviceText = chosen.map(name => {
+            const svc = stagePrices.find(s => s.name === name);
+            return svc ? `${name} (₹${svc.price.toLocaleString('en-IN')})` : name;
+        }).join(', ');
+        row.innerHTML = `<span class="label">${stageData[stageKey].label}</span><span class="value">${serviceText}</span>`;
         summaryServices.appendChild(row);
     });
 
@@ -306,57 +355,327 @@ eventCategorySelect.addEventListener('change', (e) => {
     renderServiceGrid();
 });
 
+// Keep the summary's customer/event/requirements sections live as the user types.
+['customer-name', 'customer-phone', 'customer-email', 'event-date', 'event-location', 'event-guests', 'special-requirements']
+    .forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateSummary);
+    });
+
 renderStagesList();
 renderServiceGrid();
 renderAddons();
 updateSummary();
 
 const WHATSAPP_NUMBER = '918978367995'; // country code 91 + 8978367995
+const STUDIO_NAME = 'VK Photography';
+const STUDIO_ADDRESS = 'VK Colour Lab Digital Photo Studio, Hyderabad';
+const STUDIO_PHONE = '+91 89783 67995';
 
-document.getElementById('quotation-form').addEventListener('submit', (e) => {
-    e.preventDefault();
+// ---- Preload logo so it's ready by the time the PDF is generated ----
+let logoBase64 = null;
+(async function preloadLogo() {
+    try {
+        const res = await fetch('logo.png');
+        const blob = await res.blob();
+        logoBase64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    } catch (err) {
+        console.warn('Logo preload failed, PDF will render without it:', err);
+    }
+})();
 
-    const name = document.getElementById('customer-name').value || 'N/A';
-    const phone = document.getElementById('customer-phone').value || 'N/A';
-    const email = document.getElementById('customer-email').value || 'N/A';
+// ---- Shared: gather form + selection data into one object ----
+function collectQuoteData() {
+    const name = document.getElementById('customer-name').value || 'Customer';
+    const phone = document.getElementById('customer-phone').value || '';
+    const email = document.getElementById('customer-email').value || '';
     const category = eventCategorySelect.value;
-    const date = document.getElementById('event-date').value || 'N/A';
-    const location = document.getElementById('event-location').value || 'N/A';
-    const guests = document.getElementById('event-guests').value || 'N/A';
-    const requirements = document.getElementById('special-requirements').value || 'None';
+    const date = document.getElementById('event-date').value || '';
+    const location = document.getElementById('event-location').value || '';
+    const guests = document.getElementById('event-guests').value || '';
+    const requirements = document.getElementById('special-requirements').value || '';
 
-    let msg = `*New Quotation Request*\n\n`;
-    msg += `Name: ${name}\nPhone: ${phone}\nEmail: ${email}\n\n`;
-    msg += `Category: ${category}\nDate: ${date}\nLocation: ${location}\nGuests: ${guests}\n\n`;
-    msg += `*Services:*\n`;
-
-    let total = 0;
-    let anyService = false;
+    const items = [];
     Object.keys(stageData).forEach(stageKey => {
         const chosen = Array.from(selections[stageKey]);
         if (chosen.length === 0) return;
-        anyService = true;
         const stagePrices = stageData[stageKey].services;
-        chosen.forEach(name => {
-            const svc = stagePrices.find(s => s.name === name);
-            if (svc) total += svc.price;
+        chosen.forEach(svcName => {
+            const svc = stagePrices.find(s => s.name === svcName);
+            if (svc) {
+                items.push({ desc: `${stageData[stageKey].label} — ${svc.name}`, qty: 1, unit: svc.price });
+            }
         });
-        msg += `- ${stageData[stageKey].label}: ${chosen.join(', ')}\n`;
     });
-    if (!anyService) msg += `- None selected\n`;
+    selectedAddons.forEach(addonName => {
+        const addon = addonData.find(a => a.name === addonName);
+        if (addon) items.push({ desc: `Add-on — ${addon.name}`, qty: 1, unit: addon.price });
+    });
 
-    if (selectedAddons.size > 0) {
-        msg += `\n*Add-ons:*\n`;
-        selectedAddons.forEach(name => {
-            const addon = addonData.find(a => a.name === name);
-            total += addon.price;
-            msg += `- ${addon.name} (₹${addon.price.toLocaleString('en-IN')})\n`;
-        });
+    const total = items.reduce((sum, it) => sum + it.qty * it.unit, 0);
+
+    return { name, phone, email, category, date, location, guests, requirements, items, total };
+}
+
+// ---- PDF quotation generation ----
+function generateQuotePDF() {
+    if (!window.jspdf) {
+        alert('PDF library failed to load. Please check your connection and try again.');
+        return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 50;
+    const navy = '#0b2d55';
+    const gray = '#4e4637';
+    const ink = '#1b1c1c';
+
+    const data = collectQuoteData();
+    const quoteNumber = 'VKQ' + Date.now().toString().slice(-8);
+    const quoteDate = new Date();
+    const dueDate = new Date(quoteDate.getTime() + 15 * 24 * 60 * 60 * 1000);
+    const fmt = (d) => d.toLocaleDateString('en-GB').split('/').join('-');
+
+    // Header
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.setTextColor(navy);
+    doc.text(STUDIO_NAME, margin, 58);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(gray);
+    doc.text('Hyderabad', margin, 74);
+    doc.text(STUDIO_PHONE, margin, 88);
+
+    // Logo, top-right
+    const logoW = 90;
+    const logoH = 40;
+    const logoX = pageWidth - margin - logoW;
+    const logoY = 20;
+    if (logoBase64) {
+        try {
+            doc.addImage(logoBase64, 'PNG', logoX, logoY, logoW, logoH, undefined, 'FAST');
+        } catch (err) {
+            console.warn('Could not draw logo in PDF:', err);
+        }
     }
 
-    msg += `\n*Estimated Total: ₹${total.toLocaleString('en-IN')}*\n\n`;
-    msg += `Special Requirements: ${requirements}`;
+    // Bill To / meta
+    let y = 140;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(navy);
+    doc.text('BILL TO', margin, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(13);
+    doc.setTextColor(ink);
+    doc.text(data.name, margin, y + 18);
+    doc.setFontSize(10);
+    doc.setTextColor(gray);
+    if (data.phone) doc.text(data.phone, margin, y + 34);
+    if (data.email) doc.text(data.email, margin, y + 48);
 
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
+    const metaRight = pageWidth - margin;
+    const metaLabelX = pageWidth - 190;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(navy);
+    doc.text('Quote #', metaLabelX, y);
+    doc.text('Quote date', metaLabelX, y + 18);
+    doc.text('Valid until', metaLabelX, y + 36);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(ink);
+    doc.text(quoteNumber, metaRight, y, { align: 'right' });
+    doc.text(fmt(quoteDate), metaRight, y + 18, { align: 'right' });
+    doc.text(fmt(dueDate), metaRight, y + 36, { align: 'right' });
+
+    // Event details
+    y += 80;
+    doc.setDrawColor('#d2c5b1');
+    doc.setLineWidth(0.6);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 22;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(navy);
+    doc.text('EVENT DETAILS', margin, y);
+    y += 16;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(ink);
+    doc.text(`Category: ${data.category}`, margin, y);
+    doc.text(`Date: ${data.date || 'To be confirmed'}`, margin + 220, y);
+    y += 16;
+    doc.text(`Location: ${data.location || 'To be confirmed'}`, margin, y);
+    doc.text(`Guests: ${data.guests || 'N/A'}`, margin + 220, y);
+    y += 30;
+
+    // Table
+    const colQty = margin;
+    const colDesc = margin + 36;
+    const colUnitRight = pageWidth - margin - 90;
+    const colAmountRight = pageWidth - margin;
+
+    doc.setFillColor(navy);
+    doc.rect(margin, y, pageWidth - margin * 2, 24, 'F');
+    doc.setTextColor('#ffffff');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.text('QTY', colQty + 4, y + 16);
+    doc.text('Description', colDesc, y + 16);
+    doc.text('Unit Price', colUnitRight, y + 16, { align: 'right' });
+    doc.text('Amount', colAmountRight, y + 16, { align: 'right' });
+    y += 24;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(ink);
+    doc.setFontSize(10);
+
+    if (data.items.length === 0) {
+        y += 22;
+        doc.text('No services selected', colDesc, y);
+    } else {
+        data.items.forEach(it => {
+            y += 22;
+            if (y > 720) { doc.addPage(); y = 60; }
+            doc.text(String(it.qty), colQty + 4, y);
+            doc.text(it.desc, colDesc, y);
+            doc.text('Rs. ' + it.unit.toLocaleString('en-IN'), colUnitRight, y, { align: 'right' });
+            doc.text('Rs. ' + (it.qty * it.unit).toLocaleString('en-IN'), colAmountRight, y, { align: 'right' });
+        });
+    }
+    y += 14;
+    doc.setDrawColor('#d2c5b1');
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 26;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text('Subtotal', colUnitRight - 90, y);
+    doc.text('Rs. ' + data.total.toLocaleString('en-IN'), colAmountRight, y, { align: 'right' });
+    y += 26;
+
+    doc.setFillColor('#f0ece0');
+    doc.rect(colUnitRight - 100, y - 15, (colAmountRight) - (colUnitRight - 100) + 4, 24, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(navy);
+    doc.text('Estimated Total (INR)', colUnitRight - 90, y);
+    doc.text('Rs. ' + data.total.toLocaleString('en-IN'), colAmountRight, y, { align: 'right' });
+    y += 50;
+
+    // Special requirements
+    if (data.requirements) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(navy);
+        doc.text('SPECIAL REQUIREMENTS', margin, y);
+        y += 16;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(ink);
+        const lines = doc.splitTextToSize(data.requirements, pageWidth - margin * 2);
+        doc.text(lines, margin, y);
+        y += lines.length * 14 + 20;
+    }
+
+    // Terms
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(navy);
+    doc.text('TERMS AND CONDITIONS', margin, y);
+    y += 16;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.setTextColor(ink);
+    doc.text('This quotation is an estimate only and is valid for 15 days from the quote date.', margin, y);
+    y += 14;
+    doc.text('A booking is confirmed only after advance payment and written confirmation from the studio.', margin, y);
+    y += 60;
+
+    // Signature
+    doc.setDrawColor(ink);
+    doc.setLineWidth(0.7);
+    doc.line(pageWidth - margin - 180, y, pageWidth - margin, y);
+    doc.setFontSize(9);
+    doc.setTextColor(gray);
+    doc.text('Customer Signature', pageWidth - margin - 90, y + 14, { align: 'center' });
+
+    // Return the built doc instead of saving directly — caller decides what to do with it
+    return { doc, quoteNumber, data };
+}
+
+// ---- Google Apps Script config ----
+// After deploying your Apps Script as a Web App (see setup notes), paste the
+// resulting /exec URL here.
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz5eya2N0MBi2zFAgN_pwNGDFwd78Uxz3nbyvANz7ShQ9suFHH3WAKKB_uAYDFyzKR1/exec';
+
+// ---- CTA state machine: idle -> sending -> success | error ----
+function setCtaState(state) {
+    ['idle', 'sending', 'success', 'error'].forEach(s => {
+        const el = document.getElementById('cta-' + s);
+        if (el) el.style.display = (s === state) ? '' : 'none';
+    });
+}
+
+const ctaRetryBtn = document.getElementById('cta-retry-btn');
+if (ctaRetryBtn) {
+    ctaRetryBtn.addEventListener('click', () => setCtaState('idle'));
+}
+const ctaCallBtn = document.getElementById('cta-call-btn');
+if (ctaCallBtn) {
+    ctaCallBtn.href = 'tel:' + STUDIO_PHONE.replace(/\s+/g, '');
+}
+
+async function sendQuotePDFByEmail() {
+    setCtaState('sending');
+
+    const { doc, quoteNumber, data } = generateQuotePDF();
+    const pdfBase64 = doc.output('datauristring').split(',')[1]; // strip the data: prefix
+    const fileName = `${STUDIO_NAME.replace(/\s+/g, '-')}-Quote-${quoteNumber}.pdf`;
+
+    const payload = {
+        customer_name: data.name,
+        customer_phone: data.phone || 'N/A',
+        customer_email: data.email || 'N/A',
+        event_category: data.category,
+        event_date: data.date || 'N/A',
+        event_location: data.location || 'N/A',
+        event_guests: data.guests || 'N/A',
+        estimated_total: '₹' + data.total.toLocaleString('en-IN'),
+        special_requirements: data.requirements || 'None',
+        pdf_base64: pdfBase64,
+        file_name: fileName
+    };
+
+    try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            // Apps Script doPost reads the raw body regardless of content-type;
+            // using text/plain avoids a CORS preflight that application/json would trigger.
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+        if (result && result.status === 'success') {
+            setCtaState('success');
+        } else {
+            throw new Error((result && result.message) || 'Unknown error from Apps Script');
+        }
+    } catch (err) {
+        console.error('Apps Script send failed:', err);
+        setCtaState('error');
+    }
+}
+
+document.getElementById('quotation-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    sendQuotePDFByEmail();
 });

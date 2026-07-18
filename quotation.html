@@ -140,6 +140,14 @@
 </div>
 <span class="badge">Active Draft</span>
 </div>
+<div class="summary-block" id="summary-customer-wrap" style="display:none;">
+<span>Customer Details:</span>
+<div class="summary-list" id="summary-customer"></div>
+</div>
+<div class="summary-block" id="summary-event-wrap" style="display:none;">
+<span>Event Details:</span>
+<div class="summary-list" id="summary-event"></div>
+</div>
 <div class="summary-row">
 <span>Selected Category:</span>
 <span id="summary-category">Wedding Photography</span>
@@ -154,6 +162,10 @@
 <span>Add-ons:</span>
 <div class="summary-list" id="summary-addons"></div>
 </div>
+<div class="summary-block" id="summary-requirements-wrap" style="display:none;">
+<span>Special Requirements:</span>
+<div class="summary-requirements-text" id="summary-requirements"></div>
+</div>
 <div class="summary-total-row">
 <span>Estimated Total:</span>
 <span id="summary-total">₹0</span>
@@ -162,11 +174,38 @@
 </div>
 <!-- Final CTA -->
 <div class="cta-wrap">
-<button class="btn-whatsapp" type="submit">
-<svg viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.284l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.768-5.764-5.768zm3.393 8.221c-.146.413-.731.758-1.006.804-.244.041-.56.071-1.63-.374-1.365-.567-2.245-1.953-2.314-2.044-.069-.091-.563-.748-.563-1.423 0-.675.353-1.007.48-1.144.127-.136.277-.17.37-.17.092 0 .185.001.266.005.085.004.2.022.304.274.108.258.37.905.402.969.032.064.053.139.011.224-.042.085-.063.138-.126.213-.063.074-.133.166-.19.224-.063.064-.129.134-.056.26.073.127.324.535.696.867.48.427.883.56 1.01.622.127.063.201.053.276-.032.075-.085.319-.371.404-.499.084-.127.17-.106.286-.064.117.042.742.35.869.414.127.064.212.096.243.15.032.053.032.308-.114.721z"></path></svg>
-                REQUEST QUOTATION
+<div id="cta-idle" class="cta-state">
+<button class="btn-send" id="pdf-quote-btn" type="submit">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><rect height="16" rx="2" width="20" x="2" y="4"></rect><path d="m22 6-10 7L2 6"></path></svg>
+                Send quotation to studio
             </button>
-<p>Direct inquiry to our curation team for faster response.</p>
+<p class="cta-hint">Your filled quotation is emailed to the studio as a PDF — no message typing needed.</p>
+</div>
+<div id="cta-sending" class="cta-state" style="display:none;">
+<button class="btn-send btn-send-sending" type="button" disabled>
+<svg class="spin" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9"></path></svg>
+                Sending…
+            </button>
+<p class="cta-hint">Hang tight, this takes a few seconds.</p>
+</div>
+<div id="cta-success" class="cta-state cta-result" style="display:none;">
+<div class="cta-result-icon cta-icon-success">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+</div>
+<div class="cta-result-title">Quotation sent</div>
+<div class="cta-result-text">The studio has received your request and will reach out shortly.</div>
+</div>
+<div id="cta-error" class="cta-state cta-result" style="display:none;">
+<div class="cta-result-icon cta-icon-error">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+</div>
+<div class="cta-result-title">Couldn't send automatically</div>
+<div class="cta-result-text">Try again, or reach the studio directly.</div>
+<div class="cta-result-actions">
+<button type="button" class="btn-retry" id="cta-retry-btn">Try again</button>
+<a class="btn-call" id="cta-call-btn" href="tel:">Call studio</a>
+</div>
+</div>
 </div>
 </form>
 </main>
@@ -247,6 +286,7 @@
   </footer>
 
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="js/quotation.js"></script>
 </body>
 </html>

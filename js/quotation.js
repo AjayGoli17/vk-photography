@@ -614,7 +614,7 @@ function generateQuotePDF() {
 // ---- Google Apps Script config ----
 // After deploying your Apps Script as a Web App (see setup notes), paste the
 // resulting /exec URL here.
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz5eya2N0MBi2zFAgN_pwNGDFwd78Uxz3nbyvANz7ShQ9suFHH3WAKKB_uAYDFyzKR1/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxuJuUjff-6oI631EXlCKCIRaCmJi3Pxf4xi_YO8_QeaEPzDC-geTa-BQrbkkimqb_Y/exec';
 
 // ---- CTA state machine: idle -> sending -> success | error ----
 function setCtaState(state) {

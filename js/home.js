@@ -300,3 +300,50 @@
        form.reset();
      });
    })();
+/* -----------------------------------------------------------
+   Liquid glass nav: locks the header to the top and intensifies
+   the glass effect once the user scrolls past the hero
+   ----------------------------------------------------------- */
+  (() => {
+    const header = document.querySelector('.site-header');
+    if (!header) return;
+
+    const THRESHOLD = 80; // px scrolled before the nav locks to top
+
+    // spacer keeps content from jumping when header switches to position:fixed
+    const spacer = document.createElement('div');
+    spacer.className = 'nav-fixed-spacer';
+    header.parentNode.insertBefore(spacer, header.nextSibling);
+
+    function setSpacerHeight() {
+      spacer.style.height = `${header.offsetHeight}px`;
+    }
+
+    function update() {
+      const scrolled = window.scrollY > THRESHOLD;
+      if (scrolled) {
+        if (!header.classList.contains('nav-fixed')) {
+          setSpacerHeight();
+          header.classList.add('nav-fixed');
+          spacer.classList.add('active');
+        }
+      } else {
+        header.classList.remove('nav-fixed');
+        spacer.classList.remove('active');
+      }
+    }
+
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        update();
+        ticking = false;
+      });
+    }, { passive: true });
+
+    window.addEventListener('resize', setSpacerHeight);
+
+    update();
+  })();

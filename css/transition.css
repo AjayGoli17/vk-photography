@@ -1,0 +1,36 @@
+/* ==========================================================================
+   Page Transition — smooth white fade between pages
+   ========================================================================== */
+
+:root {
+  --page-transition-duration: 700ms;
+}
+
+.page-transition-overlay {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  z-index: 99999;
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity var(--page-transition-duration) ease;
+  will-change: opacity;
+}
+
+/* Applied on load once the incoming page is ready to be revealed */
+.page-transition-overlay.is-hidden {
+  opacity: 0;
+}
+
+/* Applied right before navigating away, to fade the outgoing page to white */
+.page-transition-overlay.is-active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Respect users who prefer less motion: swap the fade for an instant cut */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-overlay {
+    transition: none;
+  }
+}

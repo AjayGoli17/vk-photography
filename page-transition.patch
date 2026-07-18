@@ -1,0 +1,257 @@
+diff --git a/contact.html b/contact.html
+index 0997841..6d72cd4 100644
+--- a/contact.html
++++ b/contact.html
+@@ -11,9 +11,12 @@
+ 
+     <link rel="stylesheet" href="css/style.css">
+     <link rel="stylesheet" href="css/contact.css">
++    <link rel="stylesheet" href="css/transition.css">
+ </head>
+ <body>
+ 
++    <div class="page-transition-overlay"></div>
++
+     <header class="site-header">
+       <a href="#" class="logo">
+         <img src="logo.png" alt="VK Photography" class="logo-img">
+@@ -229,5 +232,6 @@
+     </footer>
+ 
+     <script src="js/contact.js"></script>
++    <script src="js/transition.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/css/transition.css b/css/transition.css
+new file mode 100644
+index 0000000..5aa8426
+--- /dev/null
++++ b/css/transition.css
+@@ -0,0 +1,36 @@
++/* ==========================================================================
++   Page Transition — smooth white fade between pages
++   ========================================================================== */
++
++:root {
++  --page-transition-duration: 700ms;
++}
++
++.page-transition-overlay {
++  position: fixed;
++  inset: 0;
++  background: #ffffff;
++  z-index: 99999;
++  opacity: 1;
++  pointer-events: none;
++  transition: opacity var(--page-transition-duration) ease;
++  will-change: opacity;
++}
++
++/* Applied on load once the incoming page is ready to be revealed */
++.page-transition-overlay.is-hidden {
++  opacity: 0;
++}
++
++/* Applied right before navigating away, to fade the outgoing page to white */
++.page-transition-overlay.is-active {
++  opacity: 1;
++  pointer-events: all;
++}
++
++/* Respect users who prefer less motion: swap the fade for an instant cut */
++@media (prefers-reduced-motion: reduce) {
++  .page-transition-overlay {
++    transition: none;
++  }
++}
+diff --git a/index.html b/index.html
+index 5524284..522e9ee 100644
+--- a/index.html
++++ b/index.html
+@@ -9,9 +9,12 @@
+ <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="css/style.css">
+ <link rel="stylesheet" href="css/home.css">
++<link rel="stylesheet" href="css/transition.css">
+ </head>
+ <body>
+ 
++<div class="page-transition-overlay"></div>
++
+ <div class="bg-video-fixed">
+   <video autoplay muted loop playsinline src="main.mp4"></video>
+ </div>
+@@ -281,6 +284,7 @@
+ </footer>
+ 
+ <script src="js/home.js"></script>
++<script src="js/transition.js"></script>
+ <script>
+ (function () {
+   var mq = window.matchMedia('(max-width: 640px)');
+diff --git a/js/transition.js b/js/transition.js
+new file mode 100644
+index 0000000..3b28561
+--- /dev/null
++++ b/js/transition.js
+@@ -0,0 +1,86 @@
++/* ==========================================================================
++   Page Transition — smooth white fade between every page
++   Add this file + css/transition.css to every page. No other setup needed.
++   ========================================================================== */
++(function () {
++  var DURATION = 700; // ms — keep in sync with --page-transition-duration in css/transition.css
++  var overlay = document.querySelector('.page-transition-overlay');
++
++  // Safety net: if the overlay markup was forgotten on a page, create it.
++  if (!overlay) {
++    overlay = document.createElement('div');
++    overlay.className = 'page-transition-overlay';
++    document.body.insertBefore(overlay, document.body.firstChild);
++  }
++
++  var isNavigating = false;
++
++  function revealPage() {
++    // Two rAFs so the browser commits the initial opaque frame first,
++    // guaranteeing the fade is actually visible instead of being skipped.
++    requestAnimationFrame(function () {
++      requestAnimationFrame(function () {
++        overlay.classList.add('is-hidden');
++      });
++    });
++  }
++
++  function isInternalNavigableLink(link) {
++    if (!link || !link.getAttribute) return false;
++    if (link.hasAttribute('download')) return false;
++    if (link.target && link.target !== '' && link.target !== '_self') return false;
++
++    var href = link.getAttribute('href');
++    if (!href) return false;
++    if (href.indexOf('#') === 0) return false;
++    if (/^(mailto:|tel:|javascript:)/i.test(href)) return false;
++
++    var url;
++    try {
++      url = new URL(href, window.location.href);
++    } catch (err) {
++      return false;
++    }
++
++    if (url.origin !== window.location.origin) return false;
++    // Same-page anchor links shouldn't trigger a full white transition.
++    if (url.pathname === window.location.pathname && url.hash) return false;
++
++    return url;
++  }
++
++  document.addEventListener('click', function (e) {
++    if (isNavigating) return;
++    if (e.defaultPrevented || e.button !== 0) return;
++    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
++
++    var link = e.target.closest('a');
++    var url = isInternalNavigableLink(link);
++    if (!url) return;
++
++    e.preventDefault();
++    isNavigating = true;
++
++    overlay.classList.remove('is-hidden');
++    overlay.classList.add('is-active');
++
++    setTimeout(function () {
++      window.location.href = url.href;
++    }, DURATION);
++  });
++
++  // If the page is restored from bfcache (browser back/forward), reset the overlay.
++  window.addEventListener('pageshow', function (e) {
++    if (e.persisted) {
++      isNavigating = false;
++      overlay.classList.remove('is-active');
++      overlay.classList.add('is-hidden');
++    }
++  });
++
++  if (document.readyState === 'loading') {
++    document.addEventListener('DOMContentLoaded', revealPage);
++  } else {
++    revealPage();
++  }
++})();
+diff --git a/portfolio.html b/portfolio.html
+index 5cbacf5..98a23ee 100644
+--- a/portfolio.html
++++ b/portfolio.html
+@@ -11,9 +11,12 @@
+ 
+     <link rel="stylesheet" href="css/style.css">
+     <link rel="stylesheet" href="css/portfolio.css">
++    <link rel="stylesheet" href="css/transition.css">
+ </head>
+ <body>
+ 
++    <div class="page-transition-overlay"></div>
++
+     <header class="site-header">
+       <a href="#" class="logo">
+         <img src="logo.png" alt="VK Photography" class="logo-img">
+@@ -136,5 +139,6 @@
+     </footer>
+ 
+     <script src="js/portfolio.js"></script>
++    <script src="js/transition.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/quotation.html b/quotation.html
+index d379054..cb8dbf6 100644
+--- a/quotation.html
++++ b/quotation.html
+@@ -7,8 +7,10 @@
+ <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+ <link rel="stylesheet" href="css/style.css"/>
+ <link rel="stylesheet" href="css/quotation.css"/>
++<link rel="stylesheet" href="css/transition.css"/>
+ </head>
+ <body>
++    <div class="page-transition-overlay"></div>
+     <header class="site-header">
+         <a href="#" class="logo">
+           <img src="logo.png" alt="VK Photography" class="logo-img">
+@@ -288,5 +290,6 @@
+ 
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+ <script src="js/quotation.js"></script>
++<script src="js/transition.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/service.html b/service.html
+index 02d97ba..678dac3 100644
+--- a/service.html
++++ b/service.html
+@@ -11,9 +11,12 @@
+ 
+     <link rel="stylesheet" href="css/style.css">
+     <link rel="stylesheet" href="css/service.css">
++    <link rel="stylesheet" href="css/transition.css">
+ </head>
+ <body>
+ 
++    <div class="page-transition-overlay"></div>
++
+     <header class="site-header">
+       <a href="#" class="logo">
+         <img src="logo.png" alt="VK Photography" class="logo-img">
+@@ -216,5 +219,6 @@
+     </footer>
+ 
+     <script src="js/service.js"></script>
++    <script src="js/transition.js"></script>
+ </body>
+ </html>
+\ No newline at end of file

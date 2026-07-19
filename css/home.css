@@ -1,6 +1,25 @@
 /* NOTE: :root variables, reset, nav, mobile sidebar, and footer
      now live in style.css. Link style.css BEFORE this file. */
 
+/* ---------- PAGE LOADER: video plays full-screen before the page shows ---------- */
+#pageLoader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+#pageLoader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+#pageLoader video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
   /* ---------- HOME PAGE THEME OVERRIDE: black bg, white text ----------
      Redeclares the shared tokens from style.css. Since home.css is only
      linked on index.html, this only affects the home page — every other
@@ -18,6 +37,155 @@
       --border-strong: rgba(255,255,255,0.24);
       --cognac: #b9793f;
     }
+
+    /* ===== VK Photography — Home Navbar ===== */
+:root{
+  --nav-ink:#0a0a0c;
+  --nav-panel: rgba(10,10,12,0.55);
+  --nav-panel-strong: rgba(10,10,12,0.72);
+  --nav-panel-border: rgba(255,255,255,0.14);
+  --nav-gold: #cda45e;
+  --nav-gold-2: #f0d8a8;
+  --nav-ivory: #f6f3ec;
+  --nav-muted: #c9c6cc;
+  --nav-ease: cubic-bezier(.16,.84,.44,1);
+}
+
+nav.vk-nav{
+  position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:50;
+  width:min(1200px, calc(100% - 32px));
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 14px 10px 14px;
+  border-radius:999px;
+  font-family:'Manrope', sans-serif;
+  isolation:isolate;
+  overflow:hidden;
+  background:
+    radial-gradient(65% 160% at 3% 50%, rgba(205,164,94,.55), rgba(205,164,94,0) 68%),
+    radial-gradient(80% 160% at 30% 50%, rgba(0,0,0,.45), rgba(0,0,0,0) 70%),
+    linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.02) 45%, rgba(0,0,0,.12) 100%),
+    var(--nav-panel-strong);
+  border: 1px solid rgba(255,255,255,.16);
+  backdrop-filter: blur(28px) saturate(220%) brightness(1.08);
+  -webkit-backdrop-filter: blur(28px) saturate(220%) brightness(1.08);
+  box-shadow:
+    0 20px 50px -12px rgba(0,0,0,.55),
+    0 2px 10px rgba(0,0,0,.35),
+    inset 0 1px 1px rgba(255,255,255,.55),
+    inset 0 -1px 1px rgba(255,255,255,.05),
+    inset 0 0 0 1px rgba(255,255,255,.06);
+  transition: box-shadow .4s var(--nav-ease), background .4s var(--nav-ease);
+}
+/* soft top-left light pool for depth */
+nav.vk-nav::after{
+  content:"";
+  position:absolute; inset:0;
+  border-radius:inherit;
+  background: radial-gradient(120% 70% at 22% -30%, rgba(255,255,255,.22), transparent 60%);
+  pointer-events:none;
+  z-index:0;
+}
+
+.vk-nav a{ color:inherit; text-decoration:none; }
+.vk-nav-brand{ position:relative; z-index:1; display:flex; align-items:center; gap:12px; }
+.vk-nav-logo-chip{
+  width:44px; height:44px; border-radius:50%; overflow:hidden; flex:none;
+  display:flex; align-items:center; justify-content:center;
+}
+.vk-nav-logo-chip img{ width:100%; height:100%; object-fit:cover; display:block; }
+.vk-nav-brand-text{ font-family:'Cormorant Garamond', serif; font-size:1.3rem; letter-spacing:.04em; color:var(--nav-ivory); }
+.vk-nav-brand-text b{ color:var(--nav-gold-2); font-weight:600; }
+
+.vk-nav-right{ position:relative; z-index:1; display:flex; align-items:center; gap:34px; }
+
+.vk-nav-links{ display:flex; gap:4px; font-size:.86rem; color:var(--nav-muted); }
+.vk-nav-links a{
+  padding:8px 14px;
+  border-radius:999px;
+  background: rgba(255,255,255,0);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0);
+  transition: color .25s var(--nav-ease), background-color .3s var(--nav-ease), box-shadow .3s var(--nav-ease);
+}
+.vk-nav-links a:hover, .vk-nav-links a:focus-visible{
+  color: var(--nav-ivory);
+  background: rgba(255,255,255,.1);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.14), inset 0 1px 0 rgba(255,255,255,.3);
+}
+
+.vk-nav-cta{ display:flex; align-items:center; gap:10px; }
+.vk-btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:11px 22px; border-radius:999px; font-size:.82rem; font-weight:700;
+  letter-spacing:.02em; cursor:pointer; border:1px solid transparent;
+  transition: transform .35s var(--nav-ease), box-shadow .35s var(--nav-ease), background .35s var(--nav-ease);
+  font-family:'Manrope', sans-serif;
+}
+.vk-btn-gold{
+  background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 55%), linear-gradient(135deg, var(--nav-gold-2), var(--nav-gold));
+  color:#221a0d;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.6), 0 6px 18px rgba(205,164,94,.35);
+}
+.vk-btn-gold:hover{ transform: translateY(-2px); box-shadow: 0 10px 26px rgba(205,164,94,.5); }
+.vk-btn-ghost{
+  color: var(--nav-ivory);
+  border-color: rgba(255,255,255,.2);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.02) 55%, rgba(0,0,0,.08) 100%),
+    var(--nav-panel-strong);
+  backdrop-filter: blur(20px) saturate(200%);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.4),
+    inset 0 -1px 1px rgba(255,255,255,.04),
+    0 8px 20px rgba(0,0,0,.35);
+}
+.vk-btn-ghost:hover{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.04) 55%, rgba(0,0,0,.08) 100%),
+    var(--nav-panel-strong);
+  transform: translateY(-2px);
+}
+
+.vk-nav-toggle{
+  display:none; width:40px; height:40px; border-radius:50%; border:1px solid var(--nav-panel-border);
+  background:var(--nav-panel); align-items:center; justify-content:center; cursor:pointer; flex-direction:column; gap:4px;
+}
+.vk-nav-toggle span{ width:16px; height:1.5px; background:var(--nav-ivory); display:block; transition:.3s var(--nav-ease); }
+.vk-nav-toggle.open span:nth-child(1){ transform:translateY(5.5px) rotate(45deg); }
+.vk-nav-toggle.open span:nth-child(2){ opacity:0; }
+.vk-nav-toggle.open span:nth-child(3){ transform:translateY(-5.5px) rotate(-45deg); }
+
+.vk-nav-mobile{
+  position:fixed; top:0; right:0; height:100vh; width:min(320px, 78%);
+  z-index:49; border-radius:24px 0 0 24px; padding:110px 22px 28px;
+  display:flex; flex-direction:column; gap:6px; overflow-y:auto;
+  pointer-events:none; transform:translateX(100%);
+  transition: transform .45s var(--nav-ease), box-shadow .45s var(--nav-ease);
+  font-family:'Manrope', sans-serif;
+  background: var(--nav-panel-strong);
+  border-left: 1px solid var(--nav-panel-border);
+  backdrop-filter: blur(36px) saturate(180%);
+  -webkit-backdrop-filter: blur(36px) saturate(180%);
+  box-shadow: -16px 0 40px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.1), 0 0 0 9999px rgba(0,0,0,0);
+}
+.vk-nav-mobile.open{
+  pointer-events:auto; transform:translateX(0);
+  box-shadow: -16px 0 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1), 0 0 0 9999px rgba(0,0,0,.55);
+}
+.vk-nav-mobile a{ padding:14px 16px; border-radius:12px; font-size:1rem; color:var(--nav-ivory); }
+.vk-nav-mobile a:hover{ background:var(--nav-panel); }
+.vk-nav-mobile-cta{
+  margin-top:20px; text-align:center; font-weight:700; font-size:1.02rem;
+  padding:16px 16px !important; border-radius:999px !important;
+}
+.vk-nav-mobile-cta:hover{ transform:none; }
+
+@media (max-width:900px){
+  .vk-nav-links{ display:none; }
+  .vk-nav-cta .vk-btn-ghost{ display:none; }
+  .vk-nav-toggle{ display:flex; }
+}
+    
   
     /* ---------- HERO ---------- */
     .hero {
@@ -65,7 +233,7 @@
     }
 
     .hero-copy {
-      padding: 5vh 5vw 0;
+      padding: calc(5vh + 120px) 5vw 0;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
@@ -160,7 +328,7 @@
       display: flex;
       align-items: flex-start;
       justify-content: center;
-      padding: 5vh 4vw 3vh;
+      padding: calc(5vh + 120px) 4vw 3vh;
       z-index: 1;
       perspective: 1200px;
     }
@@ -220,7 +388,7 @@
       .hero { grid-template-columns: 1fr; min-height: auto; padding-left: 0; }
       .hero-rail { display: none; }
       .hero-frame { height: 60vh; order: -1; }
-      .hero-copy { padding: 60px 24px; }
+      .hero-copy { padding: 130px 24px 60px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -236,7 +404,7 @@
       position: relative;
       z-index: 1;
       background: var(--cream);
-      padding: 0 48px 120px;
+      padding: 90px 48px 120px;
     }
   
     .grid {
@@ -658,7 +826,7 @@
     /* ---------- RESPONSIVE ---------- */
     @media (max-width: 900px) {
       .hero { padding: 140px 20px 60px; }
-      .portfolio { padding: 0 20px 80px; }
+      .portfolio { padding: 60px 20px 80px; }
       .hero p { max-width: 480px; }
   
     }
@@ -893,179 +1061,3 @@
       transition:background .2s, border-color .2s, color .2s, transform .2s;
     }
     .tc-cta-btn:hover{background:transparent; border-color:var(--ink); color:var(--ink); transform: translateY(-3px);}
-    /* ===========================================================
-       LIQUID GLASS NAV — home page only
-       .site-header itself lives in style.css (shared across every
-       page). Because home.css loads AFTER style.css and is only
-       linked from index.html, everything below only ever applies
-       on the home page — style.css and every other page (portfolio,
-       service, quotation, contact) are completely untouched.
-       =========================================================== */
-  
-    .site-header {
-      position: sticky;
-      top: 0;
-      left: 0;
-      right: 0;
-      width: 100%;
-      z-index: 1000;
-      isolation: isolate;
-      overflow: visible;
-      transition:
-        background-color 0.5s ease,
-        backdrop-filter 0.5s ease,
-        -webkit-backdrop-filter 0.5s ease,
-        box-shadow 0.5s ease,
-        border-color 0.5s ease;
-    }
-  
-    /* ---- the glass itself: blur + saturate ----
-       NOTE: backdrop-filter deliberately does NOT combine url(#glass-distortion)
-       here. Safari silently drops the entire backdrop-filter value if any one
-       function in it is unsupported, which was killing the blur AND the tint
-       together (raw video showing through with no glass at all). Keeping this
-       to blur()+saturate() is what every engine supports reliably. The
-       distortion filter is still applied separately on .logo-glass below.
-       header.site-header is included to out-specificity anything in style.css
-       that targets the header the same way, and !important guarantees this
-       home-page-only rule always wins regardless of source order. */
-    .site-header,
-    header.site-header {
-      background-image: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.12) 0%,
-        rgba(255, 255, 255, 0.03) 45%,
-        rgba(255, 255, 255, 0.07) 100%
-      ) !important;
-      background-color: rgba(20, 20, 24, 0.6) !important;
-      background-blend-mode: overlay;
-      -webkit-backdrop-filter: blur(46px) saturate(150%) !important;
-      backdrop-filter: blur(46px) saturate(150%) !important;
-      border-top: 1px solid rgba(255, 255, 255, 0.14);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.22),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.04),
-        0 8px 32px rgba(0, 0, 0, 0.25);
-    }
-  
-    /* ---- specular highlight sweep across the top edge ---- */
-    .site-header::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: linear-gradient(
-        115deg,
-        rgba(255, 255, 255, 0.24) 0%,
-        rgba(255, 255, 255, 0.06) 22%,
-        rgba(255, 255, 255, 0) 40%,
-        rgba(255, 255, 255, 0) 68%,
-        rgba(255, 255, 255, 0.14) 100%
-      );
-      z-index: 1;
-    }
-  
-    /* ---- fixed / scrolled state: glass darkens further for contrast (toggled by home.js) ---- */
-    .site-header.nav-fixed,
-    header.site-header.nav-fixed {
-      background-image: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.1) 0%,
-        rgba(255, 255, 255, 0.02) 45%,
-        rgba(255, 255, 255, 0.05) 100%
-      ) !important;
-      background-color: rgba(10, 10, 12, 0.86) !important;
-      background-blend-mode: overlay;
-      -webkit-backdrop-filter: blur(56px) saturate(160%) !important;
-      backdrop-filter: blur(56px) saturate(160%) !important;
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.05),
-        0 10px 40px rgba(0, 0, 0, 0.5);
-    }
-  
-    /* ---- nav links: glass "pill" highlight on hover ---- */
-    .site-header .links {
-      position: relative;
-      z-index: 2;
-    }
-  
-    .site-header .links a {
-      position: relative;
-      padding: 8px 14px;
-      border-radius: 999px;
-      transition: background 0.35s ease, box-shadow 0.35s ease, color 0.35s ease;
-    }
-  
-    .site-header .links a:hover,
-    .site-header .links a:focus-visible {
-      background: rgba(255, 255, 255, 0.14);
-      -webkit-backdrop-filter: blur(6px);
-      backdrop-filter: blur(6px);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.35),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.05);
-    }
-  
-    /* ---- logo: same white/black gradient + blur recipe as the header
-       itself (not a separate floating pill), so it reads as one
-       continuous glass surface rather than an added-on chip. ---- */
-    .logo-glass {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-radius: 12px;
-      position: relative;
-      z-index: 2;
-      background-image: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.16) 0%,
-        rgba(255, 255, 255, 0.04) 45%,
-        rgba(255, 255, 255, 0.1) 100%
-      ) !important;
-      background-color: rgba(20, 20, 24, 0.55) !important;
-      background-blend-mode: overlay;
-      -webkit-backdrop-filter: blur(30px) saturate(150%) !important;
-      backdrop-filter: blur(30px) saturate(150%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.24),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.05),
-        0 4px 16px rgba(0, 0, 0, 0.25);
-      transition: background-color 0.5s ease, box-shadow 0.35s ease;
-    }
-
-    /* darkens in step with the header once scrolled, same as .nav-fixed */
-    .site-header.nav-fixed .logo-glass {
-      background-color: rgba(10, 10, 12, 0.7) !important;
-    }
-
-    .logo-glass .logo-img {
-      display: block;
-      /* logo.png itself is untouched — this just lifts the mark off the glass */
-      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
-    }
-
-    /* ---- fallback for browsers without backdrop-filter support ---- */
-    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-      .site-header {
-        background-color: rgba(8, 8, 10, 0.85);
-      }
-      .site-header.nav-fixed {
-        background-color: rgba(6, 6, 8, 0.92);
-      }
-      .logo-glass {
-        background-color: rgba(20, 20, 22, 0.75) !important;
-      }
-    }
-  
-    /* ---- respect reduced motion ---- */
-    @media (prefers-reduced-motion: reduce) {
-      .site-header,
-      .site-header .links a,
-      .logo-glass {
-        transition: none;
-      }
-    }

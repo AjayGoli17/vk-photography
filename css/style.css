@@ -555,3 +555,38 @@
     height: 56px;
   }
 }
+
+@media (hover: hover) and (pointer: fine) {
+  body {
+    cursor: none !important;
+  }
+  a, button, [role="button"], input, textarea, select {
+    cursor: none !important;
+  }
+}
+
+.vk-cursor-dot,
+.vk-cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0;
+  mix-blend-mode: difference;
+  transition: opacity 0.15s ease;
+}
+
+.vk-cursor-dot {
+  width: 6px;
+  height: 6px;
+  background: #fff;
+}
+
+.vk-cursor-ring {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid #fff;
+}

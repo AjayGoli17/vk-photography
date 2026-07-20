@@ -13,9 +13,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<div id="pageLoader">
-<video id="pageLoaderVideo" src="loading-video.mp4" autoplay muted playsinline></video>
-</div>
 <div class="page-transition-overlay"></div>
 <div class="bg-video-fixed">
 <video autoplay muted loop playsinline src="main.mp4"></video>
@@ -247,20 +244,6 @@ Get Directions
 </div>
 </div>
 </footer>
-<script>
-(function () {
-  var loader = document.getElementById('pageLoader');
-  var loaderVideo = document.getElementById('pageLoaderVideo');
-  var revealed = false;
-  function reveal() {
-    if (revealed) return;
-    revealed = true;
-    loader.classList.add('hidden');
-  }
-  loaderVideo.addEventListener('ended', reveal, { once: true });
-  setTimeout(reveal, 6000);
-})();
-</script>
 <script src="js/home.js"></script>
 <script src="js/transition.js"></script>
 <script>
@@ -318,5 +301,6 @@ window.addEventListener('resize', update);
 update();
 })();
 </script>
+<script src="js/cursor.js"></script>
 </body>
 </html>

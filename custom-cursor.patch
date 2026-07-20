@@ -1,0 +1,180 @@
+diff --git a/contact.html b/contact.html
+index b57aa48..1a6d672 100644
+--- a/contact.html
++++ b/contact.html
+@@ -240,5 +240,6 @@ Get Directions
+       }
+     </script>
+     <script src="js/transition.js"></script>
++<script src="js/cursor.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/css/style.css b/css/style.css
+index 4859eef..89a49ce 100644
+--- a/css/style.css
++++ b/css/style.css
+@@ -554,4 +554,39 @@
+   .logo-img {
+     height: 56px;
+   }
++}
++
++@media (hover: hover) and (pointer: fine) {
++  body {
++    cursor: none;
++  }
++  a, button, [role="button"], input, textarea, select {
++    cursor: none;
++  }
++}
++
++.vk-cursor-dot,
++.vk-cursor-ring {
++  position: fixed;
++  top: 0;
++  left: 0;
++  border-radius: 50%;
++  pointer-events: none;
++  z-index: 9998;
++  opacity: 0;
++  mix-blend-mode: difference;
++  transition: opacity 0.15s ease;
++}
++
++.vk-cursor-dot {
++  width: 6px;
++  height: 6px;
++  background: #fff;
++}
++
++.vk-cursor-ring {
++  width: 36px;
++  height: 36px;
++  background: transparent;
++  border: 1px solid #fff;
+ }
+\ No newline at end of file
+diff --git a/index.html b/index.html
+index 902d30f..d0d29b6 100644
+--- a/index.html
++++ b/index.html
+@@ -13,9 +13,6 @@
+ <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+ </head>
+ <body>
+-<div id="pageLoader">
+-<video id="pageLoaderVideo" src="loading-video.mp4" autoplay muted playsinline></video>
+-</div>
+ <div class="page-transition-overlay"></div>
+ <div class="bg-video-fixed">
+ <video autoplay muted loop playsinline src="main.mp4"></video>
+@@ -247,20 +244,6 @@ Get Directions
+ </div>
+ </div>
+ </footer>
+-<script>
+-(function () {
+-  var loader = document.getElementById('pageLoader');
+-  var loaderVideo = document.getElementById('pageLoaderVideo');
+-  var revealed = false;
+-  function reveal() {
+-    if (revealed) return;
+-    revealed = true;
+-    loader.classList.add('hidden');
+-  }
+-  loaderVideo.addEventListener('ended', reveal, { once: true });
+-  setTimeout(reveal, 6000);
+-})();
+-</script>
+ <script src="js/home.js"></script>
+ <script src="js/transition.js"></script>
+ <script>
+@@ -318,5 +301,6 @@ window.addEventListener('resize', update);
+ update();
+ })();
+ </script>
++<script src="js/cursor.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/js/cursor.js b/js/cursor.js
+new file mode 100644
+index 0000000..a625562
+--- /dev/null
++++ b/js/cursor.js
+@@ -0,0 +1,38 @@
++(function () {
++  if (window.matchMedia('(hover: none), (pointer: coarse)').matches) return;
++
++  var dot = document.createElement('div');
++  dot.className = 'vk-cursor-dot';
++  var ring = document.createElement('div');
++  ring.className = 'vk-cursor-ring';
++  document.body.appendChild(dot);
++  document.body.appendChild(ring);
++
++  var mx = -100, my = -100, rx = -100, ry = -100;
++  var active = false;
++
++  document.addEventListener('mousemove', function (e) {
++    mx = e.clientX;
++    my = e.clientY;
++    if (!active) {
++      active = true;
++      dot.style.opacity = '1';
++      ring.style.opacity = '1';
++    }
++  });
++
++  document.addEventListener('mouseleave', function () {
++    active = false;
++    dot.style.opacity = '0';
++    ring.style.opacity = '0';
++  });
++
++  function loop() {
++    rx += (mx - rx) * 0.2;
++    ry += (my - ry) * 0.2;
++    dot.style.transform = 'translate(' + mx + 'px,' + my + 'px) translate(-50%,-50%)';
++    ring.style.transform = 'translate(' + rx + 'px,' + ry + 'px) translate(-50%,-50%)';
++    requestAnimationFrame(loop);
++  }
++  loop();
++})();
+diff --git a/portfolio.html b/portfolio.html
+index 91aa6f6..a090091 100644
+--- a/portfolio.html
++++ b/portfolio.html
+@@ -147,5 +147,6 @@ Get Directions
+       }
+     </script>
+     <script src="js/transition.js"></script>
++<script src="js/cursor.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/quotation.html b/quotation.html
+index c28f423..2ad52f8 100644
+--- a/quotation.html
++++ b/quotation.html
+@@ -298,5 +298,6 @@ Get Directions
+   }
+ </script>
+ <script src="js/transition.js"></script>
++<script src="js/cursor.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/service.html b/service.html
+index 3127be4..0f8b06d 100644
+--- a/service.html
++++ b/service.html
+@@ -227,5 +227,6 @@ Get Directions
+       }
+     </script>
+     <script src="js/transition.js"></script>
++<script src="js/cursor.js"></script>
+ </body>
+ </html>
+\ No newline at end of file

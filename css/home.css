@@ -6,30 +6,31 @@
      linked on index.html, this only affects the home page — every other
      page keeps the white theme from style.css untouched. */
      :root {
-      --cream: #000000;
-      --ink: #FFFFFF;
-      --gray: #B7B3AA;
-      --line: rgba(255,255,255,0.16);
-      --card: #141414;
-      --accent-bg-light: #0D0D0D;
-      --accent-bg-deep: #1A1A1A;
-      --border-subtle: rgba(255,255,255,0.12);
-      --border-default: rgba(255,255,255,0.16);
-      --border-strong: rgba(255,255,255,0.24);
+      --cream: #ffffff;
+      --ink: #000000;
+      --gray: #555555;
+      --line: rgba(0,0,0,0.12);
+      --card: #ffffff;
+      --accent-bg-light: #f5f5f5;
+      --accent-bg-deep: #ececec;
+      --border-subtle: rgba(0,0,0,0.08);
+      --border-default: rgba(0,0,0,0.12);
+      --border-strong: rgba(0,0,0,0.18);
       --cognac: #b9793f;
     }
 
     /* ===== VK Photography — Home Navbar ===== */
 :root{
-  --nav-ink:#0a0a0c;
-  --nav-panel: rgba(10,10,12,0.55);
-  --nav-panel-strong: rgba(10,10,12,0.72);
-  --nav-panel-border: rgba(255,255,255,0.14);
-  --nav-gold: #cda45e;
-  --nav-gold-2: #f0d8a8;
-  --nav-ivory: #f6f3ec;
-  --nav-muted: #c9c6cc;
-  --nav-ease: cubic-bezier(.16,.84,.44,1);
+  :root{
+    --nav-ink:#000;
+    --nav-panel: rgba(255,255,255,.75);
+    --nav-panel-strong: rgba(255,255,255,.90);
+    --nav-panel-border: rgba(0,0,0,.10);
+    --nav-gold:#cda45e;
+    --nav-gold-2:#d8b77a;
+    --nav-ivory:#000;
+    --nav-muted:#555;
+  }
 }
 
 nav.vk-nav{
@@ -83,7 +84,10 @@ nav.vk-nav::after{
   transform-origin:center;
 }
 .vk-nav-brand-text{ font-family:'Cormorant Garamond', serif; font-size:1.3rem; letter-spacing:.04em; color:var(--nav-ivory); }
-.vk-nav-brand-text b{ color:var(--nav-gold-2); font-weight:600; }
+.vk-nav-brand-text b { 
+  color: #B9793E; /* A bright, vibrant orange */
+  font-weight: 700; 
+}
 
 .vk-nav-right{ position:relative; z-index:1; display:flex; align-items:center; gap:34px; }
 
@@ -116,23 +120,20 @@ nav.vk-nav::after{
 }
 .vk-btn-gold:hover{ transform: translateY(-2px); box-shadow: 0 10px 26px rgba(205,164,94,.5); }
 .vk-btn-ghost{
-  color: var(--nav-ivory);
-  border-color: rgba(255,255,255,.2);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.02) 55%, rgba(0,0,0,.08) 100%),
-    var(--nav-panel-strong);
-  backdrop-filter: blur(20px) saturate(200%);
-  -webkit-backdrop-filter: blur(20px) saturate(200%);
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,.4),
-    inset 0 -1px 1px rgba(255,255,255,.04),
-    0 8px 20px rgba(0,0,0,.35);
+  color:#fff !important;
+  background:#000;
+  border:1px solid #000;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  box-shadow:none;
+  transition:.35s var(--nav-ease);
 }
+
 .vk-btn-ghost:hover{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.04) 55%, rgba(0,0,0,.08) 100%),
-    var(--nav-panel-strong);
-  transform: translateY(-2px);
+  color:#fff !important;
+  background:#222;
+  border-color:#222;
+  transform:translateY(-2px);
 }
 
 .vk-nav-toggle{

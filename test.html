@@ -2,151 +2,88 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VK Photography — Nav</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Background Video Playlist Demo</title>
 <style>
-  :root{
-    --ink:#0a0a0c;
-    --panel: rgba(255,255,255,0.055);
-    --panel-strong: rgba(255,255,255,0.09);
-    --panel-border: rgba(255,255,255,0.14);
-    --gold: #cda45e;
-    --gold-2: #f0d8a8;
-    --ivory: #f6f3ec;
-    --muted: #a7a3ab;
-    --ease: cubic-bezier(.16,.84,.44,1);
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{
-    background: var(--ink);
-    color: var(--ivory);
-    font-family: 'Manrope', sans-serif;
-    min-height:100vh;
-  }
-  a{color:inherit; text-decoration:none;}
-  img{max-width:100%; display:block;}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  /* ambient shapes behind the nav so the blur has something to blur */
-  .ambient{ position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
-  .ambient span{ position:absolute; border-radius:50%; filter:blur(70px); }
-  .ambient span:nth-child(1){ width:480px; height:480px; background:radial-gradient(circle,#cda45e,transparent 70%); top:-140px; left:-80px; opacity:.55; }
-  .ambient span:nth-child(2){ width:560px; height:560px; background:radial-gradient(circle,#6fa8c9,transparent 70%); top:60px; right:-160px; opacity:.4; }
-  .ambient span:nth-child(3){ width:420px; height:420px; background:radial-gradient(circle,#e9dcc0,transparent 70%); bottom:-220px; left:38%; opacity:.28; }
-
-  .glass-strong{
-    background: var(--panel-strong);
-    border: 1px solid var(--panel-border);
-    backdrop-filter: blur(36px) saturate(180%);
-    -webkit-backdrop-filter: blur(36px) saturate(180%);
-    box-shadow: 0 12px 40px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.1);
+  .bg-video-fixed {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100dvh;
+    z-index: 0;
+    overflow: hidden;
+    background: #000; /* shows briefly between clips while the next one loads */
   }
 
-  nav{
-    position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:50;
-    width:min(1200px, calc(100% - 32px));
-    display:flex; align-items:center; justify-content:space-between;
-    padding:10px 14px 10px 14px;
-    border-radius:999px;
+  .bg-video-fixed video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
-  .nav-brand{ display:flex; align-items:center; gap:12px; }
-  .nav-logo-chip{
-    width:44px; height:44px; border-radius:50%; overflow:hidden; flex:none;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .nav-logo-chip img{
-    width:100%; height:100%; object-fit:cover;
-  }
-  .nav-brand-text{ font-family:'Cormorant Garamond', serif; font-size:1.3rem; letter-spacing:.04em; color:var(--ivory); }
-  .nav-brand-text b{ color:var(--gold-2); font-weight:600; }
 
-  .nav-right{ display:flex; align-items:center; gap:34px; }
-
-  .nav-links{ display:flex; gap:26px; font-size:.86rem; color:var(--muted); }
-  .nav-links a{ transition: color .25s var(--ease); }
-  .nav-links a:hover, .nav-links a:focus-visible{ color: var(--ivory); }
-
-  .nav-cta{ display:flex; align-items:center; gap:10px; }
-  .btn{
-    display:inline-flex; align-items:center; justify-content:center; gap:8px;
-    padding:11px 22px; border-radius:999px; font-size:.82rem; font-weight:700;
-    letter-spacing:.02em; cursor:pointer; border:1px solid transparent;
-    transition: transform .35s var(--ease), box-shadow .35s var(--ease), background .35s var(--ease);
-  }
-  .btn-gold{
-    background: linear-gradient(135deg, var(--gold-2), var(--gold));
-    color:#221a0d;
-    box-shadow: 0 6px 18px rgba(205,164,94,.35);
-  }
-  .btn-gold:hover{ transform: translateY(-2px); box-shadow: 0 10px 26px rgba(205,164,94,.5); }
-  .btn-ghost{ color: var(--ivory); border-color: var(--panel-border); background: var(--panel); }
-  .btn-ghost:hover{ background: var(--panel-strong); transform: translateY(-2px); }
-
-  .nav-toggle{
-    display:none; width:40px; height:40px; border-radius:50%; border:1px solid var(--panel-border);
-    background:var(--panel); align-items:center; justify-content:center; cursor:pointer; flex-direction:column; gap:4px;
-  }
-  .nav-toggle span{ width:16px; height:1.5px; background:var(--ivory); display:block; transition:.3s var(--ease); }
-  .nav-toggle.open span:nth-child(1){ transform:translateY(5.5px) rotate(45deg); }
-  .nav-toggle.open span:nth-child(2){ opacity:0; }
-  .nav-toggle.open span:nth-child(3){ transform:translateY(-5.5px) rotate(-45deg); }
-
-  .nav-mobile{
-    position:fixed; top:78px; left:50%; transform:translateX(-50%) translateY(-12px); width:min(420px, calc(100% - 32px));
-    z-index:49; border-radius:24px; padding:18px; display:flex; flex-direction:column; gap:4px;
-    opacity:0; pointer-events:none; transition:.3s var(--ease);
-  }
-  .nav-mobile.open{ opacity:1; pointer-events:auto; transform:translateX(-50%) translateY(0); }
-  .nav-mobile a{ padding:12px 14px; border-radius:12px; font-size:.92rem; color:var(--ivory); }
-  .nav-mobile a:hover{ background:var(--panel); }
-
-  @media (max-width:900px){
-    .nav-links{ display:none; }
-    .nav-cta .btn-ghost{ display:none; }
-    .nav-toggle{ display:flex; }
+  /* just so you can see content sits on top, like your hero section does */
+  .demo-overlay {
+    position: relative;
+    z-index: 1;
+    height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-family: sans-serif;
+    font-size: 1.5rem;
+    text-shadow: 0 2px 10px rgba(0,0,0,.6);
   }
 </style>
 </head>
 <body>
 
-<div class="ambient"><span></span><span></span><span></span></div>
-
-<nav class="glass-strong" id="mainNav">
-  <div class="nav-brand">
-    <a href="#home" class="nav-logo-chip"><img src="VK LOGO (1).jpg" alt="VK Photography"></a>
-    <div class="nav-brand-text"><b>VK</b> Photography</div>
+  <div class="bg-video-fixed">
+    <video id="bgVideo" muted playsinline autoplay></video>
   </div>
-  <div class="nav-right">
-    <div class="nav-links">
-      <a href="#home">Home</a>
-      <a href="#portfolio">Portfolio</a>
-      <a href="#services">Services</a>
-      <a href="#quotation">Quotation</a>
-      <a href="#contact">Contact</a>
-    </div>
-    <div class="nav-cta">
-      <a href="#quotation" class="btn btn-ghost">Get Quote</a>
-      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
-    </div>
-  </div>
-</nav>
-<div class="nav-mobile glass-strong" id="navMobile">
-  <a href="#home">Home</a>
-  <a href="#portfolio">Portfolio</a>
-  <a href="#services">Services</a>
-  <a href="#quotation">Quotation</a>
-  <a href="#contact">Contact</a>
-</div>
 
-<script>
-  const navToggle = document.getElementById('navToggle');
-  const navMobile = document.getElementById('navMobile');
-  navToggle.addEventListener('click', () => {
-    navToggle.classList.toggle('open');
-    navMobile.classList.toggle('open');
-  });
-</script>
+  <div class="demo-overlay">Your content goes here</div>
+
+  <script>
+    // Publicly hosted sample clips (Google's open test-video bucket).
+    // Each entry defines which SEGMENT of the source video to use as your
+    // "5-6 sec clip" — start/end are in seconds.
+    const playlist = [
+      { src: "main.mp4", start: 10, end: 16 },
+      { src: "loading-video.mp4", start: 20, end: 26 },
+      { src: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", start: 5,  end: 11 }
+    ];
+
+    let current = 0;
+    const video = document.getElementById("bgVideo");
+
+    function playClip(index) {
+      const clip = playlist[index];
+      video.src = clip.src;
+
+      // Once metadata is loaded, jump to the clip's start point
+      video.onloadedmetadata = () => {
+        video.currentTime = clip.start;
+        video.play().catch(() => {
+          // Autoplay can get blocked if the tab isn't focused yet — safe to ignore
+        });
+      };
+    }
+
+    // Watch playback and cut to the next clip once we hit this clip's "end"
+    video.addEventListener("timeupdate", () => {
+      const clip = playlist[current];
+      if (video.currentTime >= clip.end) {
+        current = (current + 1) % playlist.length;
+        playClip(current);
+      }
+    });
+
+    // Kick things off
+    playClip(current);
+  </script>
+
 </body>
 </html>

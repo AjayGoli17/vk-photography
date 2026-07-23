@@ -239,6 +239,58 @@
   })();
 
 /* -----------------------------------------------------------
+   Videos section: click-to-play cards + scroll reveal
+   ----------------------------------------------------------- */
+  (() => {
+    const cards = document.querySelectorAll('.videos .video-card');
+    if (!cards.length) return;
+
+    cards.forEach(card => {
+      const video = card.querySelector('.video-el');
+      const playBtn = card.querySelector('.video-play');
+      if (!video || !playBtn) return;
+
+      function play() {
+        video.play();
+        card.classList.add('is-playing');
+      }
+      function pause() {
+        video.pause();
+        card.classList.remove('is-playing');
+      }
+
+      playBtn.addEventListener('click', play);
+      video.addEventListener('click', pause);
+      video.addEventListener('ended', pause);
+
+      // Pause a card's video whenever another one starts, so only one
+      // plays at a time.
+      video.addEventListener('play', () => {
+        cards.forEach(other => {
+          if (other !== card) {
+            const otherVideo = other.querySelector('.video-el');
+            if (otherVideo && !otherVideo.paused) {
+              otherVideo.pause();
+              other.classList.remove('is-playing');
+            }
+          }
+        });
+      });
+    });
+
+    const videoObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('in-view'), i * 70);
+          videoObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    cards.forEach(card => videoObserver.observe(card));
+  })();
+
+/* -----------------------------------------------------------
    Testimonials carousel
    ----------------------------------------------------------- */
   // Testimonials carousel (merged from sample1.html), scoped in its own IIFE

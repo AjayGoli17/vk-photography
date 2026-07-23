@@ -398,11 +398,12 @@ nav.vk-nav::after{
     }
   
     .grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      grid-auto-rows: 110px;
-      grid-auto-flow: dense;
-      gap: 18px;
+      column-count: 3;
+      column-gap: 18px;
+    }
+
+    @media (max-width: 1100px) {
+      .grid { column-count: 2; }
     }
   
     .tile {
@@ -416,6 +417,10 @@ nav.vk-nav::after{
       transition: opacity 0.9s cubic-bezier(.16,.84,.44,1),
                   transform 0.9s cubic-bezier(.16,.84,.44,1),
                   filter 0.9s cubic-bezier(.16,.84,.44,1);
+      display: block;
+      width: 100%;
+      break-inside: avoid;
+      margin-bottom: 18px;
     }
   
     .tile.in-view {
@@ -426,8 +431,7 @@ nav.vk-nav::after{
   
     .tile img {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
       display: block;
       transform: scale(1.18);
       transition: transform 1s cubic-bezier(.16,.84,.44,1);
@@ -465,16 +469,6 @@ nav.vk-nav::after{
       color: #FFFDF4;
     }
   
-    .tile.t1 { grid-column: span 2; grid-row: span 3; }
-    .tile.t2 { grid-column: span 2; grid-row: span 2; }
-    .tile.t3 { grid-column: span 2; grid-row: span 2; }
-    .tile.t4 { grid-column: span 2; grid-row: span 2; }
-    .tile.t5 { grid-column: span 2; grid-row: span 3; }
-    .tile.t6 { grid-column: span 2; grid-row: span 2; }
-    .tile.t7 { grid-column: span 4; grid-row: span 2; }
-    .tile.t8 { grid-column: span 2; grid-row: span 2; }
-    .tile.t9 { grid-column: span 2; grid-row: span 3; }
-    .tile.t10 { grid-column: span 4; grid-row: span 2; }
   
     /* ---------- SERVICES (auto-scrolling slider) ---------- */
     .services {
@@ -836,6 +830,7 @@ nav.vk-nav::after{
   
     .pair-row {
       display: flex;
+      align-items: flex-start;
       gap: 12px;
     }
   
@@ -891,6 +886,153 @@ nav.vk-nav::after{
       pointer-events: none;
     }
   
+    /* ---------- VIDEOS ---------- */
+    .videos {
+      position: relative;
+      z-index: 1;
+      background: var(--cream);
+      padding: 90px 48px 110px;
+      border-top: 1px solid var(--line);
+    }
+
+    .videos-head {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 44px;
+    }
+
+    .videos-head .overline {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      color: var(--gray);
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    .videos-head h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: clamp(30px, 4.4vw, 50px);
+      line-height: 1.15;
+      max-width: 640px;
+      letter-spacing: -0.01em;
+    }
+
+    .videos-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 26px;
+    }
+
+    .video-card {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #000;
+      aspect-ratio: 4 / 3;
+    }
+
+    .video-el {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .video-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(20,18,15,0) 55%, rgba(20,18,15,0.72) 100%);
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .video-play {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.92);
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.3s cubic-bezier(.2,.8,.2,1), background 0.3s ease, opacity 0.3s ease;
+      z-index: 2;
+    }
+
+    .video-play svg { width: 22px; height: 22px; margin-left: 3px; }
+
+    .video-play:hover {
+      transform: translate(-50%, -50%) scale(1.08);
+      background: #fff;
+    }
+
+    .video-card.is-playing .video-play {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .video-card.is-playing::after {
+      opacity: 0;
+    }
+
+    .video-info {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      padding: 20px 22px;
+      color: #FFFDF4;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .video-info h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+      text-shadow: 0 1px 12px rgba(0,0,0,0.3);
+    }
+
+    .video-card.is-playing .video-info {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Fade in / slide up reveal, same pattern as the service cards */
+    .video-card {
+      opacity: 0;
+      transform: translateY(48px);
+      transition: opacity 0.8s cubic-bezier(.16,.84,.44,1),
+                  transform 0.8s cubic-bezier(.16,.84,.44,1);
+    }
+
+    .video-card.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .video-card:nth-child(1) { transition-delay: 0s; }
+    .video-card:nth-child(2) { transition-delay: 0.1s; }
+    .video-card:nth-child(3) { transition-delay: 0.2s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .video-card { opacity: 1; transform: none; transition: none; }
+    }
+
+    @media (max-width: 900px) {
+      .videos { padding: 60px 20px 80px; }
+      .videos-grid { grid-template-columns: 1fr; }
+    }
+
     /* ---------- TESTIMONIALS (merged from sample1.html, classes namespaced with tc- to avoid collisions) ---------- */
     .testimonials-section{
       position:relative;

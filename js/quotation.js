@@ -22,8 +22,39 @@ const categoryData = {
     },
     'Corporate Photography': {
         stages: ['corporate-event']
+    },
+    'House Warming Ceremony': {
+        stages: ['housewarming-pooja', 'griha-pravesh', 'housewarming-family']
+    },
+    'Saree Ceremony': {
+        stages: ['saree-draping', 'saree-blessing', 'saree-family-portraits']
+    },
+    'Cradle Ceremony': {
+        stages: ['naming-ritual', 'cradle-ceremony-stage', 'cradle-family-gathering']
+    },
+    'Birthday': {
+        stages: ['pre-birthday-shoot', 'cake-cutting', 'party-candids']
+    },
+    'Camera / Album': {
+        stages: ['coffee-table-album', 'standard-album', 'digital-album']
     }
 };
+
+// Overrides the "Event Stages" panel heading for categories where that
+// label doesn't fit (e.g. Camera / Album isn't stage-based).
+const categoryPanelLabel = {
+    'Camera / Album': 'Album Type'
+};
+
+// Reverse lookup: stage key -> parent category name. Selections persist
+// across categories (see updateSummary), so the PDF needs this to know
+// which category each selected stage actually belongs to.
+const stageToCategory = {};
+Object.keys(categoryData).forEach(cat => {
+    categoryData[cat].stages.forEach(stageKey => {
+        stageToCategory[stageKey] = cat;
+    });
+});
 
 const stageData = {
     'pre-wedding': {
@@ -134,6 +165,137 @@ const stageData = {
             { name: 'Drone', price: 8000, icon: 'drone', desc: 'Breathtaking perspectives from above.' },
             { name: '8x12 Screen', price: 12000, icon: 'screen', desc: 'Live LED screen display at the venue.' }
         ]
+    },
+
+    // ---- House Warming Ceremony ----
+    'housewarming-pooja': {
+        title: 'Pooja Rituals Services',
+        label: 'Pooja Rituals',
+        services: [
+            { name: 'Candid', price: 5000, icon: 'camera', desc: 'Natural moments and editorial style.' },
+            { name: 'Cinematic', price: 7000, icon: 'video', desc: 'High-end storytelling film in 4K.' }
+        ]
+    },
+    'griha-pravesh': {
+        title: 'Griha Pravesh Services',
+        label: 'Griha Pravesh',
+        services: [
+            { name: 'Candid', price: 5000, icon: 'camera', desc: 'Natural moments and editorial style.' },
+            { name: 'Cinematic', price: 7000, icon: 'video', desc: 'High-end storytelling film in 4K.' },
+            { name: 'Photo + Video Combo', price: 10000, icon: 'cameraFlash', desc: 'Combined photo and video coverage.' }
+        ]
+    },
+    'housewarming-family': {
+        title: 'Family Gathering Services',
+        label: 'Family Gathering',
+        services: [
+            { name: 'Candid', price: 5000, icon: 'camera', desc: 'Natural moments and editorial style.' },
+            { name: 'Regular Photography', price: 4000, icon: 'camera', desc: 'Standard photo coverage of the event.' }
+        ]
+    },
+
+    // ---- Saree Ceremony ----
+    'saree-draping': {
+        title: 'Saree Draping Services',
+        label: 'Saree Draping',
+        services: [
+            { name: 'Candid', price: 4000, icon: 'camera', desc: 'Natural moments and editorial style.' },
+            { name: 'Cinematic', price: 6000, icon: 'video', desc: 'High-end storytelling film in 4K.' }
+        ]
+    },
+    'saree-blessing': {
+        title: 'Blessing Ceremony Services',
+        label: 'Blessing Ceremony',
+        services: [
+            { name: 'Candid', price: 4000, icon: 'camera', desc: 'Natural moments and editorial style.' },
+            { name: 'Cinematic', price: 6000, icon: 'video', desc: 'High-end storytelling film in 4K.' },
+            { name: 'Photo + Video Combo', price: 8500, icon: 'cameraFlash', desc: 'Combined photo and video coverage.' }
+        ]
+    },
+    'saree-family-portraits': {
+        title: 'Family Portraits Services',
+        label: 'Family Portraits',
+        services: [
+            { name: 'Candid', price: 4000, icon: 'camera', desc: 'Natural moments and editorial style.' },
+            { name: 'Regular Photography', price: 3000, icon: 'camera', desc: 'Standard photo coverage of the event.' }
+        ]
+    },
+
+    // ---- Cradle Ceremony ----
+    'naming-ritual': {
+        title: 'Naming Ritual Services',
+        label: 'Naming Ritual',
+        services: [
+            { name: 'Candid', price: 5000, icon: 'camera', desc: 'Natural moments and editorial style.' },
+            { name: 'Cinematic', price: 8000, icon: 'video', desc: 'High-end storytelling film in 4K.' }
+        ]
+    },
+    'cradle-ceremony-stage': {
+        title: 'Cradle Ceremony Services',
+        label: 'Cradle Ceremony',
+        services: [
+            { name: 'Candid', price: 5000, icon: 'camera', desc: 'Natural moments and editorial style.' },
+            { name: 'Cinematic', price: 8000, icon: 'video', desc: 'High-end storytelling film in 4K.' },
+            { name: 'Photo + Video Combo', price: 11000, icon: 'cameraFlash', desc: 'Combined photo and video coverage.' }
+        ]
+    },
+    'cradle-family-gathering': {
+        title: 'Family Gathering Services',
+        label: 'Family Gathering',
+        services: [
+            { name: 'Candid', price: 5000, icon: 'camera', desc: 'Natural moments and editorial style.' },
+            { name: 'Regular Photography', price: 4000, icon: 'camera', desc: 'Standard photo coverage of the event.' }
+        ]
+    },
+
+    // ---- Birthday (standalone category) ----
+    'pre-birthday-shoot': {
+        title: 'Pre-Birthday Shoot Services',
+        label: 'Pre-Birthday Shoot',
+        services: [
+            { name: 'Candid', price: 4500, icon: 'camera', desc: 'Natural moments and editorial style.' },
+            { name: 'Cinematic', price: 7500, icon: 'video', desc: 'High-end storytelling film in 4K.' }
+        ]
+    },
+    'cake-cutting': {
+        title: 'Cake Cutting Services',
+        label: 'Cake Cutting',
+        services: [
+            { name: 'Candid', price: 4500, icon: 'camera', desc: 'Natural moments and editorial style.' },
+            { name: 'Cinematic', price: 7500, icon: 'video', desc: 'High-end storytelling film in 4K.' },
+            { name: 'Photo + Video Combo', price: 10500, icon: 'cameraFlash', desc: 'Combined photo and video coverage.' }
+        ]
+    },
+    'party-candids': {
+        title: 'Party Candids Services',
+        label: 'Party Candids',
+        services: [
+            { name: 'Candid', price: 4500, icon: 'camera', desc: 'Natural moments and editorial style.' },
+            { name: 'Regular Photography', price: 3500, icon: 'camera', desc: 'Standard photo coverage of the event.' }
+        ]
+    },
+
+    // ---- Camera / Album (product-based, not stage-based) ----
+    'coffee-table-album': {
+        title: 'Coffee Table Album',
+        label: 'Coffee Table Album',
+        services: [
+            { name: 'Coffee Table Album (20 pages)', price: 6000, icon: 'book', desc: '20-page premium hardbound album.' }
+        ]
+    },
+    'standard-album': {
+        title: 'Standard Album',
+        label: 'Standard Album',
+        services: [
+            { name: 'Standard Photo Album (30 pages)', price: 3500, icon: 'book', desc: '30-page printed photo album.' }
+        ]
+    },
+    'digital-album': {
+        title: 'Digital Album',
+        label: 'Digital Album',
+        services: [
+            { name: 'Digital Album + USB/Drive', price: 2000, icon: 'screen', desc: 'Edited digital copies delivered on USB or drive.' }
+        ]
     }
 };
 
@@ -155,6 +317,7 @@ let currentCategory = 'Wedding Photography';
 let currentStage = categoryData[currentCategory].stages[0];
 
 const stagesList = document.getElementById('stages-list');
+const stagePanelTitle = document.getElementById('stage-panel-title');
 const stageTitle = document.getElementById('current-stage-title');
 const servicesGrid = document.getElementById('services-grid');
 const addonsGrid = document.getElementById('addons-grid');
@@ -173,6 +336,7 @@ const summaryRequirements = document.getElementById('summary-requirements');
 const saveBtn = document.getElementById('save-selection-btn');
 
 function renderStagesList() {
+    stagePanelTitle.textContent = categoryPanelLabel[currentCategory] || 'Event Stages';
     stagesList.innerHTML = '';
     const stages = categoryData[currentCategory].stages;
     stages.forEach(stageKey => {
@@ -401,25 +565,35 @@ function collectQuoteData() {
     const requirements = document.getElementById('special-requirements').value || '';
 
     const items = [];
-    Object.keys(stageData).forEach(stageKey => {
-        const chosen = Array.from(selections[stageKey]);
-        if (chosen.length === 0) return;
-        const stagePrices = stageData[stageKey].services;
-        chosen.forEach(svcName => {
-            const svc = stagePrices.find(s => s.name === svcName);
-            if (svc) {
-                items.push({ desc: `${stageData[stageKey].label} — ${svc.name}`, qty: 1, unit: svc.price });
-            }
+    const categoriesWithSelections = [];
+    Object.keys(categoryData).forEach(catName => {
+        const stages = categoryData[catName].stages;
+        const hasAny = stages.some(stageKey => selections[stageKey].size > 0);
+        if (hasAny) categoriesWithSelections.push(catName);
+        stages.forEach(stageKey => {
+            const chosen = Array.from(selections[stageKey]);
+            if (chosen.length === 0) return;
+            const stagePrices = stageData[stageKey].services;
+            chosen.forEach(svcName => {
+                const svc = stagePrices.find(s => s.name === svcName);
+                if (svc) {
+                    items.push({ category: catName, desc: `${stageData[stageKey].label} — ${svc.name}`, qty: 1, unit: svc.price });
+                }
+            });
         });
     });
     selectedAddons.forEach(addonName => {
         const addon = addonData.find(a => a.name === addonName);
-        if (addon) items.push({ desc: `Add-on — ${addon.name}`, qty: 1, unit: addon.price });
+        if (addon) items.push({ category: 'Add-ons', desc: `Add-on — ${addon.name}`, qty: 1, unit: addon.price });
     });
 
     const total = items.reduce((sum, it) => sum + it.qty * it.unit, 0);
 
-    return { name, phone, email, category, date, location, guests, requirements, items, total };
+    // categoriesWithSelections drives what shows on the PDF; if nothing has
+    // been picked yet, fall back to whatever is active in the dropdown.
+    const displayCategories = categoriesWithSelections.length > 0 ? categoriesWithSelections : [category];
+
+    return { name, phone, email, category, displayCategories, date, location, guests, requirements, items, total };
 }
 
 // ---- PDF quotation generation ----
@@ -510,7 +684,7 @@ function generateQuotePDF() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.setTextColor(ink);
-    doc.text(`Category: ${data.category}`, margin, y);
+    doc.text(`Category: ${data.displayCategories.join(', ')}`, margin, y);
     doc.text(`Date: ${data.date || 'To be confirmed'}`, margin + 220, y);
     y += 16;
     doc.text(`Location: ${data.location || 'To be confirmed'}`, margin, y);
@@ -542,7 +716,20 @@ function generateQuotePDF() {
         y += 22;
         doc.text('No services selected', colDesc, y);
     } else {
+        let lastCategory = null;
         data.items.forEach(it => {
+            if (it.category !== lastCategory) {
+                lastCategory = it.category;
+                y += 20;
+                if (y > 700) { doc.addPage(); y = 60; }
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(9);
+                doc.setTextColor(navy);
+                doc.text(lastCategory.toUpperCase(), colDesc, y);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(10);
+                doc.setTextColor(ink);
+            }
             y += 22;
             if (y > 720) { doc.addPage(); y = 60; }
             doc.text(String(it.qty), colQty + 4, y);
@@ -644,7 +831,7 @@ async function sendQuotePDFByEmail() {
         customer_name: data.name,
         customer_phone: data.phone || 'N/A',
         customer_email: data.email || 'N/A',
-        event_category: data.category,
+        event_category: data.displayCategories.join(', '),
         event_date: data.date || 'N/A',
         event_location: data.location || 'N/A',
         event_guests: data.guests || 'N/A',

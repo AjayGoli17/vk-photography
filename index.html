@@ -103,7 +103,7 @@
 <div class="card-info">
 <span class="num">01</span>
 <h3>Portrait Photography</h3>
-<p>One-on-one sessions capturing genuine personality and connection, on location or in-studio.</p>
+<a class="service-cta" href="quotation.html">Get quote</a>
 </div>
 </div>
 <div class="service-card">
@@ -111,7 +111,7 @@
 <div class="card-info">
 <span class="num">02</span>
 <h3>Wedding Photography</h3>
-<p>Full-day coverage that captures every unscripted moment, from getting ready to the last dance.</p>
+<a class="service-cta" href="quotation.html">Get quote</a>
 </div>
 </div>
 <div class="service-card">
@@ -119,7 +119,7 @@
 <div class="card-info">
 <span class="num">03</span>
 <h3>Commercial &amp; Product</h3>
-<p>Clean, high-impact imagery for brands, e-commerce listings, and marketing campaigns.</p>
+<a class="service-cta" href="quotation.html">Get quote</a>
 </div>
 </div>
 <div class="service-card">
@@ -127,7 +127,7 @@
 <div class="card-info">
 <span class="num">04</span>
 <h3>Ongoing Brand Retainers</h3>
-<p>A photographer on call throughout the year, building a consistent visual archive for your business.</p>
+<a class="service-cta" href="quotation.html">Get quote</a>
 </div>
 </div>
 <div class="service-card">
@@ -135,7 +135,7 @@
 <div class="card-info">
 <span class="num">05</span>
 <h3>Fine Art Prints</h3>
-<p>Limited-run archival prints of select images, hand-numbered and shipped ready to frame.</p>
+<a class="service-cta" href="quotation.html">Get quote</a>
 </div>
 </div>
 <div class="service-card">
@@ -143,7 +143,7 @@
 <div class="card-info">
 <span class="num">06</span>
 <h3>Licensing &amp; Syndication</h3>
-<p>Editorial and commercial licensing of our archive for outlets, brands, and publications.</p>
+<a class="service-cta" href="quotation.html">Get quote</a>
 </div>
 </div>
 </div>
@@ -207,9 +207,9 @@
 </div>
 <div class="tc-section-divider"></div>
 <div class="tc-hero">
-<div class="tc-eyebrow">Studio 2024 Client Stories</div>
+
 <h1 class="tc-headline"><span class="tc-headline-line">Capture <img class="tc-headline-img" src="https://images.unsplash.com/photo-1519741497674-611481863552?w=200&h=140&fit=crop&auto=format" alt=""> moments that</span><span class="tc-headline-line">last a lifetime</span></h1>
-<p class="tc-subtext">Real stories from clients who trusted us with their biggest days</p>
+
 <button class="tc-cta-btn">Book a session</button>
 </div>
 </section>
@@ -302,7 +302,9 @@ var viewport = track ? track.closest('.slider-viewport') : null;
 var dotsWrap = document.getElementById('mobileProgressDots');
 var countEl = document.getElementById('mobileProgressCount');
 if (!track || !viewport || !dotsWrap || !countEl) return;
-var cards = Array.prototype.slice.call(track.children);
+var cards = Array.prototype.slice.call(track.children).filter(function (c) {
+return !c.hasAttribute('aria-hidden');
+});
 var total = cards.length;
 cards.forEach(function (card, i) {
 var dot = document.createElement('span');

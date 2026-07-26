@@ -132,10 +132,11 @@
     if (!track || !viewport) return;
 
     const originalCards = Array.from(track.children);
-    originalCards.forEach(card => {
+    const clones = originalCards.map(card => {
       const clone = card.cloneNode(true);
       clone.setAttribute('aria-hidden', 'true');
       track.appendChild(clone);
+      return clone;
     });
 
     // Scroll-reveal for service cards: fade in / slide up the first time
@@ -159,14 +160,20 @@
     let resumeTimer = null;
     const gap = 22;
 
-    const setWidth = () => originalCards.reduce((sum, c) => sum + c.offsetWidth + gap, 0);
+    const setWidth = () => {
+      if (clones.length && originalCards.length) {
+        return clones[0].offsetLeft - originalCards[0].offsetLeft;
+      }
+      return originalCards.reduce((sum, c) => sum + c.offsetWidth + gap, 0);
+    };
     let loopWidth = setWidth();
     window.addEventListener('resize', () => { loopWidth = setWidth(); });
+    window.addEventListener('load', () => { loopWidth = setWidth(); });
 
     function frame() {
       if (!paused) {
         pos += speed;
-        if (pos >= loopWidth) pos -= loopWidth;
+        if (loopWidth > 0) pos %= loopWidth;
         track.style.transform = `translateX(${-pos}px)`;
       }
       requestAnimationFrame(frame);
@@ -185,8 +192,9 @@
     function step(dir) {
       const cardW = originalCards[0].offsetWidth + gap;
       pos += dir * cardW;
-      if (pos < 0) pos += loopWidth;
-      if (pos >= loopWidth) pos -= loopWidth;
+      if (loopWidth > 0) {
+        pos = ((pos % loopWidth) + loopWidth) % loopWidth;
+      }
       // Apply immediately (don't wait for the rAF loop, which is
       // about to be paused) with a short smooth transition
       track.style.transition = 'transform 0.5s cubic-bezier(.2,.8,.2,1)';

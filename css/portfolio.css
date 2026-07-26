@@ -288,6 +288,18 @@ h1, h2, h3 {
     .gallery-container {
         padding: 0.5rem 1rem 3rem 1rem;
     }
+    .cta-section {
+        padding: 4rem 1.5rem;
+    }
+    .cta-divider.divider-top {
+        margin-bottom: 2rem;
+    }
+    .cta-button {
+        padding: 0.9rem 1.8rem;
+        font-size: 0.78rem;
+        letter-spacing: 1.2px;
+        white-space: nowrap;
+    }
     .hero {
         height: 32vh; /* Even tighter on mobile */
         min-height: 260px;

@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // Set Dynamic Year in Footer
     const yearSpan = document.getElementById('current-year');
     if (yearSpan) {
@@ -7,27 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const gallery = document.getElementById('gallery');
-    const totalPhotos = 39; 
+    const totalPhotos = 35;
 
-    // 1. Generate 39 gallery items with randomized layout
+    // 1. Build gallery items from your local photos (portfolio/image1.jpg ... image39.jpg)
+    //    Orientation (landscape/portrait) is auto-detected once each image loads.
     for (let i = 1; i <= totalPhotos; i++) {
         const item = document.createElement('div');
-        
-        // Randomly assign format: ~40% chance for landscape, ~60% for portrait
-        // This removes the repeating pattern while keeping a balanced mix
-        const isLandscape = Math.random() < 0.40;
-        
-        let imgUrl = "";
+        item.className = 'gallery-item'; // orientation class added below once image loads
 
-        if (isLandscape) {
-            item.className = 'gallery-item landscape';
-            // Requesting a landscape image seed
-            imgUrl = `https://picsum.photos/seed/${i + 400}/1600/900`;
-        } else {
-            item.className = 'gallery-item portrait';
-            // Requesting a portrait image seed
-            imgUrl = `https://picsum.photos/seed/${i + 400}/900/1200`;
-        }
+        const imgUrl = `portfolio/image${i}.webp`;
 
         item.innerHTML = `
             <div class="gallery-image-wrapper">
@@ -37,13 +25,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span>Archive No. ${i.toString().padStart(2, '0')}</span>
             </div>
         `;
+
+        const img = item.querySelector('img');
+
+        // If .webp fails to load, automatically try .png instead
+        img.addEventListener('error', () => {
+            if (!img.dataset.triedPng) {
+                img.dataset.triedPng = 'true';
+                img.src = `portfolio/image${i}.png`;
+            }
+        }, { once: false });
+
+        img.addEventListener('load', () => {
+            if (img.naturalWidth >= img.naturalHeight) {
+                item.classList.add('landscape');
+            } else {
+                item.classList.add('portrait');
+            }
+        });
+
         gallery.appendChild(item);
     }
 
     // 2. Scroll Reveal Animation (Intersection Observer)
     const observerOptions = {
         root: null,
-        rootMargin: '0px 0px -10% 0px', 
+        rootMargin: '0px 0px -10% 0px',
         threshold: 0.1
     };
 
@@ -76,36 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(ctaButton);
     }
 
-    // 3. Smooth Parallax Scrolling Effect
-    const parallaxImages = document.querySelectorAll('.parallax-img');
-    let ticking = false;
-    
-    function updateParallax() {
-        if (window.innerWidth <= 768) return; // masonry layout on mobile doesn't use parallax offset
-        const scrollY = window.scrollY;
-        const windowHeight = window.innerHeight;
-
-        parallaxImages.forEach(img => {
-            const rect = img.parentElement.getBoundingClientRect();
-            // Check if element is in viewport
-            if (rect.top <= windowHeight && rect.bottom >= 0) {
-                // Calculate parallax offset based on scroll position
-                const yPos = (rect.top / windowHeight) * 20 - 10; 
-                img.style.transform = `translateY(${yPos}%)`;
-            }
-        });
-        ticking = false;
-    }
-
-    window.addEventListener('scroll', () => {
-        if (!ticking) {
-            window.requestAnimationFrame(updateParallax);
-            ticking = true;
-        }
-    });
-    
-    // Trigger once on load
-    updateParallax();
 });
 // Mobile sidebar: opens from the side when the hamburger button is
 // tapped, closes via the X button, the overlay, Escape, or picking a link

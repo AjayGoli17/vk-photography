@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop — Personalized Photoframes | VK Photography</title>
+<meta name="description" content="Upload your favorite photo, choose your frame and size, preview it live, and order your personalized VK Photography photoframe.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/shop.css">
+<link rel="stylesheet" href="css/transition.css">
+</head>
+<body>
+
+<div class="page-transition-overlay"></div>
+
+<!-- ============================================================
+     NAV — same markup/classes as the rest of the site (vk-nav).
+     "Shop" added as a link here; add the same link to the nav on
+     index.html / portfolio.html / service.html / contact.html so
+     it's reachable site-wide.
+     ============================================================ -->
+<nav class="vk-nav" id="mainNav">
+  <div class="vk-nav-brand">
+    <a href="index.html" class="vk-nav-logo-chip">
+        <video src="loading-video.mp4" autoplay muted loop playsinline></video>
+      </a>
+    <div class="vk-nav-brand-text"><b>VK</b> Photography</div>
+  </div>
+  <div class="vk-nav-right">
+    <div class="vk-nav-links">
+      <a href="index.html">Home</a>
+      <a href="portfolio.html">Portfolio</a>
+      <a href="service.html">Services</a>
+      <a href="shop.html" aria-current="page" style="color:var(--nav-ivory);">Shop</a>
+      <a href="quotation.html">Quotation</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="vk-nav-cta">
+      <a href="quotation.html" class="vk-btn vk-btn-quote">Get Quote</a>
+      <button class="vk-nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+<div class="vk-nav-mobile" id="navMobile">
+  <a href="index.html">Home</a>
+  <a href="portfolio.html">Portfolio</a>
+  <a href="service.html">Services</a>
+  <a href="shop.html">Shop</a>
+  <a href="quotation.html">Quotation</a>
+  <a href="contact.html">Contact</a>
+  <a href="quotation.html" class="vk-btn vk-btn-quote vk-nav-mobile-cta">Get Quote</a>
+  <button class="vk-btn vk-btn-ghost vk-nav-mobile-cta" id="mobileCartToggle" type="button">View Cart</button>
+</div>
+
+<!-- FLOATING CART BUTTON — fixed bottom-right, always reachable -->
+<button class="cart-fab" id="cartToggle" aria-haspopup="dialog" aria-controls="cartDrawer" aria-label="Open cart">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 2H2"/><circle cx="9.5" cy="20" r="1"/><circle cx="17.5" cy="20" r="1"/></svg>
+  <span class="cart-count" id="cartCount" data-empty="true">0</span>
+</button>
+
+<!-- VIEW: SHOP -->
+<main id="viewShop" class="shop-view active">
+  <section class="shop-hero">
+    <div class="shop-container">
+      <span class="shop-eyebrow">Shop</span>
+      <h1>Turn Your Moments Into Something You Can Keep.</h1>
+      <p>Upload your favorite photo, choose your frame and size, preview it, and order your personalized photoframe.</p>
+      <div class="shop-hero-actions">
+        <a href="#collection" class="shop-btn shop-btn-primary" id="ctaCreate">Create Your Frame</a>
+        <a href="#collection" class="shop-btn shop-btn-outline">Explore Frames</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="shop-section">
+    <div class="shop-container">
+      <div class="shop-section-head"><div><span class="shop-eyebrow">How it works</span><h2>From photo to frame in three steps.</h2></div></div>
+      <div class="shop-steps-grid">
+        <div class="shop-step-card"><span class="shop-step-num">01</span><h3>Upload Your Photo</h3><p>Choose any photo from your device — nothing is ever sent to a server.</p></div>
+        <div class="shop-step-card"><span class="shop-step-num">02</span><h3>Customize Your Frame</h3><p>Pick a size, frame style, finish and mat while your photo updates live.</p></div>
+        <div class="shop-step-card"><span class="shop-step-num">03</span><h3>Preview &amp; Order</h3><p>See exactly how it will look, then check out in under two minutes.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="shop-section" id="collection">
+    <div class="shop-container">
+      <div class="shop-section-head">
+        <div><span class="shop-eyebrow">Frame collection</span><h2>Choose a frame to begin.</h2></div>
+        <p class="shop-section-sub">Every frame is available in four sizes, two finishes, and an optional mat — customize any of them to fit your photo.</p>
+      </div>
+      <div class="frame-grid" id="frameGrid"></div>
+    </div>
+  </section>
+</main>
+
+<!-- VIEW: CUSTOMIZER -->
+<main id="viewCustomizer" class="shop-view">
+  <section class="shop-section" style="border-top:none; padding-top:calc(var(--nav-h) + 40px);">
+    <div class="shop-container">
+      <div class="customizer-head">
+        <div><span class="shop-eyebrow">Create your frame</span><h1 id="customizerTitle">Create Your Frame</h1></div>
+        <button class="shop-btn-ghost" id="backToCollection">&larr; Back to collection</button>
+      </div>
+
+      <div class="customizer-grid">
+        <div class="preview-col">
+          <div class="frame-preview-shell">
+            <div class="frame-preview" id="framePreview">
+              <div class="fp-frame" id="fpFrame" data-frame="classic-black">
+                <div class="fp-mat" id="fpMat">
+                  <div class="fp-window" id="fpWindow">
+                    <div class="fp-empty" id="fpEmpty">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                      <span>Your photo will appear here</span>
+                    </div>
+                    <img id="fpImage" src="" alt="" hidden>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="crop-controls" id="cropControls" hidden>
+            <button class="icon-btn" id="zoomOut" type="button" aria-label="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8 11h6"/></svg></button>
+            <button class="icon-btn" id="zoomIn" type="button" aria-label="Zoom in"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v6M8 11h6"/></svg></button>
+            <button class="icon-btn" id="autoFit" type="button" aria-label="Auto fit"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+            <button class="icon-btn" id="resetCrop" type="button" aria-label="Reset position"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.6 5.6L1 10m22 4-4.6 4.4A9 9 0 0 1 3.51 15"/></svg></button>
+          </div>
+          <p class="crop-hint" id="cropHint" hidden>Drag your photo to reposition &middot; use the buttons to zoom</p>
+          <div class="quality-badge" id="qualityBadge" hidden></div>
+        </div>
+
+        <div class="controls-col">
+          <div class="control-block">
+            <h2>Upload Your Photo</h2>
+            <div class="upload-area" id="uploadArea">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M12 4 7 9M12 4l5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+              <p>Drag &amp; drop your image here</p>
+              <p class="upload-sub">or</p>
+              <label class="shop-btn shop-btn-outline shop-btn-sm" for="fileInput" style="cursor:pointer;">Choose Photo</label>
+              <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-label="Upload your photo">
+              <p class="upload-meta">JPG, PNG or WEBP &middot; up to 10MB</p>
+              <p class="field-error" id="uploadError" role="alert" hidden>Please upload your photo first.</p>
+            </div>
+            <div class="upload-actions" id="uploadActions" hidden>
+              <button class="shop-btn shop-btn-outline shop-btn-sm" id="changePhoto" type="button">Change Photo</button>
+              <button class="shop-btn-ghost" id="removePhoto" type="button">Remove Photo</button>
+            </div>
+          </div>
+
+          <div class="control-block"><h2>Orientation</h2><div class="option-grid" id="orientationOptions" role="group" aria-label="Choose orientation"></div></div>
+          <div class="control-block"><h2>Size</h2><p class="shop-section-sub" style="margin:-6px 0 12px; font-size:12.5px;">Standard Indian frame sizes — pick whichever feels closest to what you have printed before.</p><div class="option-grid" id="sizeOptions" role="group" aria-label="Choose size"></div></div>
+          <div class="control-block"><h2>Frame Style</h2><div class="option-grid" id="frameOptions" role="group" aria-label="Choose frame style"></div></div>
+          <div class="control-block"><h2>Finish</h2><div class="option-grid" id="finishOptions" role="group" aria-label="Choose finish"></div></div>
+          <div class="control-block"><h2>Mat</h2><div class="option-grid" id="matOptions" role="group" aria-label="Choose mat"></div></div>
+
+          <div class="control-block price-summary">
+            <div class="price-row"><span>Size</span><span id="sumSize">—</span></div>
+            <div class="price-row"><span>Frame</span><span id="sumFrame">—</span></div>
+            <div class="price-row"><span>Finish</span><span id="sumFinish">—</span></div>
+            <div class="price-row"><span>Mat</span><span id="sumMat">—</span></div>
+            <div class="price-total"><span class="label">Total</span><span class="value" id="sumTotal">₹0</span></div>
+          </div>
+
+          <div class="add-to-cart-row"><button class="shop-btn shop-btn-primary shop-btn-block" id="addToCartBtn" type="button">Add to Cart</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="mobile-sticky-cta" id="mobileCta">
+  <div class="msc-total">Total<strong id="mobileTotal">₹0</strong></div>
+  <button class="shop-btn shop-btn-primary" id="mobileAddToCart" type="button">Add to Cart</button>
+</div>
+
+<!-- VIEW: CHECKOUT -->
+<main id="viewCheckout" class="shop-view">
+  <section class="shop-section" style="border-top:none; padding-top:calc(var(--nav-h) + 40px);">
+    <div class="shop-container">
+      <div class="shop-progress-track">
+        <span class="step done">Cart</span><span class="divider"></span>
+        <span class="step active">Details</span><span class="divider"></span>
+        <span class="step">Payment</span><span class="divider"></span>
+        <span class="step">Confirmed</span>
+      </div>
+      <div class="shop-section-head"><div><span class="shop-eyebrow">Checkout</span><h2>Where should we deliver your frame?</h2></div></div>
+
+      <div class="checkout-grid">
+        <form id="checkoutForm" novalidate>
+          <div class="form-row"><label for="custName">Name</label><input type="text" id="custName" name="name" autocomplete="name" required><p class="field-error" data-error-for="custName" hidden></p></div>
+          <div class="form-row-2">
+            <div class="form-row"><label for="custPhone">Phone</label><input type="tel" id="custPhone" name="phone" autocomplete="tel" required><p class="field-error" data-error-for="custPhone" hidden></p></div>
+            <div class="form-row"><label for="custEmail">Email</label><input type="email" id="custEmail" name="email" autocomplete="email" required><p class="field-error" data-error-for="custEmail" hidden></p></div>
+          </div>
+          <div class="form-row"><label for="custAddress">Address</label><textarea id="custAddress" name="address" rows="3" required></textarea><p class="field-error" data-error-for="custAddress" hidden></p></div>
+          <div class="form-row-2">
+            <div class="form-row"><label for="custCity">City</label><input type="text" id="custCity" name="city" required><p class="field-error" data-error-for="custCity" hidden></p></div>
+            <div class="form-row"><label for="custState">State</label><input type="text" id="custState" name="state" required><p class="field-error" data-error-for="custState" hidden></p></div>
+          </div>
+          <div class="form-row"><label for="custPincode">Pincode</label><input type="text" id="custPincode" name="pincode" inputmode="numeric" maxlength="6" required><p class="field-error" data-error-for="custPincode" hidden></p></div>
+          <button type="submit" class="shop-btn shop-btn-primary shop-btn-block" style="margin-top:10px;">Continue to Payment</button>
+        </form>
+
+        <div class="order-summary-card">
+          <h2>Order Summary</h2>
+          <div id="checkoutSummaryItems"></div>
+          <div class="price-summary" style="margin-top:18px;">
+            <div class="price-row"><span>Product</span><span id="coProduct">₹0</span></div>
+            <div class="price-row"><span>Shipping</span><span id="coShipping">₹199</span></div>
+            <div class="price-total"><span class="label">Total</span><span class="value" id="coTotal">₹0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- VIEW: PAYMENT -->
+<main id="viewPayment" class="shop-view">
+  <div class="shop-container">
+    <div class="payment-wrap">
+      <div class="shop-progress-track">
+        <span class="step done">Cart</span><span class="divider"></span>
+        <span class="step done">Details</span><span class="divider"></span>
+        <span class="step active">Payment</span><span class="divider"></span>
+        <span class="step">Confirmed</span>
+      </div>
+
+      <h1>Complete Your Payment</h1>
+      <p class="sub">Scan the QR code using any UPI app to complete your payment.</p>
+
+      <div class="payment-status-banner" id="statusBanner" role="status" aria-live="polite"></div>
+
+      <div class="qr-card">
+        <div class="qr-label">Scan &amp; Pay</div>
+        <div class="qr-image-wrap"><span class="qr-demo-tag">Demo</span><img id="qrImage" src="" alt="UPI QR code to pay VK Photography"></div>
+        <div class="qr-amount" id="qrAmount">₹0</div>
+        <div class="qr-apps">Scan using Google Pay, PhonePe, Paytm, or any UPI app</div>
+      </div>
+
+      <div class="upi-id-row">
+        <div><span class="upi-id-label">UPI ID</span><span class="upi-id-value" id="upiIdValue">vkphotography@upi</span></div>
+        <button class="copy-btn" id="copyUpiBtn" type="button">Copy</button>
+      </div>
+
+      <div class="payment-steps">
+        <div><span class="shop-step-num">01</span><p>Open your UPI app</p></div>
+        <div><span class="shop-step-num">02</span><p>Scan the QR code</p></div>
+        <div><span class="shop-step-num">03</span><p>Complete payment</p></div>
+        <div><span class="shop-step-num">04</span><p>Tap "I've Paid"</p></div>
+      </div>
+
+      <div class="security-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9 8 11 4.6-2 8-6 8-11V5z"/></svg>
+        <span><strong>Never share your UPI PIN or OTP with anyone.</strong> VK Photography will never ask for these on this website.</span>
+      </div>
+
+      <button class="shop-btn shop-btn-primary shop-btn-block" id="paidBtn" type="button">I've Paid</button>
+      <p style="margin-top:16px; font-size:12.5px; color:var(--gray);">This is a demo payment flow. Tapping "I've Paid" does not verify a real transaction — it marks your order for manual verification until a payment gateway is connected.</p>
+    </div>
+  </div>
+</main>
+
+<!-- VIEW: CONFIRMATION -->
+<main id="viewConfirmation" class="shop-view">
+  <div class="shop-container">
+    <div class="confirm-wrap">
+      <div class="shop-progress-track">
+        <span class="step done">Cart</span><span class="divider"></span>
+        <span class="step done">Details</span><span class="divider"></span>
+        <span class="step done">Payment</span><span class="divider"></span>
+        <span class="step active">Confirmed</span>
+      </div>
+
+      <div class="confirm-check"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <h1>Your frame is on its way to becoming a memory.</h1>
+      <div class="confirm-order-id" id="orderIdLine">Order #—</div>
+
+      <div id="confirmItems"></div>
+
+      <div class="confirm-card" id="orderTotalsCard"><div id="orderTotals"></div></div>
+
+      <div class="confirm-delivery">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" style="flex-shrink:0;"><rect x="1" y="7" width="15" height="10" rx="1"/><path d="M16 10h4l3 3v4h-7z"/><circle cx="5.5" cy="19.5" r="1.5"/><circle cx="18.5" cy="19.5" r="1.5"/></svg>
+        <span>Estimated delivery: <strong>5–7 business days</strong></span>
+      </div>
+
+      <div class="confirm-actions">
+        <a href="#" class="shop-btn shop-btn-outline" id="trackOrderBtn">Track Order</a>
+        <a href="#" class="shop-btn shop-btn-primary" id="continueShoppingBtn">Continue Shopping</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- CART DRAWER -->
+<div class="overlay" id="overlay"></div>
+<aside class="cart-drawer" id="cartDrawer" role="dialog" aria-label="Shopping cart" aria-hidden="true">
+  <div class="cart-drawer-head">
+    <h2>Your Cart</h2>
+    <button class="close-btn" id="closeCart" type="button" aria-label="Close cart"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-drawer-foot">
+    <div class="cart-subtotal"><span>Subtotal</span><strong id="cartSubtotal">₹0</strong></div>
+    <button class="shop-btn shop-btn-primary shop-btn-block" id="checkoutBtn" type="button" style="margin-bottom:10px;">Checkout</button>
+    <button class="shop-btn-ghost" id="continueShopping" type="button" style="width:100%; text-align:center;">Continue Shopping</button>
+  </div>
+</aside>
+
+<div class="shop-toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ============================================================
+     FOOTER — identical markup to the rest of the site, with a
+     Shop link added to the Navigate column.
+     ============================================================ -->
+<footer class="site-footer">
+<div class="footer-top">
+<div class="footer-brand">
+<a href="index.html" class="logo">
+<span class="logo-text">VK Photography</span>
+</a>
+<p class="footer-tagline">A studio built around light, story and craft — capturing moments that last a lifetime.</p>
+<div class="footer-social">
+<a href="#" aria-label="Instagram">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"></line></svg>
+</a>
+<a href="#" aria-label="Facebook">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9h3V5h-3c-2.2 0-4 1.8-4 4v3H7v4h3v6h4v-6h3l1-4h-4V9c0-.6.4-1 1-1z"></path></svg>
+</a>
+<a href="#" aria-label="Pinterest">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20c.5-2 1.5-6 1.5-6"></path><path d="M8 12a4 4 0 1 1 7 2.6c-.6.8-1.5 1.4-2.5 1.4-1.1 0-1.8-.7-1.8-1.7 0-1.2 1-3.3 1-4.4"></path><circle cx="12" cy="12" r="9"></circle></svg>
+</a>
+</div>
+</div>
+<div class="footer-col">
+<h4>Navigate</h4>
+<nav class="footer-links">
+<a href="index.html">Home</a>
+<a href="portfolio.html">Portfolio</a>
+<a href="service.html">Services</a>
+<a href="shop.html">Shop</a>
+<a href="contact.html">Contact</a>
+</nav>
+</div>
+<div class="footer-col">
+<h4>Shop</h4>
+<nav class="footer-links">
+<a href="shop.html#collection">Frame Collection</a>
+<a href="shop.html" id="footerCreateFrame">Create Your Frame</a>
+</nav>
+</div>
+<div class="footer-col">
+<h4>Get in touch</h4>
+<div class="contact-card">
+<div class="contact-row">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+<span>Rampally, Hyderabad</span>
+</div>
+<div class="contact-row">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 3a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.5c1 .3 2 .5 3 .7a2 2 0 0 1 1.7 2z"></path></svg>
+<a href="tel:+918978367995">+91 89783 67995</a>
+</div>
+<div class="contact-row">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg>
+<span>Mon&ndash;Sat, 10:00 AM &ndash; 8:30 PM</span>
+</div>
+<a href="#" class="contact-directions-btn">
+Get Directions
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+</a>
+</div>
+</div>
+</div>
+<div class="footer-bottom">
+<p>&copy; <span id="footerYear"></span> VK Photography. All rights reserved.</p>
+<div class="footer-legal">
+<a href="#">Privacy Policy</a>
+<a href="#">Terms of Service</a>
+</div>
+</div>
+</footer>
+
+<script src="js/shop.js"></script>
+<script>
+  var navToggle = document.getElementById('navToggle');
+  var navMobile = document.getElementById('navMobile');
+  if (navToggle && navMobile) {
+    navToggle.addEventListener('click', function () {
+      navToggle.classList.toggle('open');
+      navMobile.classList.toggle('open');
+    });
+  }
+  var footerYearEl = document.getElementById('footerYear');
+  if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
+</script>
+<script src="js/transition.js"></script>
+<script src="js/cursor.js"></script>
+</body>
+</html>

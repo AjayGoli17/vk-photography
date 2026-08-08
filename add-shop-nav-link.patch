@@ -1,0 +1,116 @@
+From 46d6c91313bfc44e13ff6936fb6001a43602774f Mon Sep 17 00:00:00 2001
+From: Claude <assistant@example.com>
+Date: Sat, 8 Aug 2026 12:47:34 +0000
+Subject: [PATCH] Add Shop nav link to desktop and mobile nav across all pages
+
+---
+ contact.html   | 2 ++
+ index.html     | 2 ++
+ portfolio.html | 2 ++
+ quotation.html | 2 ++
+ service.html   | 2 ++
+ 5 files changed, 10 insertions(+)
+
+diff --git a/contact.html b/contact.html
+index 1a6d672..3efd3c3 100644
+--- a/contact.html
++++ b/contact.html
+@@ -30,6 +30,7 @@
+           <a href="index.html">Home</a>
+           <a href="portfolio.html">Portfolio</a>
+           <a href="service.html">Services</a>
++          <a href="shop.html">Shop</a>
+           <a href="quotation.html">Quotation</a>
+           <a href="contact.html">Contact</a>
+         </div>
+@@ -43,6 +44,7 @@
+       <a href="index.html">Home</a>
+       <a href="portfolio.html">Portfolio</a>
+       <a href="service.html">Services</a>
++      <a href="shop.html">Shop</a>
+       <a href="quotation.html">Quotation</a>
+       <a href="contact.html">Contact</a>
+       <a href="quotation.html" class="vk-btn vk-btn-ghost vk-nav-mobile-cta">Get Quote</a>
+diff --git a/index.html b/index.html
+index c3e688c..2e5a149 100644
+--- a/index.html
++++ b/index.html
+@@ -30,6 +30,7 @@
+       <a href="index.html">Home</a>
+       <a href="portfolio.html">Portfolio</a>
+       <a href="service.html">Services</a>
++      <a href="shop.html">Shop</a>
+       <a href="quotation.html">Quotation</a>
+       <a href="contact.html">Contact</a>
+     </div>
+@@ -43,6 +44,7 @@
+   <a href="index.html">Home</a>
+   <a href="portfolio.html">Portfolio</a>
+   <a href="service.html">Services</a>
++  <a href="shop.html">Shop</a>
+   <a href="quotation.html">Quotation</a>
+   <a href="contact.html">Contact</a>
+   <a href="quotation.html" class="vk-btn vk-btn-ghost vk-nav-mobile-cta">Get Quote</a>
+diff --git a/portfolio.html b/portfolio.html
+index a090091..00c462b 100644
+--- a/portfolio.html
++++ b/portfolio.html
+@@ -30,6 +30,7 @@
+           <a href="index.html">Home</a>
+           <a href="portfolio.html">Portfolio</a>
+           <a href="service.html">Services</a>
++          <a href="shop.html">Shop</a>
+           <a href="quotation.html">Quotation</a>
+           <a href="contact.html">Contact</a>
+         </div>
+@@ -43,6 +44,7 @@
+       <a href="index.html">Home</a>
+       <a href="portfolio.html">Portfolio</a>
+       <a href="service.html">Services</a>
++      <a href="shop.html">Shop</a>
+       <a href="quotation.html">Quotation</a>
+       <a href="contact.html">Contact</a>
+       <a href="quotation.html" class="vk-btn vk-btn-ghost vk-nav-mobile-cta">Get Quote</a>
+diff --git a/quotation.html b/quotation.html
+index 25b0753..ad13595 100644
+--- a/quotation.html
++++ b/quotation.html
+@@ -24,6 +24,7 @@
+       <a href="index.html">Home</a>
+       <a href="portfolio.html">Portfolio</a>
+       <a href="service.html">Services</a>
++      <a href="shop.html">Shop</a>
+       <a href="quotation.html">Quotation</a>
+       <a href="contact.html">Contact</a>
+     </div>
+@@ -37,6 +38,7 @@
+   <a href="index.html">Home</a>
+   <a href="portfolio.html">Portfolio</a>
+   <a href="service.html">Services</a>
++  <a href="shop.html">Shop</a>
+   <a href="quotation.html">Quotation</a>
+   <a href="contact.html">Contact</a>
+   <a href="quotation.html" class="vk-btn vk-btn-ghost vk-nav-mobile-cta">Get Quote</a>
+diff --git a/service.html b/service.html
+index 725cece..5cb534d 100644
+--- a/service.html
++++ b/service.html
+@@ -30,6 +30,7 @@
+           <a href="index.html">Home</a>
+           <a href="portfolio.html">Portfolio</a>
+           <a href="service.html">Services</a>
++          <a href="shop.html">Shop</a>
+           <a href="quotation.html">Quotation</a>
+           <a href="contact.html">Contact</a>
+         </div>
+@@ -43,6 +44,7 @@
+       <a href="index.html">Home</a>
+       <a href="portfolio.html">Portfolio</a>
+       <a href="service.html">Services</a>
++      <a href="shop.html">Shop</a>
+       <a href="quotation.html">Quotation</a>
+       <a href="contact.html">Contact</a>
+       <a href="quotation.html" class="vk-btn vk-btn-ghost vk-nav-mobile-cta">Get Quote</a>
+-- 
+2.43.0
+

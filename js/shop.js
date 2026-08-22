@@ -690,6 +690,18 @@
         description: "Personalized Photoframe Order",
         prefill: { name: order.customer.name, email: order.customer.email, contact: order.customer.phone },
         theme: { color: "#2b2620" },
+        config: {
+          display: {
+            blocks: {
+              upi: {
+                name: "Pay via UPI",
+                instruments: [{ method: "upi" }],
+              },
+            },
+            sequence: ["block.upi"],
+            preferences: { show_default_blocks: true },
+          },
+        },
         modal: {
           ondismiss: () => setPaymentState("cancelled"),
         },

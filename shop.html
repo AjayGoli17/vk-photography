@@ -234,36 +234,23 @@
       </div>
 
       <h1>Complete Your Payment</h1>
-      <p class="sub">Scan the QR code using any UPI app to complete your payment.</p>
+      <p class="sub">Pay securely with UPI, card, netbanking or wallet via Razorpay.</p>
 
       <div class="payment-status-banner" id="statusBanner" role="status" aria-live="polite"></div>
 
       <div class="qr-card">
-        <div class="qr-label">Scan &amp; Pay</div>
-        <div class="qr-image-wrap"><span class="qr-demo-tag">Demo</span><img id="qrImage" src="" alt="UPI QR code to pay VK Photography"></div>
-        <div class="qr-amount" id="qrAmount">₹0</div>
-        <div class="qr-apps">Scan using Google Pay, PhonePe, Paytm, or any UPI app</div>
-      </div>
-
-      <div class="upi-id-row">
-        <div><span class="upi-id-label">UPI ID</span><span class="upi-id-value" id="upiIdValue">vkphotography@upi</span></div>
-        <button class="copy-btn" id="copyUpiBtn" type="button">Copy</button>
-      </div>
-
-      <div class="payment-steps">
-        <div><span class="shop-step-num">01</span><p>Open your UPI app</p></div>
-        <div><span class="shop-step-num">02</span><p>Scan the QR code</p></div>
-        <div><span class="shop-step-num">03</span><p>Complete payment</p></div>
-        <div><span class="shop-step-num">04</span><p>Tap "I've Paid"</p></div>
+        <div class="qr-label">Order Total</div>
+        <div class="qr-amount" id="paymentAmount">₹0</div>
+        <div class="qr-apps">Order reference: <span id="paymentOrderRef">—</span></div>
       </div>
 
       <div class="security-note">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9 8 11 4.6-2 8-6 8-11V5z"/></svg>
-        <span><strong>Never share your UPI PIN or OTP with anyone.</strong> VK Photography will never ask for these on this website.</span>
+        <span><strong>Payments are processed securely by Razorpay.</strong> VK Photography never sees or stores your card, UPI PIN or bank details.</span>
       </div>
 
-      <button class="shop-btn shop-btn-primary shop-btn-block" id="paidBtn" type="button">I've Paid</button>
-      <p style="margin-top:16px; font-size:12.5px; color:var(--gray);">This is a demo payment flow. Tapping "I've Paid" does not verify a real transaction — it marks your order for manual verification until a payment gateway is connected.</p>
+      <button class="shop-btn shop-btn-primary shop-btn-block" id="payNowBtn" type="button">Pay Now</button>
+      <p style="margin-top:16px; font-size:12.5px; color:var(--gray);">You'll only see your order confirmed after payment is verified — this page never marks an order as paid on its own.</p>
     </div>
   </div>
 </main>
@@ -388,6 +375,7 @@ Get Directions
 </div>
 </footer>
 
+<script src="js/shop-pricing.js"></script>
 <script src="js/shop.js"></script>
 <script>
   var navToggle = document.getElementById('navToggle');

@@ -5,49 +5,17 @@
    ============================================================ */
 
 /* ------------------------------------------------------------
-   PRODUCT DATA — change prices, add frames/sizes here.
+   PRODUCT DATA — shared with the server (see js/shop-pricing.js
+   and netlify/functions/create-order.js) so the browser and the
+   Razorpay order-creation function always agree on prices.
+   Change prices/add frames/sizes in js/shop-pricing.js only.
    ------------------------------------------------------------ */
-   const FRAMES = [
-    { id: "classic-black", name: "Classic Black", description: "A timeless matte-black frame that suits any photo, any room.", basePrice: 1499, priceModifier: 0 },
-    { id: "natural-wood", name: "Natural Wood", description: "Warm, honest wood grain — a favorite for portraits and family photos.", basePrice: 1699, priceModifier: 200 },
-    { id: "white-gallery", name: "White Gallery", description: "Clean gallery-white edges that let bright, airy photos breathe.", basePrice: 1599, priceModifier: 100 },
-    { id: "premium-walnut", name: "Premium Walnut", description: "Deep walnut tones with a refined finish, for your most cherished shot.", basePrice: 1999, priceModifier: 500 },
-  ];
-  
-  /* Standard sizes as sold by Indian photoframe/print shops.
-     Each size is listed the conventional way — smaller number
-     first — and the Orientation control below determines whether
-     it's mounted upright (Portrait) or on its side (Landscape). */
-  const SIZES = [
-    { id: "5x7", label: "5 × 7\"", note: "Desk frame", basePrice: 999, aspectRatio: 5 / 7, minResolution: { w: 750, h: 1050 } },
-    { id: "8x10", label: "8 × 10\"", note: "Most popular", basePrice: 1499, aspectRatio: 8 / 10, minResolution: { w: 1200, h: 1500 } },
-    { id: "8x12", label: "8 × 12\"", note: "A4-ish", basePrice: 1799, aspectRatio: 8 / 12, minResolution: { w: 1200, h: 1800 } },
-    { id: "12x16", label: "12 × 16\"", note: "Wall frame", basePrice: 2499, aspectRatio: 12 / 16, minResolution: { w: 1800, h: 2400 } },
-    { id: "12x18", label: "12 × 18\"", note: "Wall frame", basePrice: 2999, aspectRatio: 12 / 18, minResolution: { w: 1800, h: 2700 } },
-    { id: "16x20", label: "16 × 20\"", note: "Large wall", basePrice: 3999, aspectRatio: 16 / 20, minResolution: { w: 2400, h: 3000 } },
-    { id: "20x24", label: "20 × 24\"", note: "Statement piece", basePrice: 4999, aspectRatio: 20 / 24, minResolution: { w: 3000, h: 3600 } },
-  ];
-  
-  const ORIENTATIONS = [
-    { id: "portrait", name: "Portrait", sub: "Taller than wide" },
-    { id: "landscape", name: "Landscape", sub: "Wider than tall" },
-  ];
-  
-  const FINISHES = [
-    { id: "matte", name: "Matte", priceModifier: 0 },
-    { id: "glossy", name: "Glossy", priceModifier: 150 },
-  ];
-  
-  const MATS = [
-    { id: "no-mat", name: "No Mat", priceModifier: 0 },
-    { id: "white-mat", name: "White Mat", priceModifier: 300 },
-  ];
-  
-  const SHIPPING_FEE = 199;
-  
-  /* Configurable UPI / QR settings — replace for production */
-  const UPI_ID = "vkphotography@upi";
-  const UPI_QR_IMAGE = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent("upi://pay?pa=" + UPI_ID + "&pn=VK Photography&cu=INR")}`;
+  const { FRAMES, SIZES, ORIENTATIONS, FINISHES, MATS, SHIPPING_FEE } = window.VKPricing;
+
+  /* Razorpay Checkout — the public Key ID is safe to expose to the
+     browser and is returned by the create-order function on each
+     request, so nothing sensitive is hardcoded here. */
+  const RAZORPAY_CHECKOUT_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
   
   /* ------------------------------------------------------------
      STORAGE HELPERS
@@ -621,78 +589,163 @@
   }
   
   /* ============================================================
-     PAYMENT (demo state machine — see submitPayment() below)
+     PAYMENT — Razorpay Standard Checkout
+     Flow: Pay Now -> POST /create-order (server prices + creates
+     the Razorpay order) -> Razorpay Checkout collects payment ->
+     POST /verify-payment (server verifies the signature) -> only
+     on a verified server response do we advance to Confirmation.
+     The frontend never marks an order as paid on its own.
      ============================================================ */
+  const RAZORPAY_FN_BASE = "/.netlify/functions";
+  let payInFlight = false; // guards against rapid/duplicate Pay Now clicks
+
   function initPaymentPage() {
-    document.getElementById("paidBtn")?.addEventListener("click", submitPayment);
-    document.getElementById("copyUpiBtn")?.addEventListener("click", copyUpiId);
+    document.getElementById("payNowBtn")?.addEventListener("click", handlePayNow);
   }
-  
+
   function renderPayment() {
     const order = Store.getOrder();
     if (!order) return;
-    document.getElementById("qrImage").src = UPI_QR_IMAGE;
-    document.getElementById("qrAmount").textContent = formatINR(order.total);
-    document.getElementById("upiIdValue").textContent = UPI_ID;
-    renderPaymentStatus(order.paymentStatus);
+    document.getElementById("paymentAmount").textContent = formatINR(order.total);
+    document.getElementById("paymentOrderRef").textContent = order.orderId;
+    setPaymentState("idle");
   }
-  
-  function renderPaymentStatus(status) {
+
+  /* idle | loading | cancelled | failed — "success" is not a state
+     the customer waits in; a verified payment moves straight to
+     the Confirmation view. */
+  function setPaymentState(state, message) {
     const banner = document.getElementById("statusBanner");
-    const paidBtn = document.getElementById("paidBtn");
+    const payBtn = document.getElementById("payNowBtn");
     banner.classList.remove("submitted", "success", "failed", "show");
-  
-    switch (status) {
-      case "submitted":
-        banner.textContent = "Payment Submitted — we're verifying your payment.";
+
+    switch (state) {
+      case "loading":
+        banner.textContent = message || "Contacting payment gateway…";
         banner.classList.add("submitted", "show");
-        paidBtn.disabled = true; paidBtn.textContent = "Verifying…";
+        payBtn.disabled = true; payBtn.textContent = "Please wait…";
         break;
-      case "success":
-        banner.textContent = "Payment received — redirecting to your confirmation…";
-        banner.classList.add("success", "show");
-        paidBtn.disabled = true; paidBtn.textContent = "Payment Successful";
+      case "cancelled":
+        banner.textContent = message || "Payment was cancelled. You haven't been charged — you can try again.";
+        banner.classList.add("failed", "show");
+        payBtn.disabled = false; payBtn.textContent = "Pay Now";
         break;
       case "failed":
-        banner.textContent = "We couldn't confirm this payment. Please try again or use a different UPI app.";
+        banner.textContent = message || "We couldn't confirm this payment. Please try again.";
         banner.classList.add("failed", "show");
-        paidBtn.disabled = false; paidBtn.textContent = "I've Paid";
+        payBtn.disabled = false; payBtn.textContent = "Pay Now";
         break;
       default:
-        paidBtn.disabled = false; paidBtn.textContent = "I've Paid";
+        payBtn.disabled = false; payBtn.textContent = "Pay Now";
     }
   }
-  
-  function copyUpiId() {
-    const btn = document.getElementById("copyUpiBtn");
-    navigator.clipboard.writeText(UPI_ID).then(() => {
-      btn.textContent = "UPI ID copied ✓";
-      btn.classList.add("copied");
-      setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("copied"); }, 2000);
-    }).catch(() => showToast("Couldn't copy — please copy the UPI ID manually."));
+
+  function loadRazorpayScript() {
+    if (window.Razorpay) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector(`script[src="${RAZORPAY_CHECKOUT_SCRIPT}"]`);
+      if (existing) { existing.addEventListener("load", () => resolve()); existing.addEventListener("error", () => reject()); return; }
+      const script = document.createElement("script");
+      script.src = RAZORPAY_CHECKOUT_SCRIPT;
+      script.onload = () => resolve();
+      script.onerror = () => reject();
+      document.body.appendChild(script);
+    });
   }
-  
-  /* Demo verification flow — swap for a real gateway callback later. */
-  function submitPayment() {
+
+  async function handlePayNow() {
+    if (payInFlight) return; // prevent duplicate order creation from rapid clicks
     const order = Store.getOrder();
     if (!order) return;
-  
-    order.paymentStatus = "submitted";
-    Store.setOrder(order);
-    renderPaymentStatus("submitted");
-  
-    setTimeout(() => {
-      const latestOrder = Store.getOrder();
-      latestOrder.paymentStatus = "success";
-      latestOrder.orderStatus = "confirmed";
-      Store.setOrder(latestOrder);
-      renderPaymentStatus("success");
-  
-      setTimeout(() => {
-        switchView("Confirmation");
-        showConfirmation();
-      }, 1200);
-    }, 2200);
+
+    payInFlight = true;
+    setPaymentState("loading", "Preparing secure checkout…");
+
+    try {
+      await loadRazorpayScript();
+
+      const createRes = await fetch(`${RAZORPAY_FN_BASE}/create-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderRef: order.orderId,
+          items: order.items.map((i) => ({ sizeId: i.sizeId, frameId: i.frameId, finishId: i.finishId, matId: i.matId, quantity: i.quantity })),
+          customer: { name: order.customer.name, email: order.customer.email, phone: order.customer.phone },
+        }),
+      });
+
+      if (!createRes.ok) {
+        const err = await safeJson(createRes);
+        throw new Error(err?.error || "Couldn't start the payment. Please try again.");
+      }
+      const { keyId, razorpayOrderId, amount, currency, orderRef } = await createRes.json();
+
+      payInFlight = false; // Razorpay Checkout has its own UI lock from here
+
+      const rzp = new window.Razorpay({
+        key: keyId,
+        order_id: razorpayOrderId,
+        amount, currency,
+        name: "VK Photography",
+        description: "Personalized Photoframe Order",
+        prefill: { name: order.customer.name, email: order.customer.email, contact: order.customer.phone },
+        theme: { color: "#2b2620" },
+        modal: {
+          ondismiss: () => setPaymentState("cancelled"),
+        },
+        handler: (response) => verifyAndConfirm(response, orderRef),
+      });
+
+      rzp.on("payment.failed", () => {
+        setPaymentState("failed", "Your payment didn't go through. Please try again or use a different payment method.");
+      });
+
+      setPaymentState("idle");
+      rzp.open();
+    } catch (err) {
+      payInFlight = false;
+      setPaymentState("failed", err.message || "Something went wrong starting the payment. Please try again.");
+    }
+  }
+
+  async function verifyAndConfirm(razorpayResponse, orderRef) {
+    setPaymentState("loading", "Verifying your payment…");
+    try {
+      const verifyRes = await fetch(`${RAZORPAY_FN_BASE}/verify-payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          razorpay_order_id: razorpayResponse.razorpay_order_id,
+          razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+          razorpay_signature: razorpayResponse.razorpay_signature,
+          orderRef,
+        }),
+      });
+
+      const result = await safeJson(verifyRes);
+      if (!verifyRes.ok || !result?.verified) {
+        setPaymentState("failed", "We couldn't verify this payment. If money was deducted, it will be refunded automatically — please try again.");
+        return;
+      }
+
+      // Only a successful server-side verification updates the order.
+      const order = Store.getOrder();
+      if (!order) return;
+      order.paymentStatus = "paid";
+      order.orderStatus = "confirmed";
+      order.razorpayOrderId = result.razorpayOrderId;
+      order.razorpayPaymentId = result.razorpayPaymentId;
+      Store.setOrder(order);
+
+      switchView("Confirmation");
+      showConfirmation();
+    } catch (err) {
+      setPaymentState("failed", "We couldn't verify this payment due to a network error. Please try again.");
+    }
+  }
+
+  async function safeJson(res) {
+    try { return await res.json(); } catch { return null; }
   }
   
   /* ============================================================
@@ -700,7 +753,7 @@
      ============================================================ */
   function showConfirmation() {
     const order = Store.getOrder();
-    if (!order || order.paymentStatus !== "success") return;
+    if (!order || order.paymentStatus !== "paid") return;
   
     document.getElementById("orderIdLine").textContent = `Order #${order.orderId}`;
   

@@ -1,0 +1,9 @@
+{
+  "name": "vk-photography",
+  "private": true,
+  "version": "1.0.0",
+  "description": "VK Photography site — Shop checkout powered by Razorpay Standard Checkout via Netlify Functions.",
+  "dependencies": {
+    "razorpay": "^2.9.8"
+  }
+}

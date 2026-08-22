@@ -1,0 +1,1158 @@
+diff --git a/.env.example b/.env.example
+new file mode 100644
+index 0000000..5fa06dd
+--- /dev/null
++++ b/.env.example
+@@ -0,0 +1,9 @@
++# Razorpay TEST MODE credentials — get these from the Razorpay Dashboard
++# (Settings > API Keys, Test Mode). Never commit real values.
++# Configure the real values in Netlify: Site settings > Environment variables.
++
++RAZORPAY_KEY_ID=YOUR_RAZORPAY_TEST_KEY_ID
++RAZORPAY_KEY_SECRET=YOUR_RAZORPAY_TEST_KEY_SECRET
++
++# Settings > Webhooks > (your webhook) > Secret
++RAZORPAY_WEBHOOK_SECRET=YOUR_RAZORPAY_TEST_WEBHOOK_SECRET
+diff --git a/.gitignore b/.gitignore
+index 808d681..ba04e70 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,2 +1,8 @@
+ originals/
+ originals_video/
++
++# Razorpay / Netlify Functions
++node_modules/
++.env
++.env.local
++.netlify/
+diff --git a/js/shop-pricing.js b/js/shop-pricing.js
+new file mode 100644
+index 0000000..da18ebb
+--- /dev/null
++++ b/js/shop-pricing.js
+@@ -0,0 +1,80 @@
++/* ============================================================
++   VK PHOTOGRAPHY — SHARED PRODUCT / PRICING CONFIG
++   Single source of truth for frame, size, finish and mat prices.
++
++   Used by:
++     - js/shop.js (browser)               -> window.VKPricing
++     - netlify/functions/create-order.js  -> require("../../js/shop-pricing.js")
++
++   IMPORTANT: this file is loaded both as a plain <script> in the
++   browser and with require() in a Node (Netlify Function) context.
++   Keep it dependency-free and CommonJS/UMD-safe.
++
++   Prices here are what the server trusts. The browser only uses
++   them to render the UI — the server always recalculates the
++   order total from these values, never from anything the client
++   sends over the wire.
++   ------------------------------------------------------------ */
++(function (root, factory) {
++  if (typeof module === "object" && module.exports) {
++    module.exports = factory();
++  } else {
++    root.VKPricing = factory();
++  }
++})(typeof self !== "undefined" ? self : this, function () {
++  const FRAMES = [
++    { id: "classic-black", name: "Classic Black", description: "A timeless matte-black frame that suits any photo, any room.", basePrice: 1499, priceModifier: 0 },
++    { id: "natural-wood", name: "Natural Wood", description: "Warm, honest wood grain — a favorite for portraits and family photos.", basePrice: 1699, priceModifier: 200 },
++    { id: "white-gallery", name: "White Gallery", description: "Clean gallery-white edges that let bright, airy photos breathe.", basePrice: 1599, priceModifier: 100 },
++    { id: "premium-walnut", name: "Premium Walnut", description: "Deep walnut tones with a refined finish, for your most cherished shot.", basePrice: 1999, priceModifier: 500 },
++  ];
++
++  /* Standard sizes as sold by Indian photoframe/print shops.
++     Each size is listed the conventional way — smaller number
++     first — and the Orientation control determines whether it's
++     mounted upright (Portrait) or on its side (Landscape).
++     basePrice does not change with orientation. */
++  const SIZES = [
++    { id: "5x7", label: "5 × 7\"", note: "Desk frame", basePrice: 999, aspectRatio: 5 / 7, minResolution: { w: 750, h: 1050 } },
++    { id: "8x10", label: "8 × 10\"", note: "Most popular", basePrice: 1499, aspectRatio: 8 / 10, minResolution: { w: 1200, h: 1500 } },
++    { id: "8x12", label: "8 × 12\"", note: "A4-ish", basePrice: 1799, aspectRatio: 8 / 12, minResolution: { w: 1200, h: 1800 } },
++    { id: "12x16", label: "12 × 16\"", note: "Wall frame", basePrice: 2499, aspectRatio: 12 / 16, minResolution: { w: 1800, h: 2400 } },
++    { id: "12x18", label: "12 × 18\"", note: "Wall frame", basePrice: 2999, aspectRatio: 12 / 18, minResolution: { w: 1800, h: 2700 } },
++    { id: "16x20", label: "16 × 20\"", note: "Large wall", basePrice: 3999, aspectRatio: 16 / 20, minResolution: { w: 2400, h: 3000 } },
++    { id: "20x24", label: "20 × 24\"", note: "Statement piece", basePrice: 4999, aspectRatio: 20 / 24, minResolution: { w: 3000, h: 3600 } },
++  ];
++
++  const ORIENTATIONS = [
++    { id: "portrait", name: "Portrait", sub: "Taller than wide" },
++    { id: "landscape", name: "Landscape", sub: "Wider than tall" },
++  ];
++
++  const FINISHES = [
++    { id: "matte", name: "Matte", priceModifier: 0 },
++    { id: "glossy", name: "Glossy", priceModifier: 150 },
++  ];
++
++  const MATS = [
++    { id: "no-mat", name: "No Mat", priceModifier: 0 },
++    { id: "white-mat", name: "White Mat", priceModifier: 300 },
++  ];
++
++  const SHIPPING_FEE = 199;
++  const CURRENCY = "INR";
++  const MAX_QTY_PER_ITEM = 20;
++  const MAX_ITEMS_PER_ORDER = 20;
++
++  /* Server-trusted unit price for one item, given selected option
++     ids. Returns null if any id is invalid so callers can reject
++     the request instead of silently pricing it at 0. */
++  function getUnitPrice({ sizeId, frameId, finishId, matId }) {
++    const size = SIZES.find((s) => s.id === sizeId);
++    const frame = FRAMES.find((f) => f.id === frameId);
++    const finish = FINISHES.find((f) => f.id === finishId);
++    const mat = MATS.find((m) => m.id === matId);
++    if (!size || !frame || !finish || !mat) return null;
++    return size.basePrice + frame.priceModifier + finish.priceModifier + mat.priceModifier;
++  }
++
++  return { FRAMES, SIZES, ORIENTATIONS, FINISHES, MATS, SHIPPING_FEE, CURRENCY, MAX_QTY_PER_ITEM, MAX_ITEMS_PER_ORDER, getUnitPrice };
++});
+diff --git a/js/shop.js b/js/shop.js
+index e826ac9..36c7760 100644
+--- a/js/shop.js
++++ b/js/shop.js
+@@ -5,49 +5,17 @@
+    ============================================================ */
+ 
+ /* ------------------------------------------------------------
+-   PRODUCT DATA — change prices, add frames/sizes here.
++   PRODUCT DATA — shared with the server (see js/shop-pricing.js
++   and netlify/functions/create-order.js) so the browser and the
++   Razorpay order-creation function always agree on prices.
++   Change prices/add frames/sizes in js/shop-pricing.js only.
+    ------------------------------------------------------------ */
+-   const FRAMES = [
+-    { id: "classic-black", name: "Classic Black", description: "A timeless matte-black frame that suits any photo, any room.", basePrice: 1499, priceModifier: 0 },
+-    { id: "natural-wood", name: "Natural Wood", description: "Warm, honest wood grain — a favorite for portraits and family photos.", basePrice: 1699, priceModifier: 200 },
+-    { id: "white-gallery", name: "White Gallery", description: "Clean gallery-white edges that let bright, airy photos breathe.", basePrice: 1599, priceModifier: 100 },
+-    { id: "premium-walnut", name: "Premium Walnut", description: "Deep walnut tones with a refined finish, for your most cherished shot.", basePrice: 1999, priceModifier: 500 },
+-  ];
+-  
+-  /* Standard sizes as sold by Indian photoframe/print shops.
+-     Each size is listed the conventional way — smaller number
+-     first — and the Orientation control below determines whether
+-     it's mounted upright (Portrait) or on its side (Landscape). */
+-  const SIZES = [
+-    { id: "5x7", label: "5 × 7\"", note: "Desk frame", basePrice: 999, aspectRatio: 5 / 7, minResolution: { w: 750, h: 1050 } },
+-    { id: "8x10", label: "8 × 10\"", note: "Most popular", basePrice: 1499, aspectRatio: 8 / 10, minResolution: { w: 1200, h: 1500 } },
+-    { id: "8x12", label: "8 × 12\"", note: "A4-ish", basePrice: 1799, aspectRatio: 8 / 12, minResolution: { w: 1200, h: 1800 } },
+-    { id: "12x16", label: "12 × 16\"", note: "Wall frame", basePrice: 2499, aspectRatio: 12 / 16, minResolution: { w: 1800, h: 2400 } },
+-    { id: "12x18", label: "12 × 18\"", note: "Wall frame", basePrice: 2999, aspectRatio: 12 / 18, minResolution: { w: 1800, h: 2700 } },
+-    { id: "16x20", label: "16 × 20\"", note: "Large wall", basePrice: 3999, aspectRatio: 16 / 20, minResolution: { w: 2400, h: 3000 } },
+-    { id: "20x24", label: "20 × 24\"", note: "Statement piece", basePrice: 4999, aspectRatio: 20 / 24, minResolution: { w: 3000, h: 3600 } },
+-  ];
+-  
+-  const ORIENTATIONS = [
+-    { id: "portrait", name: "Portrait", sub: "Taller than wide" },
+-    { id: "landscape", name: "Landscape", sub: "Wider than tall" },
+-  ];
+-  
+-  const FINISHES = [
+-    { id: "matte", name: "Matte", priceModifier: 0 },
+-    { id: "glossy", name: "Glossy", priceModifier: 150 },
+-  ];
+-  
+-  const MATS = [
+-    { id: "no-mat", name: "No Mat", priceModifier: 0 },
+-    { id: "white-mat", name: "White Mat", priceModifier: 300 },
+-  ];
+-  
+-  const SHIPPING_FEE = 199;
+-  
+-  /* Configurable UPI / QR settings — replace for production */
+-  const UPI_ID = "vkphotography@upi";
+-  const UPI_QR_IMAGE = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent("upi://pay?pa=" + UPI_ID + "&pn=VK Photography&cu=INR")}`;
++  const { FRAMES, SIZES, ORIENTATIONS, FINISHES, MATS, SHIPPING_FEE } = window.VKPricing;
++
++  /* Razorpay Checkout — the public Key ID is safe to expose to the
++     browser and is returned by the create-order function on each
++     request, so nothing sensitive is hardcoded here. */
++  const RAZORPAY_CHECKOUT_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
+   
+   /* ------------------------------------------------------------
+      STORAGE HELPERS
+@@ -621,78 +589,163 @@
+   }
+   
+   /* ============================================================
+-     PAYMENT (demo state machine — see submitPayment() below)
++     PAYMENT — Razorpay Standard Checkout
++     Flow: Pay Now -> POST /create-order (server prices + creates
++     the Razorpay order) -> Razorpay Checkout collects payment ->
++     POST /verify-payment (server verifies the signature) -> only
++     on a verified server response do we advance to Confirmation.
++     The frontend never marks an order as paid on its own.
+      ============================================================ */
++  const RAZORPAY_FN_BASE = "/.netlify/functions";
++  let payInFlight = false; // guards against rapid/duplicate Pay Now clicks
++
+   function initPaymentPage() {
+-    document.getElementById("paidBtn")?.addEventListener("click", submitPayment);
+-    document.getElementById("copyUpiBtn")?.addEventListener("click", copyUpiId);
++    document.getElementById("payNowBtn")?.addEventListener("click", handlePayNow);
+   }
+-  
++
+   function renderPayment() {
+     const order = Store.getOrder();
+     if (!order) return;
+-    document.getElementById("qrImage").src = UPI_QR_IMAGE;
+-    document.getElementById("qrAmount").textContent = formatINR(order.total);
+-    document.getElementById("upiIdValue").textContent = UPI_ID;
+-    renderPaymentStatus(order.paymentStatus);
++    document.getElementById("paymentAmount").textContent = formatINR(order.total);
++    document.getElementById("paymentOrderRef").textContent = order.orderId;
++    setPaymentState("idle");
+   }
+-  
+-  function renderPaymentStatus(status) {
++
++  /* idle | loading | cancelled | failed — "success" is not a state
++     the customer waits in; a verified payment moves straight to
++     the Confirmation view. */
++  function setPaymentState(state, message) {
+     const banner = document.getElementById("statusBanner");
+-    const paidBtn = document.getElementById("paidBtn");
++    const payBtn = document.getElementById("payNowBtn");
+     banner.classList.remove("submitted", "success", "failed", "show");
+-  
+-    switch (status) {
+-      case "submitted":
+-        banner.textContent = "Payment Submitted — we're verifying your payment.";
++
++    switch (state) {
++      case "loading":
++        banner.textContent = message || "Contacting payment gateway…";
+         banner.classList.add("submitted", "show");
+-        paidBtn.disabled = true; paidBtn.textContent = "Verifying…";
++        payBtn.disabled = true; payBtn.textContent = "Please wait…";
+         break;
+-      case "success":
+-        banner.textContent = "Payment received — redirecting to your confirmation…";
+-        banner.classList.add("success", "show");
+-        paidBtn.disabled = true; paidBtn.textContent = "Payment Successful";
++      case "cancelled":
++        banner.textContent = message || "Payment was cancelled. You haven't been charged — you can try again.";
++        banner.classList.add("failed", "show");
++        payBtn.disabled = false; payBtn.textContent = "Pay Now";
+         break;
+       case "failed":
+-        banner.textContent = "We couldn't confirm this payment. Please try again or use a different UPI app.";
++        banner.textContent = message || "We couldn't confirm this payment. Please try again.";
+         banner.classList.add("failed", "show");
+-        paidBtn.disabled = false; paidBtn.textContent = "I've Paid";
++        payBtn.disabled = false; payBtn.textContent = "Pay Now";
+         break;
+       default:
+-        paidBtn.disabled = false; paidBtn.textContent = "I've Paid";
++        payBtn.disabled = false; payBtn.textContent = "Pay Now";
+     }
+   }
+-  
+-  function copyUpiId() {
+-    const btn = document.getElementById("copyUpiBtn");
+-    navigator.clipboard.writeText(UPI_ID).then(() => {
+-      btn.textContent = "UPI ID copied ✓";
+-      btn.classList.add("copied");
+-      setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("copied"); }, 2000);
+-    }).catch(() => showToast("Couldn't copy — please copy the UPI ID manually."));
++
++  function loadRazorpayScript() {
++    if (window.Razorpay) return Promise.resolve();
++    return new Promise((resolve, reject) => {
++      const existing = document.querySelector(`script[src="${RAZORPAY_CHECKOUT_SCRIPT}"]`);
++      if (existing) { existing.addEventListener("load", () => resolve()); existing.addEventListener("error", () => reject()); return; }
++      const script = document.createElement("script");
++      script.src = RAZORPAY_CHECKOUT_SCRIPT;
++      script.onload = () => resolve();
++      script.onerror = () => reject();
++      document.body.appendChild(script);
++    });
+   }
+-  
+-  /* Demo verification flow — swap for a real gateway callback later. */
+-  function submitPayment() {
++
++  async function handlePayNow() {
++    if (payInFlight) return; // prevent duplicate order creation from rapid clicks
+     const order = Store.getOrder();
+     if (!order) return;
+-  
+-    order.paymentStatus = "submitted";
+-    Store.setOrder(order);
+-    renderPaymentStatus("submitted");
+-  
+-    setTimeout(() => {
+-      const latestOrder = Store.getOrder();
+-      latestOrder.paymentStatus = "success";
+-      latestOrder.orderStatus = "confirmed";
+-      Store.setOrder(latestOrder);
+-      renderPaymentStatus("success");
+-  
+-      setTimeout(() => {
+-        switchView("Confirmation");
+-        showConfirmation();
+-      }, 1200);
+-    }, 2200);
++
++    payInFlight = true;
++    setPaymentState("loading", "Preparing secure checkout…");
++
++    try {
++      await loadRazorpayScript();
++
++      const createRes = await fetch(`${RAZORPAY_FN_BASE}/create-order`, {
++        method: "POST",
++        headers: { "Content-Type": "application/json" },
++        body: JSON.stringify({
++          orderRef: order.orderId,
++          items: order.items.map((i) => ({ sizeId: i.sizeId, frameId: i.frameId, finishId: i.finishId, matId: i.matId, quantity: i.quantity })),
++          customer: { name: order.customer.name, email: order.customer.email, phone: order.customer.phone },
++        }),
++      });
++
++      if (!createRes.ok) {
++        const err = await safeJson(createRes);
++        throw new Error(err?.error || "Couldn't start the payment. Please try again.");
++      }
++      const { keyId, razorpayOrderId, amount, currency, orderRef } = await createRes.json();
++
++      payInFlight = false; // Razorpay Checkout has its own UI lock from here
++
++      const rzp = new window.Razorpay({
++        key: keyId,
++        order_id: razorpayOrderId,
++        amount, currency,
++        name: "VK Photography",
++        description: "Personalized Photoframe Order",
++        prefill: { name: order.customer.name, email: order.customer.email, contact: order.customer.phone },
++        theme: { color: "#2b2620" },
++        modal: {
++          ondismiss: () => setPaymentState("cancelled"),
++        },
++        handler: (response) => verifyAndConfirm(response, orderRef),
++      });
++
++      rzp.on("payment.failed", () => {
++        setPaymentState("failed", "Your payment didn't go through. Please try again or use a different payment method.");
++      });
++
++      setPaymentState("idle");
++      rzp.open();
++    } catch (err) {
++      payInFlight = false;
++      setPaymentState("failed", err.message || "Something went wrong starting the payment. Please try again.");
++    }
++  }
++
++  async function verifyAndConfirm(razorpayResponse, orderRef) {
++    setPaymentState("loading", "Verifying your payment…");
++    try {
++      const verifyRes = await fetch(`${RAZORPAY_FN_BASE}/verify-payment`, {
++        method: "POST",
++        headers: { "Content-Type": "application/json" },
++        body: JSON.stringify({
++          razorpay_order_id: razorpayResponse.razorpay_order_id,
++          razorpay_payment_id: razorpayResponse.razorpay_payment_id,
++          razorpay_signature: razorpayResponse.razorpay_signature,
++          orderRef,
++        }),
++      });
++
++      const result = await safeJson(verifyRes);
++      if (!verifyRes.ok || !result?.verified) {
++        setPaymentState("failed", "We couldn't verify this payment. If money was deducted, it will be refunded automatically — please try again.");
++        return;
++      }
++
++      // Only a successful server-side verification updates the order.
++      const order = Store.getOrder();
++      if (!order) return;
++      order.paymentStatus = "paid";
++      order.orderStatus = "confirmed";
++      order.razorpayOrderId = result.razorpayOrderId;
++      order.razorpayPaymentId = result.razorpayPaymentId;
++      Store.setOrder(order);
++
++      switchView("Confirmation");
++      showConfirmation();
++    } catch (err) {
++      setPaymentState("failed", "We couldn't verify this payment due to a network error. Please try again.");
++    }
++  }
++
++  async function safeJson(res) {
++    try { return await res.json(); } catch { return null; }
+   }
+   
+   /* ============================================================
+@@ -700,7 +753,7 @@
+      ============================================================ */
+   function showConfirmation() {
+     const order = Store.getOrder();
+-    if (!order || order.paymentStatus !== "success") return;
++    if (!order || order.paymentStatus !== "paid") return;
+   
+     document.getElementById("orderIdLine").textContent = `Order #${order.orderId}`;
+   
+diff --git a/netlify.toml b/netlify.toml
+new file mode 100644
+index 0000000..f655e84
+--- /dev/null
++++ b/netlify.toml
+@@ -0,0 +1,11 @@
++[build]
++  publish = "."
++  functions = "netlify/functions"
++
++[functions]
++  node_bundler = "esbuild"
++
++[[redirects]]
++  from = "/api/*"
++  to = "/.netlify/functions/:splat"
++  status = 200
+diff --git a/netlify/functions/create-order.js b/netlify/functions/create-order.js
+new file mode 100644
+index 0000000..7c51358
+--- /dev/null
++++ b/netlify/functions/create-order.js
+@@ -0,0 +1,118 @@
++/* ============================================================
++   POST /.netlify/functions/create-order
++   Creates a Razorpay Order for the customer's cart.
++
++   Security:
++   - The final amount is always derived from js/shop-pricing.js on
++     the server. Nothing supplied by the browser (unit prices,
++     totals) is ever trusted.
++   - RAZORPAY_KEY_SECRET is only used here, server-side, and is
++     never returned in the response.
++   ============================================================ */
++"use strict";
++
++const Razorpay = require("razorpay");
++const { SIZES, FRAMES, FINISHES, MATS, SHIPPING_FEE, MAX_QTY_PER_ITEM, MAX_ITEMS_PER_ORDER, getUnitPrice } = require("../../js/shop-pricing.js");
++
++const JSON_HEADERS = { "Content-Type": "application/json" };
++
++exports.handler = async (event) => {
++  if (event.httpMethod !== "POST") {
++    return respond(405, { error: "Method not allowed." });
++  }
++
++  let body;
++  try {
++    body = JSON.parse(event.body || "{}");
++  } catch {
++    return respond(400, { error: "Invalid request body." });
++  }
++
++  const { orderRef, items, customer } = body;
++
++  if (typeof orderRef !== "string" || !/^[A-Za-z0-9_-]{1,40}$/.test(orderRef)) {
++    return respond(400, { error: "Invalid order reference." });
++  }
++
++  if (!Array.isArray(items) || items.length === 0) {
++    return respond(400, { error: "Your cart is empty." });
++  }
++  if (items.length > MAX_ITEMS_PER_ORDER) {
++    return respond(400, { error: "Too many items in this order." });
++  }
++
++  // Validate every line item against the trusted product catalog and
++  // compute the total ourselves — the client only tells us *which*
++  // options were chosen, never what they cost.
++  let subtotal = 0;
++  for (const item of items) {
++    const { sizeId, frameId, finishId, matId, quantity } = item || {};
++    if (
++      !SIZES.some((s) => s.id === sizeId) ||
++      !FRAMES.some((f) => f.id === frameId) ||
++      !FINISHES.some((f) => f.id === finishId) ||
++      !MATS.some((m) => m.id === matId)
++    ) {
++      return respond(400, { error: "One of the items in your cart is no longer available." });
++    }
++    if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QTY_PER_ITEM) {
++      return respond(400, { error: "Invalid quantity in cart." });
++    }
++
++    const unitPrice = getUnitPrice({ sizeId, frameId, finishId, matId });
++    if (unitPrice == null) {
++      return respond(400, { error: "One of the items in your cart is no longer available." });
++    }
++    subtotal += unitPrice * quantity;
++  }
++
++  const total = subtotal + SHIPPING_FEE;
++  const amountInPaise = Math.round(total * 100);
++
++  if (!Number.isFinite(amountInPaise) || amountInPaise <= 0) {
++    return respond(400, { error: "Could not calculate a valid order amount." });
++  }
++
++  const keyId = process.env.RAZORPAY_KEY_ID;
++  const keySecret = process.env.RAZORPAY_KEY_SECRET;
++  if (!keyId || !keySecret) {
++    console.error("create-order: missing RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET env vars");
++    return respond(500, { error: "Payments are temporarily unavailable. Please try again shortly." });
++  }
++
++  const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
++
++  try {
++    const razorpayOrder = await razorpay.orders.create({
++      amount: amountInPaise,
++      currency: "INR",
++      receipt: orderRef,
++      notes: {
++        orderRef,
++        customerName: safeNote(customer?.name),
++        customerEmail: safeNote(customer?.email),
++        customerPhone: safeNote(customer?.phone),
++      },
++    });
++
++    return respond(200, {
++      keyId, // public key id — safe for the browser
++      razorpayOrderId: razorpayOrder.id,
++      amount: razorpayOrder.amount,
++      currency: razorpayOrder.currency,
++      orderRef,
++    });
++  } catch (err) {
++    console.error("create-order: Razorpay order creation failed", err?.message || err);
++    return respond(502, { error: "Couldn't start the payment. Please try again." });
++  }
++};
++
++function safeNote(value) {
++  if (typeof value !== "string") return "";
++  return value.slice(0, 200);
++}
++
++function respond(statusCode, body) {
++  return { statusCode, headers: JSON_HEADERS, body: JSON.stringify(body) };
++}
+diff --git a/netlify/functions/verify-payment.js b/netlify/functions/verify-payment.js
+new file mode 100644
+index 0000000..9a30b24
+--- /dev/null
++++ b/netlify/functions/verify-payment.js
+@@ -0,0 +1,66 @@
++/* ============================================================
++   POST /.netlify/functions/verify-payment
++   Verifies the signature Razorpay Checkout returns after a
++   payment attempt. The frontend must not treat a payment as
++   successful until this function responds { verified: true }.
++   ============================================================ */
++"use strict";
++
++const crypto = require("crypto");
++
++const JSON_HEADERS = { "Content-Type": "application/json" };
++
++exports.handler = async (event) => {
++  if (event.httpMethod !== "POST") {
++    return respond(405, { verified: false, error: "Method not allowed." });
++  }
++
++  let body;
++  try {
++    body = JSON.parse(event.body || "{}");
++  } catch {
++    return respond(400, { verified: false, error: "Invalid request body." });
++  }
++
++  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderRef } = body;
++
++  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
++    return respond(400, { verified: false, error: "Missing payment details." });
++  }
++
++  const keySecret = process.env.RAZORPAY_KEY_SECRET;
++  if (!keySecret) {
++    console.error("verify-payment: missing RAZORPAY_KEY_SECRET env var");
++    return respond(500, { verified: false, error: "Payment verification is temporarily unavailable." });
++  }
++
++  const expectedSignature = crypto
++    .createHmac("sha256", keySecret)
++    .update(`${razorpay_order_id}|${razorpay_payment_id}`)
++    .digest("hex");
++
++  const expected = Buffer.from(expectedSignature, "utf8");
++  const received = Buffer.from(String(razorpay_signature), "utf8");
++
++  const isValid =
++    expected.length === received.length && crypto.timingSafeEqual(expected, received);
++
++  if (!isValid) {
++    console.warn("verify-payment: signature mismatch", { orderRef, razorpay_order_id });
++    return respond(400, { verified: false, error: "Payment verification failed." });
++  }
++
++  // Signature is valid -> Razorpay confirms this payment belongs to
++  // this order and was not tampered with in transit.
++  return respond(200, {
++    verified: true,
++    razorpayOrderId: razorpay_order_id,
++    razorpayPaymentId: razorpay_payment_id,
++    orderRef: orderRef || null,
++    status: "paid",
++  });
++};
++
++function respond(statusCode, body) {
++  return { statusCode, headers: JSON_HEADERS, body: JSON.stringify(body) };
++}
+diff --git a/netlify/functions/webhook.js b/netlify/functions/webhook.js
+new file mode 100644
+index 0000000..0fc8e39
+--- /dev/null
++++ b/netlify/functions/webhook.js
+@@ -0,0 +1,105 @@
++/* ============================================================
++   POST /.netlify/functions/webhook
++   Razorpay webhook endpoint. Configure this URL in the Razorpay
++   Dashboard (Settings > Webhooks) for at least:
++     - payment.captured
++     - payment.failed
++
++   Security:
++   - Every request's signature is verified against
++     RAZORPAY_WEBHOOK_SECRET before the payload is trusted.
++   - The raw request body (not the re-serialized JSON) is what
++     gets hashed, since Razorpay signs the exact bytes it sent.
++
++   Idempotency:
++   - This site has no database, so we keep a small in-memory set of
++     already-processed event ids as a best-effort guard within a
++     single warm function instance. It does NOT provide true
++     idempotency across cold starts or multiple concurrent
++     instances — see README/limitations. A production deployment
++     should persist processed event ids (e.g. in a database or a
++     durable key-value store) and check/set that atomically here.
++   ============================================================ */
++"use strict";
++
++const crypto = require("crypto");
++
++const JSON_HEADERS = { "Content-Type": "application/json" };
++
++// Best-effort de-dupe cache for the lifetime of this function instance only.
++const processedEventIds = new Set();
++const MAX_CACHE_SIZE = 500;
++
++exports.handler = async (event) => {
++  if (event.httpMethod !== "POST") {
++    return respond(405, { error: "Method not allowed." });
++  }
++
++  const signature = event.headers["x-razorpay-signature"] || event.headers["X-Razorpay-Signature"];
++  if (!signature) {
++    return respond(400, { error: "Missing webhook signature." });
++  }
++
++  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
++  if (!webhookSecret) {
++    console.error("webhook: missing RAZORPAY_WEBHOOK_SECRET env var");
++    return respond(500, { error: "Webhook is not configured." });
++  }
++
++  const rawBody = event.isBase64Encoded
++    ? Buffer.from(event.body || "", "base64")
++    : Buffer.from(event.body || "", "utf8");
++
++  const expectedSignature = crypto.createHmac("sha256", webhookSecret).update(rawBody).digest("hex");
++
++  const expected = Buffer.from(expectedSignature, "utf8");
++  const received = Buffer.from(String(signature), "utf8");
++  const isValid = expected.length === received.length && crypto.timingSafeEqual(expected, received);
++
++  if (!isValid) {
++    console.warn("webhook: invalid signature");
++    return respond(400, { error: "Invalid signature." });
++  }
++
++  let payload;
++  try {
++    payload = JSON.parse(rawBody.toString("utf8"));
++  } catch {
++    return respond(400, { error: "Invalid payload." });
++  }
++
++  const eventId = event.headers["x-razorpay-event-id"] || event.headers["X-Razorpay-Event-Id"] || payload.id;
++  if (eventId) {
++    if (processedEventIds.has(eventId)) {
++      // Already handled this event on this instance — acknowledge without reprocessing.
++      return respond(200, { received: true, duplicate: true });
++    }
++    processedEventIds.add(eventId);
++    if (processedEventIds.size > MAX_CACHE_SIZE) {
++      processedEventIds.delete(processedEventIds.values().next().value);
++    }
++  }
++
++  const paymentEntity = payload?.payload?.payment?.entity;
++
++  switch (payload.event) {
++    case "payment.captured":
++      // In production: mark the matching order paid in your database,
++      // keyed by paymentEntity.order_id / paymentEntity.id, and only
++      // trigger fulfillment/notifications if it wasn't already marked.
++      console.log("webhook: payment.captured", paymentEntity?.id, paymentEntity?.order_id);
++      break;
++    case "payment.failed":
++      console.log("webhook: payment.failed", paymentEntity?.id, paymentEntity?.order_id);
++      break;
++    default:
++      // Ignore events we don't act on.
++      break;
++  }
++
++  return respond(200, { received: true });
++};
++
++function respond(statusCode, body) {
++  return { statusCode, headers: JSON_HEADERS, body: JSON.stringify(body) };
++}
+diff --git a/package-lock.json b/package-lock.json
+new file mode 100644
+index 0000000..3d67f9a
+--- /dev/null
++++ b/package-lock.json
+@@ -0,0 +1,355 @@
++{
++  "name": "vk-photography",
++  "version": "1.0.0",
++  "lockfileVersion": 3,
++  "requires": true,
++  "packages": {
++    "": {
++      "name": "vk-photography",
++      "version": "1.0.0",
++      "dependencies": {
++        "razorpay": "^2.9.8"
++      }
++    },
++    "node_modules/agent-base": {
++      "version": "6.0.2",
++      "resolved": "https://registry.npmjs.org/agent-base/-/agent-base-6.0.2.tgz",
++      "integrity": "sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==",
++      "license": "MIT",
++      "dependencies": {
++        "debug": "4"
++      },
++      "engines": {
++        "node": ">= 6.0.0"
++      }
++    },
++    "node_modules/asynckit": {
++      "version": "0.4.0",
++      "resolved": "https://registry.npmjs.org/asynckit/-/asynckit-0.4.0.tgz",
++      "integrity": "sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==",
++      "license": "MIT"
++    },
++    "node_modules/axios": {
++      "version": "1.19.0",
++      "resolved": "https://registry.npmjs.org/axios/-/axios-1.19.0.tgz",
++      "integrity": "sha512-ht/iuYZXEjFxLH/Hkezgd7m6JKlHHXEUSneaDz8uZe1Gj5QZtCnpyDsckvAiEnT89OEbCLmnte4R4sn7P0EKFw==",
++      "license": "MIT",
++      "dependencies": {
++        "follow-redirects": "^1.16.0",
++        "form-data": "^4.0.6",
++        "https-proxy-agent": "^5.0.1",
++        "proxy-from-env": "^2.1.0"
++      }
++    },
++    "node_modules/call-bind-apply-helpers": {
++      "version": "1.0.2",
++      "resolved": "https://registry.npmjs.org/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz",
++      "integrity": "sha512-Sp1ablJ0ivDkSzjcaJdxEunN5/XvksFJ2sMBFfq6x0ryhQV/2b/KwFe21cMpmHtPOSij8K99/wSfoEuTObmuMQ==",
++      "license": "MIT",
++      "dependencies": {
++        "es-errors": "^1.3.0",
++        "function-bind": "^1.1.2"
++      },
++      "engines": {
++        "node": ">= 0.4"
++      }
++    },
++    "node_modules/combined-stream": {
++      "version": "1.0.8",
++      "resolved": "https://registry.npmjs.org/combined-stream/-/combined-stream-1.0.8.tgz",
++      "integrity": "sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==",
++      "license": "MIT",
++      "dependencies": {
++        "delayed-stream": "~1.0.0"
++      },
++      "engines": {
++        "node": ">= 0.8"
++      }
++    },
++    "node_modules/debug": {
++      "version": "4.4.3",
++      "resolved": "https://registry.npmjs.org/debug/-/debug-4.4.3.tgz",
++      "integrity": "sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==",
++      "license": "MIT",
++      "dependencies": {
++        "ms": "^2.1.3"
++      },
++      "engines": {
++        "node": ">=6.0"
++      },
++      "peerDependenciesMeta": {
++        "supports-color": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/delayed-stream": {
++      "version": "1.0.0",
++      "resolved": "https://registry.npmjs.org/delayed-stream/-/delayed-stream-1.0.0.tgz",
++      "integrity": "sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=0.4.0"
++      }
++    },
++    "node_modules/dunder-proto": {
++      "version": "1.0.1",
++      "resolved": "https://registry.npmjs.org/dunder-proto/-/dunder-proto-1.0.1.tgz",
++      "integrity": "sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==",
++      "license": "MIT",
++      "dependencies": {
++        "call-bind-apply-helpers": "^1.0.1",
++        "es-errors": "^1.3.0",
++        "gopd": "^1.2.0"
++      },
++      "engines": {
++        "node": ">= 0.4"
++      }
++    },
++    "node_modules/es-define-property": {
++      "version": "1.0.1",
++      "resolved": "https://registry.npmjs.org/es-define-property/-/es-define-property-1.0.1.tgz",
++      "integrity": "sha512-e3nRfgfUZ4rNGL232gUgX06QNyyez04KdjFrF+LTRoOXmrOgFKDg4BCdsjW8EnT69eqdYGmRpJwiPVYNrCaW3g==",
++      "license": "MIT",
++      "engines": {
++        "node": ">= 0.4"
++      }
++    },
++    "node_modules/es-errors": {
++      "version": "1.3.0",
++      "resolved": "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz",
++      "integrity": "sha512-Zf5H2Kxt2xjTvbJvP2ZWLEICxA6j+hAmMzIlypy4xcBg1vKVnx89Wy0GbS+kf5cwCVFFzdCFh2XSCFNULS6csw==",
++      "license": "MIT",
++      "engines": {
++        "node": ">= 0.4"
++      }
++    },
++    "node_modules/es-object-atoms": {
++      "version": "1.1.2",
++      "resolved": "https://registry.npmjs.org/es-object-atoms/-/es-object-atoms-1.1.2.tgz",
++      "integrity": "sha512-HWcBoN6NileqtSydK2FqHbS/LoDd2pqrnQHLyJzBj4kOp/ky2MWMN694xOfkK8/SnUsW2DH7EfyVlydKCsm1Zw==",
++      "license": "MIT",
++      "dependencies": {
++        "es-errors": "^1.3.0"
++      },
++      "engines": {
++        "node": ">= 0.4"
++      }
++    },
++    "node_modules/es-set-tostringtag": {
++      "version": "2.1.0",
++      "resolved": "https://registry.npmjs.org/es-set-tostringtag/-/es-set-tostringtag-2.1.0.tgz",
++      "integrity": "sha512-j6vWzfrGVfyXxge+O0x5sh6cvxAog0a/4Rdd2K36zCMV5eJ+/+tOAngRO8cODMNWbVRdVlmGZQL2YS3yR8bIUA==",
++      "license": "MIT",
++      "dependencies": {
++        "es-errors": "^1.3.0",
++        "get-intrinsic": "^1.2.6",
++        "has-tostringtag": "^1.0.2",
++        "hasown": "^2.0.2"
++      },
++      "engines": {
++        "node": ">= 0.4"
++      }
++    },
++    "node_modules/follow-redirects": {
++      "version": "1.16.0",
++      "resolved": "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.16.0.tgz",
++      "integrity": "sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw==",
++      "funding": [
++        {
++          "type": "individual",
++          "url": "https://github.com/sponsors/RubenVerborgh"
++        }
++      ],
++      "license": "MIT",
++      "engines": {
++        "node": ">=4.0"
++      },
++      "peerDependenciesMeta": {
++        "debug": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/form-data": {
++      "version": "4.0.6",
++      "resolved": "https://registry.npmjs.org/form-data/-/form-data-4.0.6.tgz",
++      "integrity": "sha512-vKatAh4SlVfgbv+YtmhiRjhEMJsYpsG1Y2rMQtR+SVSbytsSD1YGzDIcrAJmdFec88u/+VoGmxnl+80gL1tRCQ==",
++      "license": "MIT",
++      "dependencies": {
++        "asynckit": "^0.4.0",
++        "combined-stream": "^1.0.8",
++        "es-set-tostringtag": "^2.1.0",
++        "hasown": "^2.0.4",
++        "mime-types": "^2.1.35"
++      },
++      "engines": {
++        "node": ">= 6"
++      }
++    },
++    "node_modules/function-bind": {
++      "version": "1.1.2",
++      "resolved": "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz",
++      "integrity": "sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==",
++      "license": "MIT",
++      "funding": {
++        "url": "https://github.com/sponsors/ljharb"
++      }
++    },
++    "node_modules/get-intrinsic": {
++      "version": "1.3.0",
++      "resolved": "https://registry.npmjs.org/get-intrinsic/-/get-intrinsic-1.3.0.tgz",
++      "integrity": "sha512-9fSjSaos/fRIVIp+xSJlE6lfwhES7LNtKaCBIamHsjr2na1BiABJPo0mOjjz8GJDURarmCPGqaiVg5mfjb98CQ==",
++      "license": "MIT",
++      "dependencies": {
++        "call-bind-apply-helpers": "^1.0.2",
++        "es-define-property": "^1.0.1",
++        "es-errors": "^1.3.0",
++        "es-object-atoms": "^1.1.1",
++        "function-bind": "^1.1.2",
++        "get-proto": "^1.0.1",
++        "gopd": "^1.2.0",
++        "has-symbols": "^1.1.0",
++        "hasown": "^2.0.2",
++        "math-intrinsics": "^1.1.0"
++      },
++      "engines": {
++        "node": ">= 0.4"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/ljharb"
++      }
++    },
++    "node_modules/get-proto": {
++      "version": "1.0.1",
++      "resolved": "https://registry.npmjs.org/get-proto/-/get-proto-1.0.1.tgz",
++      "integrity": "sha512-sTSfBjoXBp89JvIKIefqw7U2CCebsc74kiY6awiGogKtoSGbgjYE/G/+l9sF3MWFPNc9IcoOC4ODfKHfxFmp0g==",
++      "license": "MIT",
++      "dependencies": {
++        "dunder-proto": "^1.0.1",
++        "es-object-atoms": "^1.0.0"
++      },
++      "engines": {
++        "node": ">= 0.4"
++      }
++    },
++    "node_modules/gopd": {
++      "version": "1.2.0",
++      "resolved": "https://registry.npmjs.org/gopd/-/gopd-1.2.0.tgz",
++      "integrity": "sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==",
++      "license": "MIT",
++      "engines": {
++        "node": ">= 0.4"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/ljharb"
++      }
++    },
++    "node_modules/has-symbols": {
++      "version": "1.1.0",
++      "resolved": "https://registry.npmjs.org/has-symbols/-/has-symbols-1.1.0.tgz",
++      "integrity": "sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ==",
++      "license": "MIT",
++      "engines": {
++        "node": ">= 0.4"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/ljharb"
++      }
++    },
++    "node_modules/has-tostringtag": {
++      "version": "1.0.2",
++      "resolved": "https://registry.npmjs.org/has-tostringtag/-/has-tostringtag-1.0.2.tgz",
++      "integrity": "sha512-NqADB8VjPFLM2V0VvHUewwwsw0ZWBaIdgo+ieHtK3hasLz4qeCRjYcqfB6AQrBggRKppKF8L52/VqdVsO47Dlw==",
++      "license": "MIT",
++      "dependencies": {
++        "has-symbols": "^1.0.3"
++      },
++      "engines": {
++        "node": ">= 0.4"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/ljharb"
++      }
++    },
++    "node_modules/hasown": {
++      "version": "2.0.4",
++      "resolved": "https://registry.npmjs.org/hasown/-/hasown-2.0.4.tgz",
++      "integrity": "sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==",
++      "license": "MIT",
++      "dependencies": {
++        "function-bind": "^1.1.2"
++      },
++      "engines": {
++        "node": ">= 0.4"
++      }
++    },
++    "node_modules/https-proxy-agent": {
++      "version": "5.0.1",
++      "resolved": "https://registry.npmjs.org/https-proxy-agent/-/https-proxy-agent-5.0.1.tgz",
++      "integrity": "sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==",
++      "license": "MIT",
++      "dependencies": {
++        "agent-base": "6",
++        "debug": "4"
++      },
++      "engines": {
++        "node": ">= 6"
++      }
++    },
++    "node_modules/math-intrinsics": {
++      "version": "1.1.0",
++      "resolved": "https://registry.npmjs.org/math-intrinsics/-/math-intrinsics-1.1.0.tgz",
++      "integrity": "sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==",
++      "license": "MIT",
++      "engines": {
++        "node": ">= 0.4"
++      }
++    },
++    "node_modules/mime-db": {
++      "version": "1.52.0",
++      "resolved": "https://registry.npmjs.org/mime-db/-/mime-db-1.52.0.tgz",
++      "integrity": "sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==",
++      "license": "MIT",
++      "engines": {
++        "node": ">= 0.6"
++      }
++    },
++    "node_modules/mime-types": {
++      "version": "2.1.35",
++      "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.35.tgz",
++      "integrity": "sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==",
++      "license": "MIT",
++      "dependencies": {
++        "mime-db": "1.52.0"
++      },
++      "engines": {
++        "node": ">= 0.6"
++      }
++    },
++    "node_modules/ms": {
++      "version": "2.1.3",
++      "resolved": "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz",
++      "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==",
++      "license": "MIT"
++    },
++    "node_modules/proxy-from-env": {
++      "version": "2.1.0",
++      "resolved": "https://registry.npmjs.org/proxy-from-env/-/proxy-from-env-2.1.0.tgz",
++      "integrity": "sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=10"
++      }
++    },
++    "node_modules/razorpay": {
++      "version": "2.9.8",
++      "resolved": "https://registry.npmjs.org/razorpay/-/razorpay-2.9.8.tgz",
++      "integrity": "sha512-Uqv3KV7JAfpLlabGdg8Cw7e7ieGkK/DighFq6iGkNnz0Y+it6+/lFmPCTfkcptc2EagL2Og25VWUxc+Fgp/+nA==",
++      "license": "MIT",
++      "dependencies": {
++        "axios": "^1.18.1"
++      }
++    }
++  }
++}
+diff --git a/package.json b/package.json
+new file mode 100644
+index 0000000..be10f6b
+--- /dev/null
++++ b/package.json
+@@ -0,0 +1,9 @@
++{
++  "name": "vk-photography",
++  "private": true,
++  "version": "1.0.0",
++  "description": "VK Photography site — Shop checkout powered by Razorpay Standard Checkout via Netlify Functions.",
++  "dependencies": {
++    "razorpay": "^2.9.8"
++  }
++}
+diff --git a/shop.html b/shop.html
+index 77dff48..1b8298c 100644
+--- a/shop.html
++++ b/shop.html
+@@ -234,36 +234,23 @@
+       </div>
+ 
+       <h1>Complete Your Payment</h1>
+-      <p class="sub">Scan the QR code using any UPI app to complete your payment.</p>
++      <p class="sub">Pay securely with UPI, card, netbanking or wallet via Razorpay.</p>
+ 
+       <div class="payment-status-banner" id="statusBanner" role="status" aria-live="polite"></div>
+ 
+       <div class="qr-card">
+-        <div class="qr-label">Scan &amp; Pay</div>
+-        <div class="qr-image-wrap"><span class="qr-demo-tag">Demo</span><img id="qrImage" src="" alt="UPI QR code to pay VK Photography"></div>
+-        <div class="qr-amount" id="qrAmount">₹0</div>
+-        <div class="qr-apps">Scan using Google Pay, PhonePe, Paytm, or any UPI app</div>
+-      </div>
+-
+-      <div class="upi-id-row">
+-        <div><span class="upi-id-label">UPI ID</span><span class="upi-id-value" id="upiIdValue">vkphotography@upi</span></div>
+-        <button class="copy-btn" id="copyUpiBtn" type="button">Copy</button>
+-      </div>
+-
+-      <div class="payment-steps">
+-        <div><span class="shop-step-num">01</span><p>Open your UPI app</p></div>
+-        <div><span class="shop-step-num">02</span><p>Scan the QR code</p></div>
+-        <div><span class="shop-step-num">03</span><p>Complete payment</p></div>
+-        <div><span class="shop-step-num">04</span><p>Tap "I've Paid"</p></div>
++        <div class="qr-label">Order Total</div>
++        <div class="qr-amount" id="paymentAmount">₹0</div>
++        <div class="qr-apps">Order reference: <span id="paymentOrderRef">—</span></div>
+       </div>
+ 
+       <div class="security-note">
+         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9 8 11 4.6-2 8-6 8-11V5z"/></svg>
+-        <span><strong>Never share your UPI PIN or OTP with anyone.</strong> VK Photography will never ask for these on this website.</span>
++        <span><strong>Payments are processed securely by Razorpay.</strong> VK Photography never sees or stores your card, UPI PIN or bank details.</span>
+       </div>
+ 
+-      <button class="shop-btn shop-btn-primary shop-btn-block" id="paidBtn" type="button">I've Paid</button>
+-      <p style="margin-top:16px; font-size:12.5px; color:var(--gray);">This is a demo payment flow. Tapping "I've Paid" does not verify a real transaction — it marks your order for manual verification until a payment gateway is connected.</p>
++      <button class="shop-btn shop-btn-primary shop-btn-block" id="payNowBtn" type="button">Pay Now</button>
++      <p style="margin-top:16px; font-size:12.5px; color:var(--gray);">You'll only see your order confirmed after payment is verified — this page never marks an order as paid on its own.</p>
+     </div>
+   </div>
+ </main>
+@@ -388,6 +375,7 @@ Get Directions
+ </div>
+ </footer>
+ 
++<script src="js/shop-pricing.js"></script>
+ <script src="js/shop.js"></script>
+ <script>
+   var navToggle = document.getElementById('navToggle');

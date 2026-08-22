@@ -1,2 +1,8 @@
 originals/
 originals_video/
+
+# Razorpay / Netlify Functions
+node_modules/
+.env
+.env.local
+.netlify/

@@ -132,11 +132,18 @@
   
     initPhotoUpload();
     initCropControls();
+    initPreviewToggle();
   
     document.getElementById("addToCartBtn")?.addEventListener("click", addToCart);
     document.getElementById("mobileAddToCart")?.addEventListener("click", addToCart);
   
     refreshCustomizerUI();
+  
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(updatePreview, 120);
+    });
   }
   
   function renderOptionGroup(containerId, options, selectedId, onSelect) {
@@ -232,6 +239,92 @@
     document.getElementById("fileInput").value = "";
   }
   
+  /* ---------------- Live preview sizing ---------------- */
+  function getPreviewBudget() {
+    const previewCol = document.getElementById("previewCol");
+    const isExpanded = previewCol?.classList.contains("expanded");
+    const isCompact = window.matchMedia("(max-width: 1024px)").matches;
+
+    // Collapsed mobile thumbnail: fixed small box, sized in CSS
+    // (.preview-compact-row .frame-preview-shell), so just fill it.
+    if (isCompact && !isExpanded) {
+      return { maxW: 52, maxH: 52 };
+    }
+
+    const shell = document.querySelector(".frame-preview-shell");
+    const fpFrame = document.getElementById("fpFrame");
+    const fpMat = document.getElementById("fpMat");
+    if (!shell || !fpFrame || !fpMat) return { maxW: 340, maxH: 420 };
+
+    const shellStyle = getComputedStyle(shell);
+    const frameStyle = getComputedStyle(fpFrame);
+    const matStyle = getComputedStyle(fpMat);
+    const horizontalPadding =
+      parseFloat(shellStyle.paddingLeft) + parseFloat(shellStyle.paddingRight) +
+      parseFloat(frameStyle.paddingLeft) + parseFloat(frameStyle.paddingRight) +
+      parseFloat(matStyle.paddingLeft) + parseFloat(matStyle.paddingRight);
+
+    const availableW = shell.clientWidth - horizontalPadding;
+    // Expanded mobile overlay has the whole viewport to work with;
+    // desktop's column has its usual generous 420px budget.
+    const availableH = isExpanded ? Math.max(220, window.innerHeight * 0.45) : 420;
+
+    return {
+      maxW: Math.max(140, Math.min(340, availableW)),
+      maxH: Math.min(420, availableH),
+    };
+  }
+
+  function updatePreviewSummary() {
+    const el = document.getElementById("previewCompactSummary");
+    if (!el) return;
+    const frame = getFrame();
+    const size = getEffectiveSize();
+    const finish = getFinish();
+    const mat = getMat();
+    el.textContent = `${size.label} \u00b7 ${frame.name} \u00b7 ${finish.name}${mat.id !== "no-mat" ? " \u00b7 " + mat.name : ""}`;
+  }
+
+  function initPreviewToggle() {
+    const previewCol = document.getElementById("previewCol");
+    const compactRow = document.getElementById("previewCompactRow");
+    const doneBtn = document.getElementById("previewDoneBtn");
+    if (!previewCol || !compactRow || !doneBtn) return;
+
+    function expand() {
+      if (!window.matchMedia("(max-width: 1024px)").matches) return;
+      previewCol.classList.add("expanded");
+      document.body.style.overflow = "hidden";
+      compactRow.setAttribute("aria-expanded", "true");
+      updatePreview();
+    }
+    function collapse() {
+      previewCol.classList.remove("expanded");
+      document.body.style.overflow = "";
+      compactRow.setAttribute("aria-expanded", "false");
+      updatePreview();
+    }
+
+    compactRow.setAttribute("role", "button");
+    compactRow.setAttribute("tabindex", "0");
+    compactRow.setAttribute("aria-expanded", "false");
+    compactRow.setAttribute("aria-label", "Expand frame preview");
+
+    compactRow.addEventListener("click", () => {
+      if (!previewCol.classList.contains("expanded")) expand();
+    });
+    compactRow.addEventListener("keydown", (e) => {
+      if ((e.key === "Enter" || e.key === " ") && !previewCol.classList.contains("expanded")) {
+        e.preventDefault();
+        expand();
+      }
+    });
+    doneBtn.addEventListener("click", (e) => { e.stopPropagation(); collapse(); });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && previewCol.classList.contains("expanded")) collapse();
+    });
+  }
+
   /* ---------------- Live preview ---------------- */
   function updatePreview() {
     const frame = getFrame();
@@ -246,7 +339,7 @@
     fpMat.dataset.mat = mat.id;
     fpWindow.dataset.finish = finish.id;
   
-    const maxW = 340, maxH = 420;
+    const { maxW, maxH } = getPreviewBudget();
     let w = maxW, h = w / size.aspectRatio;
     if (h > maxH) { h = maxH; w = h * size.aspectRatio; }
     fpWindow.style.width = `${w}px`;
@@ -353,6 +446,7 @@
   
   function refreshCustomizerUI() {
     updatePreview();
+    updatePreviewSummary();
     if (customizerState.photoDataUrl) autoFitPhoto();
     updatePrice();
     updateQuality();

@@ -244,6 +244,9 @@
   .customizer-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: start; }
   
   .preview-col { position: sticky; top: 120px; }
+  .preview-compact-info { display: none; }
+  .preview-expanded-extras { display: contents; }
+  .preview-done-btn { display: none; }
   .frame-preview-shell {
     display: flex; align-items: center; justify-content: center; min-height: 420px;
     background: var(--accent-bg-light); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 40px;
@@ -464,7 +467,87 @@
   @media (max-width: 1024px) {
     .frame-grid { grid-template-columns: repeat(2, 1fr); }
     .customizer-grid, .checkout-grid { grid-template-columns: 1fr; gap: 40px; }
-    .preview-col { position: static; }
+
+    /* Collapsed state: a small tappable thumbnail bar pinned under the
+       nav, so the current frame is always visible while scrolling
+       through size/style/finish/mat options below it. */
+    .preview-col {
+      position: sticky;
+      top: var(--nav-h);
+      z-index: 40;
+      background: var(--cream);
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 8px;
+    }
+    .preview-compact-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 4px;
+      cursor: pointer;
+    }
+    .preview-compact-row .frame-preview-shell {
+      width: 64px;
+      height: 64px;
+      min-height: unset;
+      padding: 6px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .preview-compact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .preview-compact-summary { font-size: 12.5px; color: var(--ink); line-height: 1.4; }
+    .preview-compact-hint { font-size: 11px; color: var(--gray); }
+    .preview-expanded-extras { display: none; }
+
+    /* Expanded state: fullscreen overlay with the live preview at a
+       usable size plus the crop/zoom controls and quality check,
+       closed again with the Done button. */
+    .preview-col.expanded {
+      position: fixed;
+      inset: 0;
+      z-index: 800;
+      margin-bottom: 0;
+      border-bottom: none;
+      background: rgba(43,38,32,0.94);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 20px;
+    }
+    .preview-col.expanded .preview-compact-row {
+      flex-direction: column;
+      cursor: default;
+      padding: 0;
+    }
+    .preview-col.expanded .frame-preview-shell {
+      width: auto;
+      height: auto;
+      min-height: 260px;
+      padding: 26px;
+      overflow: visible;
+    }
+    .preview-col.expanded .preview-compact-hint { display: none; }
+    .preview-col.expanded .preview-compact-summary { color: var(--cream); text-align: center; margin-top: 16px; }
+    .preview-col.expanded .preview-expanded-extras {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .preview-col.expanded .crop-hint { color: var(--cream); opacity: 0.85; }
+    .preview-col.expanded .icon-btn { border-color: rgba(255,255,255,0.4); }
+    .preview-col.expanded .icon-btn svg { stroke: #fff; }
+    .preview-col.expanded .preview-done-btn {
+      display: inline-flex;
+      background: var(--cream);
+      color: var(--ink);
+      border: none;
+    }
   }
   @media (max-width: 860px) {
     .shop-steps-grid { grid-template-columns: 1fr; gap: 30px; }
@@ -479,7 +562,6 @@
     .cart-drawer { width: 100%; }
     body.has-sticky-cta { padding-bottom: 88px; }
     .mobile-sticky-cta.show { display: flex; }
-    .fp-window { width: 240px !important; }
     .form-row-2 { grid-template-columns: 1fr; }
     .checkout-grid { gap: 30px; }
   }

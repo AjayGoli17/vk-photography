@@ -1,0 +1,306 @@
+diff --git a/css/shop.css b/css/shop.css
+index 529c4a5..e23e3fb 100644
+--- a/css/shop.css
++++ b/css/shop.css
+@@ -244,6 +244,9 @@
+   .customizer-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: start; }
+   
+   .preview-col { position: sticky; top: 120px; }
++  .preview-compact-info { display: none; }
++  .preview-expanded-extras { display: contents; }
++  .preview-done-btn { display: none; }
+   .frame-preview-shell {
+     display: flex; align-items: center; justify-content: center; min-height: 420px;
+     background: var(--accent-bg-light); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 40px;
+@@ -464,7 +467,87 @@
+   @media (max-width: 1024px) {
+     .frame-grid { grid-template-columns: repeat(2, 1fr); }
+     .customizer-grid, .checkout-grid { grid-template-columns: 1fr; gap: 40px; }
+-    .preview-col { position: static; }
++
++    /* Collapsed state: a small tappable thumbnail bar pinned under the
++       nav, so the current frame is always visible while scrolling
++       through size/style/finish/mat options below it. */
++    .preview-col {
++      position: sticky;
++      top: var(--nav-h);
++      z-index: 40;
++      background: var(--cream);
++      border-bottom: 1px solid var(--line);
++      margin-bottom: 8px;
++    }
++    .preview-compact-row {
++      display: flex;
++      align-items: center;
++      gap: 12px;
++      padding: 10px 4px;
++      cursor: pointer;
++    }
++    .preview-compact-row .frame-preview-shell {
++      width: 64px;
++      height: 64px;
++      min-height: unset;
++      padding: 6px;
++      flex-shrink: 0;
++      overflow: hidden;
++    }
++    .preview-compact-info {
++      display: flex;
++      flex-direction: column;
++      gap: 3px;
++    }
++    .preview-compact-summary { font-size: 12.5px; color: var(--ink); line-height: 1.4; }
++    .preview-compact-hint { font-size: 11px; color: var(--gray); }
++    .preview-expanded-extras { display: none; }
++
++    /* Expanded state: fullscreen overlay with the live preview at a
++       usable size plus the crop/zoom controls and quality check,
++       closed again with the Done button. */
++    .preview-col.expanded {
++      position: fixed;
++      inset: 0;
++      z-index: 800;
++      margin-bottom: 0;
++      border-bottom: none;
++      background: rgba(43,38,32,0.94);
++      display: flex;
++      align-items: center;
++      justify-content: center;
++      padding: 30px 20px;
++    }
++    .preview-col.expanded .preview-compact-row {
++      flex-direction: column;
++      cursor: default;
++      padding: 0;
++    }
++    .preview-col.expanded .frame-preview-shell {
++      width: auto;
++      height: auto;
++      min-height: 260px;
++      padding: 26px;
++      overflow: visible;
++    }
++    .preview-col.expanded .preview-compact-hint { display: none; }
++    .preview-col.expanded .preview-compact-summary { color: var(--cream); text-align: center; margin-top: 16px; }
++    .preview-col.expanded .preview-expanded-extras {
++      display: flex;
++      flex-direction: column;
++      align-items: center;
++      gap: 10px;
++      margin-top: 18px;
++    }
++    .preview-col.expanded .crop-hint { color: var(--cream); opacity: 0.85; }
++    .preview-col.expanded .icon-btn { border-color: rgba(255,255,255,0.4); }
++    .preview-col.expanded .icon-btn svg { stroke: #fff; }
++    .preview-col.expanded .preview-done-btn {
++      display: inline-flex;
++      background: var(--cream);
++      color: var(--ink);
++      border: none;
++    }
+   }
+   @media (max-width: 860px) {
+     .shop-steps-grid { grid-template-columns: 1fr; gap: 30px; }
+@@ -479,7 +562,6 @@
+     .cart-drawer { width: 100%; }
+     body.has-sticky-cta { padding-bottom: 88px; }
+     .mobile-sticky-cta.show { display: flex; }
+-    .fp-window { width: 240px !important; }
+     .form-row-2 { grid-template-columns: 1fr; }
+     .checkout-grid { gap: 30px; }
+   }
+diff --git a/js/shop.js b/js/shop.js
+index 2d89c20..a4e0f4c 100644
+--- a/js/shop.js
++++ b/js/shop.js
+@@ -132,11 +132,18 @@
+   
+     initPhotoUpload();
+     initCropControls();
++    initPreviewToggle();
+   
+     document.getElementById("addToCartBtn")?.addEventListener("click", addToCart);
+     document.getElementById("mobileAddToCart")?.addEventListener("click", addToCart);
+   
+     refreshCustomizerUI();
++  
++    let resizeTimer;
++    window.addEventListener("resize", () => {
++      clearTimeout(resizeTimer);
++      resizeTimer = setTimeout(updatePreview, 120);
++    });
+   }
+   
+   function renderOptionGroup(containerId, options, selectedId, onSelect) {
+@@ -232,6 +239,92 @@
+     document.getElementById("fileInput").value = "";
+   }
+   
++  /* ---------------- Live preview sizing ---------------- */
++  function getPreviewBudget() {
++    const previewCol = document.getElementById("previewCol");
++    const isExpanded = previewCol?.classList.contains("expanded");
++    const isCompact = window.matchMedia("(max-width: 1024px)").matches;
++
++    // Collapsed mobile thumbnail: fixed small box, sized in CSS
++    // (.preview-compact-row .frame-preview-shell), so just fill it.
++    if (isCompact && !isExpanded) {
++      return { maxW: 52, maxH: 52 };
++    }
++
++    const shell = document.querySelector(".frame-preview-shell");
++    const fpFrame = document.getElementById("fpFrame");
++    const fpMat = document.getElementById("fpMat");
++    if (!shell || !fpFrame || !fpMat) return { maxW: 340, maxH: 420 };
++
++    const shellStyle = getComputedStyle(shell);
++    const frameStyle = getComputedStyle(fpFrame);
++    const matStyle = getComputedStyle(fpMat);
++    const horizontalPadding =
++      parseFloat(shellStyle.paddingLeft) + parseFloat(shellStyle.paddingRight) +
++      parseFloat(frameStyle.paddingLeft) + parseFloat(frameStyle.paddingRight) +
++      parseFloat(matStyle.paddingLeft) + parseFloat(matStyle.paddingRight);
++
++    const availableW = shell.clientWidth - horizontalPadding;
++    // Expanded mobile overlay has the whole viewport to work with;
++    // desktop's column has its usual generous 420px budget.
++    const availableH = isExpanded ? Math.max(220, window.innerHeight * 0.45) : 420;
++
++    return {
++      maxW: Math.max(140, Math.min(340, availableW)),
++      maxH: Math.min(420, availableH),
++    };
++  }
++
++  function updatePreviewSummary() {
++    const el = document.getElementById("previewCompactSummary");
++    if (!el) return;
++    const frame = getFrame();
++    const size = getEffectiveSize();
++    const finish = getFinish();
++    const mat = getMat();
++    el.textContent = `${size.label} \u00b7 ${frame.name} \u00b7 ${finish.name}${mat.id !== "no-mat" ? " \u00b7 " + mat.name : ""}`;
++  }
++
++  function initPreviewToggle() {
++    const previewCol = document.getElementById("previewCol");
++    const compactRow = document.getElementById("previewCompactRow");
++    const doneBtn = document.getElementById("previewDoneBtn");
++    if (!previewCol || !compactRow || !doneBtn) return;
++
++    function expand() {
++      if (!window.matchMedia("(max-width: 1024px)").matches) return;
++      previewCol.classList.add("expanded");
++      document.body.style.overflow = "hidden";
++      compactRow.setAttribute("aria-expanded", "true");
++      updatePreview();
++    }
++    function collapse() {
++      previewCol.classList.remove("expanded");
++      document.body.style.overflow = "";
++      compactRow.setAttribute("aria-expanded", "false");
++      updatePreview();
++    }
++
++    compactRow.setAttribute("role", "button");
++    compactRow.setAttribute("tabindex", "0");
++    compactRow.setAttribute("aria-expanded", "false");
++    compactRow.setAttribute("aria-label", "Expand frame preview");
++
++    compactRow.addEventListener("click", () => {
++      if (!previewCol.classList.contains("expanded")) expand();
++    });
++    compactRow.addEventListener("keydown", (e) => {
++      if ((e.key === "Enter" || e.key === " ") && !previewCol.classList.contains("expanded")) {
++        e.preventDefault();
++        expand();
++      }
++    });
++    doneBtn.addEventListener("click", (e) => { e.stopPropagation(); collapse(); });
++    document.addEventListener("keydown", (e) => {
++      if (e.key === "Escape" && previewCol.classList.contains("expanded")) collapse();
++    });
++  }
++
+   /* ---------------- Live preview ---------------- */
+   function updatePreview() {
+     const frame = getFrame();
+@@ -246,7 +339,7 @@
+     fpMat.dataset.mat = mat.id;
+     fpWindow.dataset.finish = finish.id;
+   
+-    const maxW = 340, maxH = 420;
++    const { maxW, maxH } = getPreviewBudget();
+     let w = maxW, h = w / size.aspectRatio;
+     if (h > maxH) { h = maxH; w = h * size.aspectRatio; }
+     fpWindow.style.width = `${w}px`;
+@@ -353,6 +446,7 @@
+   
+   function refreshCustomizerUI() {
+     updatePreview();
++    updatePreviewSummary();
+     if (customizerState.photoDataUrl) autoFitPhoto();
+     updatePrice();
+     updateQuality();
+diff --git a/shop.html b/shop.html
+index 1b8298c..10745e7 100644
+--- a/shop.html
++++ b/shop.html
+@@ -109,31 +109,40 @@
+       </div>
+ 
+       <div class="customizer-grid">
+-        <div class="preview-col">
+-          <div class="frame-preview-shell">
+-            <div class="frame-preview" id="framePreview">
+-              <div class="fp-frame" id="fpFrame" data-frame="classic-black">
+-                <div class="fp-mat" id="fpMat">
+-                  <div class="fp-window" id="fpWindow">
+-                    <div class="fp-empty" id="fpEmpty">
+-                      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+-                      <span>Your photo will appear here</span>
++        <div class="preview-col" id="previewCol">
++          <div class="preview-compact-row" id="previewCompactRow">
++            <div class="frame-preview-shell">
++              <div class="frame-preview" id="framePreview">
++                <div class="fp-frame" id="fpFrame" data-frame="classic-black">
++                  <div class="fp-mat" id="fpMat">
++                    <div class="fp-window" id="fpWindow">
++                      <div class="fp-empty" id="fpEmpty">
++                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
++                        <span>Your photo will appear here</span>
++                      </div>
++                      <img id="fpImage" src="" alt="" hidden>
+                     </div>
+-                    <img id="fpImage" src="" alt="" hidden>
+                   </div>
+                 </div>
+               </div>
+             </div>
++            <div class="preview-compact-info">
++              <span class="preview-compact-summary" id="previewCompactSummary">12 &times; 18&Prime; &middot; Classic Black</span>
++              <span class="preview-compact-hint">Tap to expand &#10530;</span>
++            </div>
+           </div>
+ 
+-          <div class="crop-controls" id="cropControls" hidden>
+-            <button class="icon-btn" id="zoomOut" type="button" aria-label="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8 11h6"/></svg></button>
+-            <button class="icon-btn" id="zoomIn" type="button" aria-label="Zoom in"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v6M8 11h6"/></svg></button>
+-            <button class="icon-btn" id="autoFit" type="button" aria-label="Auto fit"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+-            <button class="icon-btn" id="resetCrop" type="button" aria-label="Reset position"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.6 5.6L1 10m22 4-4.6 4.4A9 9 0 0 1 3.51 15"/></svg></button>
++          <div class="preview-expanded-extras">
++            <div class="crop-controls" id="cropControls" hidden>
++              <button class="icon-btn" id="zoomOut" type="button" aria-label="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8 11h6"/></svg></button>
++              <button class="icon-btn" id="zoomIn" type="button" aria-label="Zoom in"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v6M8 11h6"/></svg></button>
++              <button class="icon-btn" id="autoFit" type="button" aria-label="Auto fit"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
++              <button class="icon-btn" id="resetCrop" type="button" aria-label="Reset position"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.6 5.6L1 10m22 4-4.6 4.4A9 9 0 0 1 3.51 15"/></svg></button>
++            </div>
++            <p class="crop-hint" id="cropHint" hidden>Drag your photo to reposition &middot; use the buttons to zoom</p>
++            <div class="quality-badge" id="qualityBadge" hidden></div>
++            <button type="button" class="shop-btn shop-btn-outline shop-btn-sm preview-done-btn" id="previewDoneBtn">Done</button>
+           </div>
+-          <p class="crop-hint" id="cropHint" hidden>Drag your photo to reposition &middot; use the buttons to zoom</p>
+-          <div class="quality-badge" id="qualityBadge" hidden></div>
+         </div>
+ 
+         <div class="controls-col">

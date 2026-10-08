@@ -39,6 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
         img.addEventListener('load', () => {
             if (img.naturalWidth >= img.naturalHeight) {
                 item.classList.add('landscape');
+                // Photos wider than the 16:9 box would lose their sides to
+                // cropping, so give them a box that matches their own shape.
+                const ratio = img.naturalWidth / img.naturalHeight;
+                if (ratio > 16 / 9 + 0.05) {
+                    item.classList.add('wide');
+                    item.style.setProperty('--ar', ratio.toFixed(3));
+                }
             } else {
                 item.classList.add('portrait');
             }

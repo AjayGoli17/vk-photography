@@ -100,6 +100,16 @@ h1, h2, h3 {
     aspect-ratio: 3 / 4;
 }
 
+/* Extra-wide photos: box matches the photo, and no extra image height,
+   so nothing is cropped off the sides */
+.gallery-item.wide {
+    aspect-ratio: var(--ar);
+}
+.gallery-item.wide img {
+    height: 100%;
+    top: 0;
+}
+
 /* Triggered by JS IntersectionObserver */
 .gallery-item.is-visible {
     opacity: 1;
@@ -273,9 +283,13 @@ h1, h2, h3 {
         width: 100%;
     }
     .gallery-item.landscape,
-    .gallery-item.portrait {
+    .gallery-item.portrait,
+    .gallery-item.wide {
         grid-column: unset;
         aspect-ratio: unset; /* height now comes from the natural image ratio */
+    }
+    .gallery-item.wide img {
+        height: auto;
     }
     .gallery-image-wrapper {
         height: auto;

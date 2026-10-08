@@ -12,7 +12,7 @@
 "use strict";
 
 const Razorpay = require("razorpay");
-const { SIZES, FRAMES, FINISHES, MATS, SHIPPING_FEE, MAX_QTY_PER_ITEM, MAX_ITEMS_PER_ORDER, getUnitPrice } = require("../../js/shop-pricing.js");
+const { SHIPPING_FEE, MAX_QTY_PER_ITEM, MAX_ITEMS_PER_ORDER, getItemUnitPrice } = require("../../js/shop-pricing.js");
 
 const JSON_HEADERS = { "Content-Type": "application/json" };
 
@@ -43,23 +43,17 @@ exports.handler = async (event) => {
 
   // Validate every line item against the trusted product catalog and
   // compute the total ourselves — the client only tells us *which*
-  // options were chosen, never what they cost.
+  // product / options were chosen, never what they cost. A line is
+  // either a photo gift ({ productId, quantity }) or a photoframe
+  // ({ sizeId, frameId, finishId, matId, quantity }).
   let subtotal = 0;
   for (const item of items) {
-    const { sizeId, frameId, finishId, matId, quantity } = item || {};
-    if (
-      !SIZES.some((s) => s.id === sizeId) ||
-      !FRAMES.some((f) => f.id === frameId) ||
-      !FINISHES.some((f) => f.id === finishId) ||
-      !MATS.some((m) => m.id === matId)
-    ) {
-      return respond(400, { error: "One of the items in your cart is no longer available." });
-    }
+    const { quantity } = item || {};
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QTY_PER_ITEM) {
       return respond(400, { error: "Invalid quantity in cart." });
     }
 
-    const unitPrice = getUnitPrice({ sizeId, frameId, finishId, matId });
+    const unitPrice = getItemUnitPrice(item);
     if (unitPrice == null) {
       return respond(400, { error: "One of the items in your cart is no longer available." });
     }

@@ -579,6 +579,58 @@
     .checkout-grid { gap: 30px; }
   }
   
+  /* ---------------------------------------------------------- */
+  /* Photo gifts (mug, heart pillow, magic pillow)                 */
+  /* ---------------------------------------------------------- */
+  .gift-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .gift-thumb { aspect-ratio: 1 / 1; overflow: hidden; background: var(--accent-bg-deep); }
+  .gift-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
+  .gift-card:hover .gift-thumb img { transform: scale(1.03); }
+
+  .gift-preview-col { position: sticky; top: 120px; }
+  .gift-preview-shell { min-height: 420px; padding: 28px; }
+  .gift-stage { position: relative; width: 100%; max-width: 380px; aspect-ratio: 320 / 300; }
+  .gift-art { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .gift-stage[data-product="photo-mug"] .gift-art:not([data-art="photo-mug"]),
+  .gift-stage[data-product="heart-pillow"] .gift-art:not([data-art="heart-pillow"]),
+  .gift-stage[data-product="magic-pillow"] .gift-art:not([data-art="magic-pillow"]) { display: none; }
+
+  /* The photo window sits where each product's print area is. */
+  .gift-window { position: absolute; overflow: hidden; background: #e8e5dd; cursor: grab; touch-action: pan-y; }
+  .gift-window:active { cursor: grabbing; }
+  .gift-window img {
+    position: absolute; top: 50%; left: 50%; max-width: none; transform-origin: center;
+    transform: translate(-50%, -50%) translate(var(--px, 0px), var(--py, 0px)) scale(var(--pz, 1));
+    user-select: none; -webkit-user-drag: none;
+  }
+  .gift-stage[data-product="photo-mug"] .gift-window { left: 19.375%; top: 26%; width: 45.625%; height: 51.33%; border-radius: 3px; }
+  .gift-stage[data-product="heart-pillow"] .gift-window { left: 17%; top: 20.67%; width: 66%; height: 61.67%; clip-path: url(#giftHeartClip); background: #f1ece3; }
+  .gift-stage[data-product="magic-pillow"] .gift-window { left: 27.5%; top: 20.67%; width: 45%; height: 58.67%; border-radius: 50%; }
+  .gift-stage[data-product="magic-pillow"] .gift-window::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0) 52%, rgba(255,255,255,0.32) 56%, rgba(0,0,0,0.12) 100%);
+    background-size: 8px 8px;
+  }
+  .gift-empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--gray); text-align: center; padding: 12px; font-size: 12px; }
+  .gift-empty[hidden] { display: none; }
+  .gift-empty svg { width: 28px; height: 28px; stroke: var(--gray); }
+  .gift-preview-col .crop-controls[hidden], .gift-preview-col .crop-hint[hidden] { display: none; }
+
+  .gift-note { font-size: 13.5px; color: var(--ink); line-height: 1.6; margin-top: 16px; }
+  .gift-tip { font-size: 12.5px; color: var(--gray); line-height: 1.5; margin-top: 6px; }
+  .gift-qty { display: inline-flex; }
+  .gift-qty button { width: 38px; height: 38px; font-size: 16px; }
+  .gift-qty span { min-width: 44px; font-size: 15px; }
+
+  @media (max-width: 1024px) {
+    .gift-grid { grid-template-columns: repeat(2, 1fr); }
+    .gift-preview-col { position: static; }
+  }
+  @media (max-width: 640px) {
+    .gift-grid { grid-template-columns: 1fr; gap: 16px; }
+    .gift-preview-shell { min-height: 0; padding: 18px; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .shop-container *, .shop-container *::before, .shop-container *::after {
       animation-duration: 0.001ms !important;

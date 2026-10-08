@@ -10,7 +10,7 @@
    Razorpay order-creation function always agree on prices.
    Change prices/add frames/sizes in js/shop-pricing.js only.
    ------------------------------------------------------------ */
-   const { FRAMES, SIZES, ORIENTATIONS, FINISHES, MATS, QUALITIES, SHIPPING_FEE, getPrintPrice } = window.VKPricing;
+   const { FRAMES, SIZES, ORIENTATIONS, FINISHES, MATS, QUALITIES, PRODUCTS, SHIPPING_FEE, MAX_QTY_PER_ITEM, getPrintPrice } = window.VKPricing;
 
    /* Razorpay Checkout — the public Key ID is safe to expose to the
       browser and is returned by the create-order function on each
@@ -51,6 +51,7 @@
       ============================================================ */
    document.addEventListener("DOMContentLoaded", () => {
      initShop();
+     initGifts();
      initCustomizer();
      updateCartCount();
      initCartDrawer();
@@ -103,7 +104,7 @@
    }
    
    function switchView(view) {
-     ["Shop", "Customizer", "Checkout", "Payment", "Confirmation"].forEach((v) => {
+     ["Shop", "Customizer", "Gift", "Checkout", "Payment", "Confirmation"].forEach((v) => {
        document.getElementById(`view${v}`)?.classList.remove("active");
      });
      document.getElementById(`view${view}`)?.classList.add("active");
@@ -557,14 +558,14 @@
      if (!container) return;
    
      if (cart.length === 0) {
-       container.innerHTML = `<div class="cart-empty">Your cart is empty.<br>Start by customizing a frame.</div>`;
+       container.innerHTML = `<div class="cart-empty">Your cart is empty.<br>Start by choosing a frame or a photo gift.</div>`;
      } else {
        container.innerHTML = cart.map((item) => `
          <div class="cart-item" data-id="${item.id}">
            <div class="cart-item-thumb"><img src="${item.photo}" alt="Your uploaded photo"></div>
            <div class="cart-item-info">
-             <h3>Custom Photoframe</h3>
-             <div class="cart-item-specs">${item.sizeLabel} · ${item.qualityName}<br>${item.frameName} · ${item.finishName} · ${item.matName}</div>
+             <h3>${itemTitle(item)}</h3>
+             <div class="cart-item-specs">${itemSpecs(item, false)}</div>
              <div class="cart-item-foot">
                <div class="qty-stepper">
                  <button type="button" data-action="dec" aria-label="Decrease quantity">−</button>
@@ -640,6 +641,282 @@
      });
    }
    
+  /* ============================================================
+     CART ITEM LABELS — frames and photo gifts share one cart
+     ============================================================ */
+  function itemTitle(item) {
+    return item.kind === "gift" ? item.productName : "Custom Photoframe";
+  }
+
+  function itemSpecs(item, withQty) {
+    if (item.kind === "gift") return `Printed with your photo${withQty ? ` · Qty ${item.quantity}` : ""}`;
+    return `${item.sizeLabel} · ${item.qualityName}<br>${item.frameName} · ${item.finishName} · ${item.matName}${withQty ? ` · Qty ${item.quantity}` : ""}`;
+  }
+
+  /* ============================================================
+     PHOTO GIFTS — photo mug, heart pillow, magic pillow
+     Fixed-price products with one photo each. Product data lives in
+     js/shop-pricing.js (PRODUCTS); the server re-prices every order
+     from the same file. Drag offsets are stored as fractions of the
+     preview window so the photo stays put when the window resizes.
+     ============================================================ */
+  const giftState = {
+    productId: null,
+    photoDataUrl: null, photoNaturalW: 0, photoNaturalH: 0,
+    transform: { x: 0, y: 0, scale: 1 },
+    quantity: 1,
+  };
+
+  function getGift() { return PRODUCTS.find((p) => p.id === giftState.productId); }
+
+  function initGifts() {
+    const grid = document.getElementById("giftGrid");
+    if (!grid || !document.getElementById("viewGift")) return;
+
+    grid.innerHTML = PRODUCTS.map((p) => `
+      <article class="frame-card gift-card">
+        <div class="gift-thumb"><img src="${p.image}" alt="${p.name} with a personalized photo" loading="lazy"></div>
+        <div class="frame-card-body">
+          <h3>${p.name}</h3>
+          <p>${p.description}</p>
+          <div class="frame-price"><strong>${formatINR(p.price)}</strong></div>
+          <button class="shop-btn shop-btn-outline shop-btn-sm" type="button" data-product-id="${p.id}">Personalize</button>
+        </div>
+      </article>
+    `).join("");
+
+    grid.querySelectorAll("[data-product-id]").forEach((btn) => {
+      btn.addEventListener("click", () => openGift(btn.dataset.productId));
+    });
+
+    document.getElementById("giftBack")?.addEventListener("click", () => switchView("Shop"));
+    document.getElementById("giftAddToCart")?.addEventListener("click", addGiftToCart);
+
+    document.getElementById("giftQtyDec")?.addEventListener("click", () => changeGiftQty(-1));
+    document.getElementById("giftQtyInc")?.addEventListener("click", () => changeGiftQty(1));
+
+    initGiftUpload();
+    initGiftCrop();
+
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(layoutGiftImage, 120);
+    });
+  }
+
+  function openGift(productId) {
+    const product = PRODUCTS.find((p) => p.id === productId);
+    if (!product) return;
+    giftState.productId = productId;
+    giftState.quantity = 1;
+    giftState.transform = { x: 0, y: 0, scale: 1 };
+
+    document.getElementById("giftStage").dataset.product = productId;
+    document.getElementById("giftTitle").textContent = product.pageTitle;
+    document.getElementById("giftNote").textContent = product.note;
+    document.getElementById("giftTip").textContent = product.tip;
+    document.getElementById("giftUploadError").hidden = true;
+
+    switchView("Gift");
+    layoutGiftImage();
+    updateGiftSummary();
+    updateGiftQuality();
+  }
+
+  /* ---------------- Photo upload ---------------- */
+  function initGiftUpload() {
+    const uploadArea = document.getElementById("giftUploadArea");
+    const fileInput = document.getElementById("giftFileInput");
+    if (!uploadArea || !fileInput) return;
+
+    fileInput.addEventListener("change", (e) => handleGiftPhoto(e.target.files[0]));
+    uploadArea.addEventListener("dragover", (e) => { e.preventDefault(); uploadArea.classList.add("drag-over"); });
+    uploadArea.addEventListener("dragleave", () => uploadArea.classList.remove("drag-over"));
+    uploadArea.addEventListener("drop", (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove("drag-over");
+      if (e.dataTransfer.files[0]) handleGiftPhoto(e.dataTransfer.files[0]);
+    });
+    document.getElementById("giftChangePhoto")?.addEventListener("click", () => fileInput.click());
+    document.getElementById("giftRemovePhoto")?.addEventListener("click", removeGiftPhoto);
+  }
+
+  function handleGiftPhoto(file) {
+    const errorEl = document.getElementById("giftUploadError");
+    errorEl.hidden = true;
+    if (!file) return;
+
+    const validTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) { showFieldError(errorEl, "Please upload a JPG, PNG or WEBP image."); return; }
+    if (file.size > 10 * 1024 * 1024) { showFieldError(errorEl, "That image is larger than 10MB — please choose a smaller file."); return; }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        giftState.photoDataUrl = e.target.result;
+        giftState.photoNaturalW = img.naturalWidth;
+        giftState.photoNaturalH = img.naturalHeight;
+        giftState.transform = { x: 0, y: 0, scale: 1 };
+
+        const fpImage = document.getElementById("giftImage");
+        fpImage.src = giftState.photoDataUrl;
+        fpImage.alt = "Your uploaded photo on the selected product";
+        fpImage.hidden = false;
+        document.getElementById("giftEmpty").hidden = true;
+        document.getElementById("giftUploadActions").hidden = false;
+        document.getElementById("giftCropControls").hidden = false;
+        document.getElementById("giftCropHint").hidden = false;
+        layoutGiftImage();
+        updateGiftQuality();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeGiftPhoto() {
+    giftState.photoDataUrl = null;
+    giftState.transform = { x: 0, y: 0, scale: 1 };
+    const fpImage = document.getElementById("giftImage");
+    fpImage.hidden = true;
+    fpImage.src = "";
+    document.getElementById("giftEmpty").hidden = false;
+    document.getElementById("giftUploadActions").hidden = true;
+    document.getElementById("giftCropControls").hidden = true;
+    document.getElementById("giftCropHint").hidden = true;
+    document.getElementById("giftQualityBadge").hidden = true;
+    document.getElementById("giftFileInput").value = "";
+  }
+
+  /* ---------------- Preview window: fit, drag, zoom ---------------- */
+  /* Size the image so it covers the window (like object-fit: cover),
+     then re-apply the current zoom / offset. Safe to call any time —
+     it does nothing while the gift view is hidden (zero size). */
+  function layoutGiftImage() {
+    if (!giftState.photoDataUrl) return;
+    const win = document.getElementById("giftWindow");
+    const img = document.getElementById("giftImage");
+    const winW = win.offsetWidth, winH = win.offsetHeight;
+    if (!winW || !winH || !giftState.photoNaturalW || !giftState.photoNaturalH) return;
+
+    const cover = Math.max(winW / giftState.photoNaturalW, winH / giftState.photoNaturalH);
+    img.style.width = `${giftState.photoNaturalW * cover}px`;
+    img.style.height = `${giftState.photoNaturalH * cover}px`;
+    applyGiftTransform();
+  }
+
+  /* Keep the photo covering the whole window — no empty gaps. */
+  function applyGiftTransform() {
+    const win = document.getElementById("giftWindow");
+    const img = document.getElementById("giftImage");
+    const winW = win.offsetWidth, winH = win.offsetHeight;
+    if (!winW || !winH) return;
+
+    const t = giftState.transform;
+    const maxX = Math.max(0, (img.offsetWidth * t.scale - winW) / 2) / winW;
+    const maxY = Math.max(0, (img.offsetHeight * t.scale - winH) / 2) / winH;
+    t.x = Math.min(maxX, Math.max(-maxX, t.x));
+    t.y = Math.min(maxY, Math.max(-maxY, t.y));
+
+    win.style.setProperty("--px", `${t.x * winW}px`);
+    win.style.setProperty("--py", `${t.y * winH}px`);
+    win.style.setProperty("--pz", t.scale);
+  }
+
+  function initGiftCrop() {
+    const win = document.getElementById("giftWindow");
+    if (!win) return;
+
+    const refit = () => {
+      if (!giftState.photoDataUrl) return;
+      giftState.transform = { x: 0, y: 0, scale: 1 };
+      layoutGiftImage();
+    };
+    document.getElementById("giftZoomIn")?.addEventListener("click", () => zoomGift(0.1));
+    document.getElementById("giftZoomOut")?.addEventListener("click", () => zoomGift(-0.1));
+    document.getElementById("giftAutoFit")?.addEventListener("click", refit);
+    document.getElementById("giftResetCrop")?.addEventListener("click", refit);
+
+    let dragging = false, startX, startY, startTx, startTy;
+    const startDrag = (x, y) => {
+      if (!giftState.photoDataUrl) return;
+      dragging = true; startX = x; startY = y;
+      startTx = giftState.transform.x; startTy = giftState.transform.y;
+    };
+    const moveDrag = (x, y) => {
+      if (!dragging) return;
+      giftState.transform.x = startTx + (x - startX) / win.offsetWidth;
+      giftState.transform.y = startTy + (y - startY) / win.offsetHeight;
+      applyGiftTransform();
+    };
+    const endDrag = () => { dragging = false; };
+
+    win.addEventListener("mousedown", (e) => startDrag(e.clientX, e.clientY));
+    window.addEventListener("mousemove", (e) => moveDrag(e.clientX, e.clientY));
+    window.addEventListener("mouseup", endDrag);
+    win.addEventListener("touchstart", (e) => startDrag(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+    win.addEventListener("touchmove", (e) => moveDrag(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+    win.addEventListener("touchend", endDrag);
+  }
+
+  function zoomGift(delta) {
+    if (!giftState.photoDataUrl) return;
+    const next = Math.min(3, Math.max(1, giftState.transform.scale + delta));
+    giftState.transform.scale = Math.round(next * 100) / 100;
+    applyGiftTransform();
+  }
+
+  /* ---------------- Photo quality check ---------------- */
+  function updateGiftQuality() {
+    const badge = document.getElementById("giftQualityBadge");
+    const product = getGift();
+    if (!badge || !product || !giftState.photoDataUrl) { if (badge) badge.hidden = true; return; }
+    const meetsMin = giftState.photoNaturalW >= product.minResolution.w && giftState.photoNaturalH >= product.minResolution.h;
+    badge.hidden = false;
+    if (meetsMin) { badge.className = "quality-badge good"; badge.textContent = "✓ Great quality for printing"; }
+    else { badge.className = "quality-badge warn"; badge.textContent = "⚠ This photo may print slightly soft. A higher-resolution photo will look sharper."; }
+  }
+
+  /* ---------------- Quantity, price, cart ---------------- */
+  function changeGiftQty(delta) {
+    giftState.quantity = Math.min(MAX_QTY_PER_ITEM, Math.max(1, giftState.quantity + delta));
+    updateGiftSummary();
+  }
+
+  function updateGiftSummary() {
+    const product = getGift();
+    if (!product) return;
+    document.getElementById("giftQty").textContent = giftState.quantity;
+    document.getElementById("giftSumName").textContent = product.name;
+    document.getElementById("giftSumPrice").textContent = formatINR(product.price);
+    document.getElementById("giftSumQty").textContent = giftState.quantity;
+    document.getElementById("giftSumTotal").textContent = formatINR(product.price * giftState.quantity);
+  }
+
+  function addGiftToCart() {
+    const product = getGift();
+    if (!product) return;
+    const errorEl = document.getElementById("giftUploadError");
+    if (!giftState.photoDataUrl) {
+      showFieldError(errorEl, "Please upload your photo first.");
+      document.getElementById("giftUploadArea").scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    const cart = Store.getCart();
+    cart.push({
+      id: `item_${Date.now()}`, kind: "gift", photo: giftState.photoDataUrl,
+      productId: product.id, productName: product.name,
+      unitPrice: product.price, quantity: giftState.quantity,
+    });
+    Store.setCart(cart);
+    updateCartCount();
+    showToast("Added to cart");
+    openCart();
+  }
+
    /* ============================================================
       CHECKOUT
       ============================================================ */
@@ -652,8 +929,8 @@
        <div class="cart-item" style="border-bottom:1px solid var(--line); padding-bottom:16px; margin-bottom:16px;">
          <div class="cart-item-thumb"><img src="${item.photo}" alt="Your uploaded photo"></div>
          <div class="cart-item-info">
-           <h3>Custom Photoframe</h3>
-           <div class="cart-item-specs">${item.sizeLabel} · ${item.qualityName}<br>${item.frameName} · ${item.finishName} · ${item.matName} · Qty ${item.quantity}</div>
+           <h3>${itemTitle(item)}</h3>
+           <div class="cart-item-specs">${itemSpecs(item, true)}</div>
          </div>
        </div>
      `).join("");
@@ -796,7 +1073,9 @@
          headers: { "Content-Type": "application/json" },
          body: JSON.stringify({
            orderRef: order.orderId,
-           items: order.items.map((i) => ({ sizeId: i.sizeId, frameId: i.frameId, finishId: i.finishId, matId: i.matId, quantity: i.quantity })),
+           items: order.items.map((i) => i.kind === "gift"
+            ? { productId: i.productId, quantity: i.quantity }
+            : { sizeId: i.sizeId, qualityId: i.qualityId, frameId: i.frameId, finishId: i.finishId, matId: i.matId, quantity: i.quantity }),
            customer: { name: order.customer.name, email: order.customer.email, phone: order.customer.phone },
          }),
        });
@@ -814,7 +1093,7 @@
          order_id: razorpayOrderId,
          amount, currency,
          name: "VK Photography",
-         description: "Personalized Photoframe Order",
+         description: "Personalized Order",
          prefill: { name: order.customer.name, email: order.customer.email, contact: order.customer.phone },
          theme: { color: "#2b2620" },
          config: {
@@ -901,8 +1180,8 @@
          <div class="confirm-card-top">
            <div class="confirm-photo"><img src="${item.photo}" alt="Your uploaded photo"></div>
            <div class="confirm-specs">
-             <h3>Custom Photoframe</h3>
-             <p>${item.sizeLabel} · ${item.qualityName}<br>${item.frameName} · ${item.finishName} · ${item.matName} · Qty ${item.quantity}</p>
+             <h3>${itemTitle(item)}</h3>
+             <p>${itemSpecs(item, true)}</p>
            </div>
          </div>
        </div>

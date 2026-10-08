@@ -118,6 +118,37 @@
       { id: "white-mat", name: "White Mat", priceModifier: 300 },
     ];
   
+    /* Photo gifts: fixed-price products printed with one customer photo.
+       No size / frame / mat options — the price is just "price".
+       image: product shot shown on the shop card.
+       minResolution: smallest photo (px) that prints sharply. */
+    const PRODUCTS = [
+      {
+        id: "photo-mug", name: "Photo Mug", pageTitle: "Create your photo mug", price: 299,
+        image: "gifts/photo-mug.jpg",
+        description: "A white mug with your favorite photo printed on the front.",
+        note: "Printed on the front of the mug, opposite the handle side. Drag and zoom to choose which part of your photo shows.",
+        tip: "Close-up photos in good light print best.",
+        minResolution: { w: 900, h: 900 },
+      },
+      {
+        id: "heart-pillow", name: "Heart Pillow", pageTitle: "Create your heart pillow", price: 399,
+        image: "gifts/heart-pillow.jpg",
+        description: "A soft, fluffy red heart pillow with your photo set into the center.",
+        note: "Your photo is printed inside the heart, framed by the fluffy red edge. Drag and zoom to center the faces.",
+        tip: "Keep faces near the middle so the heart shape doesn't crop them.",
+        minResolution: { w: 1000, h: 1000 },
+      },
+      {
+        id: "magic-pillow", name: "Personalized Magic Pillow", pageTitle: "Create your magic pillow", price: 899,
+        image: "gifts/magic-pillow.jpg",
+        description: "A silver sequin cushion. Brush the sequins to reveal your photo.",
+        note: "Brush the sequins one way to reveal your photo and the other way to hide it. Drag and zoom to choose what shows in the oval.",
+        tip: "Bright, high-contrast photos look best through sequins.",
+        minResolution: { w: 1000, h: 1200 },
+      },
+    ];
+  
     const SHIPPING_FEE = 199;
     const CURRENCY = "INR";
     const MAX_QTY_PER_ITEM = 20;
@@ -140,9 +171,25 @@
       return printPrice + frame.priceModifier + finish.priceModifier + mat.priceModifier;
     }
   
+    /* Server-trusted unit price for a photo gift, or null if the id
+       isn't in the catalog. */
+    function getProductPrice(productId) {
+      const product = PRODUCTS.find((p) => p.id === productId);
+      return product ? product.price : null;
+    }
+  
+    /* One entry point for any cart line: gifts are identified by
+       productId, frames by their option ids (incl. qualityId).
+       Returns null if invalid. */
+    function getItemUnitPrice(item) {
+      if (!item || typeof item !== "object") return null;
+      if (item.productId !== undefined) return getProductPrice(item.productId);
+      return getUnitPrice(item);
+    }
+  
     return {
-      FRAMES, SIZES, ORIENTATIONS, FINISHES, MATS, QUALITIES, PRINT_PRICES,
+      FRAMES, SIZES, ORIENTATIONS, FINISHES, MATS, QUALITIES, PRINT_PRICES, PRODUCTS,
       SHIPPING_FEE, CURRENCY, MAX_QTY_PER_ITEM, MAX_ITEMS_PER_ORDER,
-      getPrintPrice, getUnitPrice,
+      getPrintPrice, getUnitPrice, getProductPrice, getItemUnitPrice,
     };
   });

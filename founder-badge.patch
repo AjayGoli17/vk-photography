@@ -1,0 +1,93 @@
+diff --git a/css/founder-badge.css b/css/founder-badge.css
+new file mode 100644
+index 0000000..165faa8
+--- /dev/null
++++ b/css/founder-badge.css
+@@ -0,0 +1,60 @@
++/* Founder badge overlapping the hero photo */
++
++/* Let the badge stick out past the photo; clipping moves to an inner wrapper */
++.hero-frame-inner {
++  overflow: visible;
++}
++
++.hero-photo-clip {
++  width: 100%;
++  height: 100%;
++  border-radius: 28px;
++  overflow: hidden;
++}
++
++.founder-badge {
++  position: absolute;
++  right: -40px;
++  bottom: 40px;
++  z-index: 5;
++  display: flex;
++  flex-direction: column;
++  gap: 2px;
++  padding: 14px 22px;
++  background: var(--cognac, #b9793f);
++  border-radius: 14px;
++  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
++}
++
++.founder-badge__role {
++  font-family: "Space Mono", monospace;
++  font-size: 11px;
++  letter-spacing: 0.15em;
++  text-transform: uppercase;
++  color: var(--ink, #000);
++}
++
++.founder-badge__name {
++  font-family: "Cormorant Garamond", serif;
++  font-size: 24px;
++  line-height: 1.1;
++  color: var(--ink, #000);
++}
++
++/* Keep the badge inside the screen on tablets and phones */
++@media (max-width: 1100px) {
++  .founder-badge {
++    right: -16px;
++  }
++}
++
++@media (max-width: 860px) {
++  .founder-badge {
++    right: 12px;
++    bottom: 12px;
++    padding: 10px 16px;
++  }
++  .founder-badge__name {
++    font-size: 20px;
++  }
++}
+diff --git a/index.html b/index.html
+index 2e5a149..cd34f11 100644
+--- a/index.html
++++ b/index.html
+@@ -10,6 +10,7 @@
+ <link rel="stylesheet" href="css/style.css">
+ <link rel="stylesheet" href="css/home.css">
+ <link rel="stylesheet" href="css/transition.css">
++<link rel="stylesheet" href="css/founder-badge.css">
+ <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+ </head>
+ <body>
+@@ -62,8 +63,14 @@
+ </div>
+ <div class="hero-frame">
+ <div class="hero-frame-inner">
++<div class="hero-photo-clip">
+ <img src="founder.jpg" alt="VK, founder and lead photographer, holding two mirrorless cameras">
+ </div>
++<div class="founder-badge">
++<span class="founder-badge__role">Founder &amp; CEO</span>
++<span class="founder-badge__name">Vamshi</span>
++</div>
++</div>
+ </div>
+ </section>
+ <section class="portfolio" id="portfolio">

@@ -1,0 +1,123 @@
+diff --git a/shop.html b/shop.html
+--- a/shop.html
++++ b/shop.html
+@@ -93,1 +93,1 @@
+-<div class="shop-step-card"><span class="shop-step-num">02</span><h3>Customize Your Frame</h3><p>Pick a size, frame style, finish and mat while your photo updates live.</p></div>
++<div class="shop-step-card"><span class="shop-step-num">02</span><h3>Customize Your Frame</h3><p>Pick a size, frame style and mounting while your photo updates live.</p></div>
+@@ -106,1 +106,1 @@
+-<p class="shop-section-sub">Every frame is available in four sizes, two finishes, and an optional mat — customize any of them to fit your photo.</p>
++<p class="shop-section-sub">Every frame is available in many standard sizes, with or without mounting — customize any of them to fit your photo.</p>
+@@ -233,1 +233,1 @@
+-<div class="control-block"><h2>Finish</h2><div class="option-grid" id="finishOptions" role="group" aria-label="Choose finish"></div></div>
++<div class="control-block"><h2>Mounting</h2><div class="option-grid" id="mountingOptions" role="group" aria-label="Choose mounting"></div></div>
+@@ -234,1 +233,0 @@
+-<div class="control-block"><h2>Mat</h2><div class="option-grid" id="matOptions" role="group" aria-label="Choose mat"></div></div>
+@@ -240,1 +239,1 @@
+-<div class="price-row"><span>Finish</span><span id="sumFinish">—</span></div>
++<div class="price-row"><span>Mounting</span><span id="sumMounting">—</span></div>
+@@ -241,1 +239,0 @@
+-<div class="price-row"><span>Mat</span><span id="sumMat">—</span></div>
+diff --git a/js/shop-pricing.js b/js/shop-pricing.js
+--- a/js/shop-pricing.js
++++ b/js/shop-pricing.js
+@@ -5,1 +5,1 @@
+-   Single source of truth for frame, size, finish and mat prices.
++   Single source of truth for frame, size, quality and mounting prices.
+@@ -138,4 +138,4 @@
+-const FINISHES = [
+-  { id: "matte", name: "Matte", priceModifier: 0 },
+-  { id: "glossy", name: "Glossy", priceModifier: 150 },
+-];
++const MOUNTINGS = [
++  { id: "without-mounting", name: "Without Mounting", sub: "Print only, no mounting board", priceModifier: 0 },
++  { id: "with-mounting", name: "With Mounting", sub: "Mounted on board, ready to display", priceModifier: 300 },
++];
+@@ -143,4 +143,0 @@
+-const MATS = [
+-  { id: "no-mat", name: "No Mat", priceModifier: 0 },
+-  { id: "white-mat", name: "White Mat", priceModifier: 300 },
+-];
+@@ -173,1 +169,1 @@
+-function getUnitPrice({ sizeId, qualityId, frameId, finishId, matId }) {
++function getUnitPrice({ sizeId, qualityId, frameId, mountingId }) {
+@@ -177,1 +173,1 @@
+-  const finish = FINISHES.find((f) => f.id === finishId);
++  const mounting = MOUNTINGS.find((m) => m.id === mountingId);
+@@ -178,1 +173,0 @@
+-  const mat = MATS.find((m) => m.id === matId);
+@@ -179,1 +174,1 @@
+-  if (!size || !quality || !frame || !finish || !mat) return null;
++  if (!size || !quality || !frame || !mounting) return null;
+@@ -182,1 +177,1 @@
+-  return printPrice + frame.priceModifier + finish.priceModifier + mat.priceModifier;
++  return printPrice + frame.priceModifier + mounting.priceModifier;
+@@ -190,1 +185,1 @@
+-  FRAMES, SIZES, ORIENTATIONS, FINISHES, MATS, QUALITIES, PRINT_PRICES, PRODUCTS,
++  FRAMES, SIZES, ORIENTATIONS, MOUNTINGS, QUALITIES, PRINT_PRICES, PRODUCTS,
+diff --git a/js/shop.js b/js/shop.js
+--- a/js/shop.js
++++ b/js/shop.js
+@@ -14,1 +14,1 @@
+-const { FRAMES, SIZES, ORIENTATIONS, FINISHES, MATS, QUALITIES, PRODUCTS, SHIPPING_FEE, MAX_QTY_PER_ITEM, getPrintPrice } = window.VKPricing;
++const { FRAMES, SIZES, ORIENTATIONS, MOUNTINGS, QUALITIES, PRODUCTS, SHIPPING_FEE, MAX_QTY_PER_ITEM, getPrintPrice } = window.VKPricing;
+@@ -48,1 +48,1 @@
+-finishId: "matte",
++mountingId: "without-mounting",
+@@ -49,1 +49,0 @@
+-matId: "no-mat",
+@@ -120,1 +120,1 @@
+-renderOptionGroup("finishOptions", FINISHES.map((f) => ({ id: f.id, name: f.name, price: f.priceModifier === 0 ? "+₹0" : `+${formatINR(f.priceModifier)}` })), customizerState.finishId, (id) => { customizerState.finishId = id; refreshCustomizerUI(); });
++renderOptionGroup("mountingOptions", MOUNTINGS.map((m) => ({ id: m.id, name: m.name, sub: m.sub, price: m.priceModifier === 0 ? "+₹0" : `+${formatINR(m.priceModifier)}` })), customizerState.mountingId, (id) => { customizerState.mountingId = id; refreshCustomizerUI(); });
+@@ -122,1 +122,0 @@
+-renderOptionGroup("matOptions", MATS.map((m) => ({ id: m.id, name: m.name, price: m.priceModifier === 0 ? "+₹0" : `+${formatINR(m.priceModifier)}` })), customizerState.matId, (id) => { customizerState.matId = id; refreshCustomizerUI(); });
+@@ -250,2 +249,1 @@
+-const finish = getFinish();
+-const mat = getMat();
++const mounting = getMounting();
+@@ -252,1 +250,1 @@
+-el.textContent = `${size.label} \u00b7 ${frame.name} \u00b7 ${finish.name}${mat.id !== "no-mat" ? " \u00b7 " + mat.name : ""}`;
++el.textContent = `${size.label} \u00b7 ${frame.name} \u00b7 ${mounting.name}`;
+@@ -300,2 +298,1 @@
+-const mat = getMat();
+-const finish = getFinish();
++const mounting = getMounting();
+@@ -306,1 +303,1 @@
+-fpMat.dataset.mat = mat.id;
++fpMat.dataset.mat = mounting.id === "with-mounting" ? "white-mat" : "no-mat";
+@@ -307,1 +304,1 @@
+-fpWindow.dataset.finish = finish.id;
++fpWindow.dataset.finish = "matte";
+@@ -420,1 +417,1 @@
+-frame.priceModifier + finish.priceModifier + mat.priceModifier.
++frame.priceModifier + mounting.priceModifier.
+@@ -424,1 +421,1 @@
+-const size = getSize(), quality = getQuality(), frame = getFrame(), finish = getFinish(), mat = getMat();
++const size = getSize(), quality = getQuality(), frame = getFrame(), mounting = getMounting();
+@@ -426,1 +423,1 @@
+-const total = printPrice == null ? null : printPrice + frame.priceModifier + finish.priceModifier + mat.priceModifier;
++const total = printPrice == null ? null : printPrice + frame.priceModifier + mounting.priceModifier;
+@@ -428,1 +425,1 @@
+-return { size, quality, frame, finish, mat, printPrice, total };
++return { size, quality, frame, mounting, printPrice, total };
+@@ -432,1 +429,1 @@
+-const { quality, frame, finish, mat, total } = calculatePrice();
++const { quality, frame, mounting, total } = calculatePrice();
+@@ -438,1 +435,1 @@
+-document.getElementById("sumFinish").textContent = finish.name;
++document.getElementById("sumMounting").textContent = mounting.name;
+@@ -439,1 +436,0 @@
+-document.getElementById("sumMat").textContent = mat.name;
+@@ -466,1 +462,1 @@
+-function getFinish() { return FINISHES.find((f) => f.id === customizerState.finishId); }
++function getMounting() { return MOUNTINGS.find((m) => m.id === customizerState.mountingId); }
+@@ -467,1 +463,0 @@
+-function getMat() { return MATS.find((m) => m.id === customizerState.matId); }
+@@ -510,1 +505,1 @@
+-const { size, quality, frame, finish, mat, total } = calculatePrice();
++const { size, quality, frame, mounting, total } = calculatePrice();
+@@ -520,1 +515,1 @@
+-finishId: finish.id, finishName: finish.name, matId: mat.id, matName: mat.name,
++mountingId: mounting.id, mountingName: mounting.name,
+@@ -600,1 +595,1 @@
+-return `${item.sizeLabel} · ${item.qualityName}<br>${item.frameName} · ${item.finishName} · ${item.matName}${withQty ? ` · Qty ${item.quantity}` : ""}`;
++return `${item.sizeLabel} · ${item.qualityName}<br>${item.frameName} · ${item.mountingName}${withQty ? ` · Qty ${item.quantity}` : ""}`;

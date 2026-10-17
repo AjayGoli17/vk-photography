@@ -137,13 +137,8 @@ h1, h2, h3 {
     position: absolute;
     top: -10%; /* Center the extra height */
     transition: filter 0.8s ease, transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
-    filter: grayscale(40%) brightness(0.7);
+    filter: none;
     will-change: transform;
-}
-
-.gallery-item:hover img {
-    filter: grayscale(0%) brightness(1.1);
-    transform: scale(1.03) !important; /* Overrides parallax temporarily on hover */
 }
 
 .item-overlay {
@@ -159,10 +154,6 @@ h1, h2, h3 {
     z-index: 2;
 }
 
-.gallery-item:hover .item-overlay {
-    opacity: 1;
-}
-
 .item-overlay span {
     font-family: var(--font-heading);
     font-size: 1.6rem;
@@ -171,10 +162,6 @@ h1, h2, h3 {
     display: block;
     transform: translateY(15px);
     transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.gallery-item:hover .item-overlay span {
-    transform: translateY(0);
 }
 
 /* --- Call to Action Section --- */

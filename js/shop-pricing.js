@@ -1,6 +1,6 @@
 /* ============================================================
    VK PHOTOGRAPHY — SHARED PRODUCT / PRICING CONFIG
-   Single source of truth for frame, size, finish and mat prices.
+   Single source of truth for frame, size, quality and mounting prices.
 
    Used by:
      - js/shop.js (browser)               -> window.VKPricing
@@ -75,21 +75,21 @@
        here as the client confirms them; nothing else needs to change.
        ------------------------------------------------------------ */
     const PRINT_PRICES = {
-      "4x6": { normal: 100, premium: 159 },
-      "5x7": { normal: null, premium: null },
-      "6x8": { normal: null, premium: null },
-      "6x9": { normal: null, premium: null },
-      "8x10": { normal: null, premium: null },
-      "8x12": { normal: null, premium: null },
-      "10x12": { normal: null, premium: null },
-      "12x15": { normal: null, premium: null },
+  "4x6": { normal: 159, premium: 329 },
+  "5x7": { normal: 149, premium: 299 },
+  "6x8": { normal: 299, premium: 499 },
+  "6x9": { normal: 299, premium: 499 },
+  "8x10": { normal: 399, premium: 549 },
+  "8x12": { normal: 399, premium: 649 },
+  "10x12": { normal: 699, premium: 999 },
+  "12x15": { normal: 899, premium: 1199 },
       "10x15": { normal: null, premium: null },
-      "12x18": { normal: null, premium: null },
-      "16x20": { normal: null, premium: null },
-      "16x24": { normal: null, premium: null },
+  "12x18": { normal: 1199, premium: 1599 },
+  "16x20": { normal: 1399, premium: 1999 },
+  "16x24": { normal: 1899, premium: 2599 },
       "24x40": { normal: null, premium: null },
-      "20x24": { normal: null, premium: null },
-      "20x30": { normal: null, premium: null },
+  "20x24": { normal: 1599, premium: 2499 },
+  "20x30": { normal: 2199, premium: 2999 },
     };
   
     /* Looks up the confirmed print price for a size + quality pair.
@@ -108,15 +108,11 @@
       { id: "landscape", name: "Landscape", sub: "Wider than tall" },
     ];
   
-    const FINISHES = [
-      { id: "matte", name: "Matte", priceModifier: 0 },
-      { id: "glossy", name: "Glossy", priceModifier: 150 },
+    const MOUNTINGS = [
+      { id: "without-mounting", name: "Without Mounting", sub: "Print only, no mounting board", priceModifier: 0 },
+      { id: "with-mounting", name: "With Mounting", sub: "Mounted on board, ready to display", priceModifier: 300 },
     ];
   
-    const MATS = [
-      { id: "no-mat", name: "No Mat", priceModifier: 0 },
-      { id: "white-mat", name: "White Mat", priceModifier: 300 },
-    ];
   
     /* Photo gifts: fixed-price products printed with one customer photo.
        No size / frame / mat options — the price is just "price".
@@ -159,16 +155,15 @@
        invalid OR if that size+quality combination has no confirmed
        price yet in PRINT_PRICES — callers must reject the request
        instead of silently pricing it at 0. */
-    function getUnitPrice({ sizeId, qualityId, frameId, finishId, matId }) {
+    function getUnitPrice({ sizeId, qualityId, frameId, mountingId }) {
       const size = SIZES.find((s) => s.id === sizeId);
       const quality = QUALITIES.find((q) => q.id === qualityId);
       const frame = FRAMES.find((f) => f.id === frameId);
-      const finish = FINISHES.find((f) => f.id === finishId);
-      const mat = MATS.find((m) => m.id === matId);
-      if (!size || !quality || !frame || !finish || !mat) return null;
+      const mounting = MOUNTINGS.find((m) => m.id === mountingId);
+      if (!size || !quality || !frame || !mounting) return null;
       const printPrice = getPrintPrice(sizeId, qualityId);
       if (printPrice == null) return null;
-      return printPrice + frame.priceModifier + finish.priceModifier + mat.priceModifier;
+      return printPrice + frame.priceModifier + mounting.priceModifier;
     }
   
     /* Server-trusted unit price for a photo gift, or null if the id
@@ -188,7 +183,7 @@
     }
   
     return {
-      FRAMES, SIZES, ORIENTATIONS, FINISHES, MATS, QUALITIES, PRINT_PRICES, PRODUCTS,
+      FRAMES, SIZES, ORIENTATIONS, MOUNTINGS, QUALITIES, PRINT_PRICES, PRODUCTS,
       SHIPPING_FEE, CURRENCY, MAX_QTY_PER_ITEM, MAX_ITEMS_PER_ORDER,
       getPrintPrice, getUnitPrice, getProductPrice, getItemUnitPrice,
     };

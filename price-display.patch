@@ -1,0 +1,65 @@
+diff --git a/js/shop-pricing.js b/js/shop-pricing.js
+--- a/js/shop-pricing.js
++++ b/js/shop-pricing.js
+@@ -118,1 +118,1 @@
+-  "4x6": { normal: 100, premium: 159 },
++  "4x6": { normal: 159, premium: 329 },
+@@ -119,1 +119,1 @@
+-  "5x7": { normal: null, premium: null },
++  "5x7": { normal: 149, premium: 299 },
+@@ -120,1 +120,1 @@
+-  "6x8": { normal: null, premium: null },
++  "6x8": { normal: 299, premium: 499 },
+@@ -121,1 +121,1 @@
+-  "6x9": { normal: null, premium: null },
++  "6x9": { normal: 299, premium: 499 },
+@@ -122,1 +122,1 @@
+-  "8x10": { normal: null, premium: null },
++  "8x10": { normal: 399, premium: 549 },
+@@ -123,1 +123,1 @@
+-  "8x12": { normal: null, premium: null },
++  "8x12": { normal: 399, premium: 649 },
+@@ -124,1 +124,1 @@
+-  "10x12": { normal: null, premium: null },
++  "10x12": { normal: 699, premium: 999 },
+@@ -125,1 +125,1 @@
+-  "12x15": { normal: null, premium: null },
++  "12x15": { normal: 899, premium: 1199 },
+@@ -127,1 +127,1 @@
+-  "12x18": { normal: null, premium: null },
++  "12x18": { normal: 1199, premium: 1599 },
+@@ -128,1 +128,1 @@
+-  "16x20": { normal: null, premium: null },
++  "16x20": { normal: 1399, premium: 1999 },
+@@ -129,1 +129,1 @@
+-  "16x24": { normal: null, premium: null },
++  "16x24": { normal: 1899, premium: 2599 },
+@@ -131,1 +131,1 @@
+-  "20x24": { normal: null, premium: null },
++  "20x24": { normal: 1599, premium: 2499 },
+@@ -132,1 +132,1 @@
+-  "20x30": { normal: null, premium: null },
++  "20x30": { normal: 2199, premium: 2999 },
+diff --git a/shop.html b/shop.html
+--- a/shop.html
++++ b/shop.html
+@@ -228,1 +228,1 @@
+-<div class="control-block"><h2>Size</h2><p class="shop-section-sub" style="margin:-6px 0 12px; font-size:12.5px;">Standard Indian frame sizes — pick whichever feels closest to what you have printed before.</p><div class="option-grid" id="sizeOptions" role="group" aria-label="Choose size"></div></div>
++<div class="control-block"><h2>Size</h2><p class="shop-section-sub" style="margin:-6px 0 12px; font-size:12.5px;">Standard Indian frame sizes. Prices shown are for the print only; frame and mounting are extra.</p><div class="option-grid" id="sizeOptions" role="group" aria-label="Choose size"></div></div>
+diff --git a/js/shop.js b/js/shop.js
+--- a/js/shop.js
++++ b/js/shop.js
+@@ -108,1 +108,1 @@
+-renderOptionGroup("sizeOptions", SIZES.map((s) => ({ id: s.id, name: s.label })), customizerState.sizeId, (id) => { customizerState.sizeId = id; refreshCustomizerUI(); });
++renderOptionGroup("sizeOptions", SIZES.map((s) => { const n = getPrintPrice(s.id, "normal"), p = getPrintPrice(s.id, "premium"); return { id: s.id, name: s.label, sub: n == null || p == null ? "Price on request" : `Normal ${formatINR(n)}<br>Premium ${formatINR(p)}` }; }), customizerState.sizeId, (id) => { customizerState.sizeId = id; refreshCustomizerUI(); });
+@@ -112,1 +112,1 @@
+-renderOptionGroup("qualityOptions", QUALITIES.map((q) => ({ id: q.id, name: q.name, sub: q.description })), customizerState.qualityId, (id) => { customizerState.qualityId = id; refreshCustomizerUI(); });
++renderQualityOptions();
+@@ -455,1 +455,6 @@
+-function refreshCustomizerUI() {
++function renderQualityOptions() {
++  renderOptionGroup("qualityOptions", QUALITIES.map((q) => { const p = getPrintPrice(customizerState.sizeId, q.id); return { id: q.id, name: q.name, sub: q.description, price: p == null ? "Price on request" : formatINR(p) }; }), customizerState.qualityId, (id) => { customizerState.qualityId = id; refreshCustomizerUI(); });
++}
++
++function refreshCustomizerUI() {
++  renderQualityOptions();

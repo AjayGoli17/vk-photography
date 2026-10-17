@@ -10,7 +10,7 @@
    Razorpay order-creation function always agree on prices.
    Change prices/add frames/sizes in js/shop-pricing.js only.
    ------------------------------------------------------------ */
-   const { FRAMES, SIZES, ORIENTATIONS, FINISHES, MATS, QUALITIES, PRODUCTS, SHIPPING_FEE, MAX_QTY_PER_ITEM, getPrintPrice } = window.VKPricing;
+   const { FRAMES, SIZES, ORIENTATIONS, MOUNTINGS, QUALITIES, PRODUCTS, SHIPPING_FEE, MAX_QTY_PER_ITEM, getPrintPrice } = window.VKPricing;
 
    /* Razorpay Checkout — the public Key ID is safe to expose to the
       browser and is returned by the create-order function on each
@@ -38,8 +38,7 @@
      sizeId: "12x18",
      qualityId: "normal",
      orientation: "portrait",
-     finishId: "matte",
-     matId: "no-mat",
+     mountingId: "without-mounting",
      photoDataUrl: null,
      photoNaturalW: 0,
      photoNaturalH: 0,
@@ -130,13 +129,12 @@
      // Size cards show only the size itself — no price, no badges.
      // Price now depends on Size + Quality together (see Quality step
      // below and calculatePrice()), so it can't live on the size card.
-     renderOptionGroup("sizeOptions", SIZES.map((s) => ({ id: s.id, name: s.label })), customizerState.sizeId, (id) => { customizerState.sizeId = id; refreshCustomizerUI(); });
+     renderOptionGroup("sizeOptions", SIZES.map((s) => { const n = getPrintPrice(s.id, "normal"), p = getPrintPrice(s.id, "premium"); return { id: s.id, name: s.label, sub: n == null || p == null ? "Price on request" : `Normal ${formatINR(n)}<br>Premium ${formatINR(p)}` }; }), customizerState.sizeId, (id) => { customizerState.sizeId = id; refreshCustomizerUI(); });
      // Quality step — deliberately no `price` field passed in, so
      // renderOptionGroup never prints a price on these two cards.
-     renderOptionGroup("qualityOptions", QUALITIES.map((q) => ({ id: q.id, name: q.name, sub: q.description })), customizerState.qualityId, (id) => { customizerState.qualityId = id; refreshCustomizerUI(); });
+     renderQualityOptions();
      renderOptionGroup("frameOptions", FRAMES.map((f) => ({ id: f.id, name: f.name, price: f.priceModifier === 0 ? "+₹0" : `+${formatINR(f.priceModifier)}`, swatch: f.id })), customizerState.frameId, (id) => { customizerState.frameId = id; refreshCustomizerUI(); });
-     renderOptionGroup("finishOptions", FINISHES.map((f) => ({ id: f.id, name: f.name, price: f.priceModifier === 0 ? "+₹0" : `+${formatINR(f.priceModifier)}` })), customizerState.finishId, (id) => { customizerState.finishId = id; refreshCustomizerUI(); });
-     renderOptionGroup("matOptions", MATS.map((m) => ({ id: m.id, name: m.name, price: m.priceModifier === 0 ? "+₹0" : `+${formatINR(m.priceModifier)}` })), customizerState.matId, (id) => { customizerState.matId = id; refreshCustomizerUI(); });
+     renderOptionGroup("mountingOptions", MOUNTINGS.map((m) => ({ id: m.id, name: m.name, sub: m.sub, price: m.priceModifier === 0 ? "+₹0" : `+${formatINR(m.priceModifier)}` })), customizerState.mountingId, (id) => { customizerState.mountingId = id; refreshCustomizerUI(); });
    
      initPhotoUpload();
      initCropControls();
@@ -288,9 +286,8 @@
      if (!el) return;
      const frame = getFrame();
      const size = getEffectiveSize();
-     const finish = getFinish();
-     const mat = getMat();
-     el.textContent = `${size.label} \u00b7 ${frame.name} \u00b7 ${finish.name}${mat.id !== "no-mat" ? " \u00b7 " + mat.name : ""}`;
+     const mounting = getMounting();
+     el.textContent = `${size.label} \u00b7 ${frame.name} \u00b7 ${mounting.name}`;
    }
  
    function initPreviewToggle() {
@@ -337,15 +334,14 @@
    function updatePreview() {
      const frame = getFrame();
      const size = getEffectiveSize();
-     const mat = getMat();
-     const finish = getFinish();
+     const mounting = getMounting();
    
      const fpFrame = document.getElementById("fpFrame");
      const fpMat = document.getElementById("fpMat");
      const fpWindow = document.getElementById("fpWindow");
      fpFrame.dataset.frame = frame.id;
-     fpMat.dataset.mat = mat.id;
-     fpWindow.dataset.finish = finish.id;
+     fpMat.dataset.mat = mounting.id === "with-mounting" ? "white-mat" : "no-mat";
+     fpWindow.dataset.finish = "matte";
    
      const { maxW, maxH } = getPreviewBudget();
      let w = maxW, h = w / size.aspectRatio;
@@ -436,24 +432,23 @@
    
    /* ---------------- Price calculation ----------------
       Total = (Size + Quality print price, from PRINT_PRICES) +
-      frame.priceModifier + finish.priceModifier + mat.priceModifier.
+      frame.priceModifier + mounting.priceModifier.
       printPrice/total are `null` — never 0 — when that size+quality
       combo has no confirmed price yet in js/shop-pricing.js. */
    function calculatePrice() {
-     const size = getSize(), quality = getQuality(), frame = getFrame(), finish = getFinish(), mat = getMat();
+     const size = getSize(), quality = getQuality(), frame = getFrame(), mounting = getMounting();
      const printPrice = getPrintPrice(size.id, quality.id);
-     const total = printPrice == null ? null : printPrice + frame.priceModifier + finish.priceModifier + mat.priceModifier;
-     return { size, quality, frame, finish, mat, printPrice, total };
+     const total = printPrice == null ? null : printPrice + frame.priceModifier + mounting.priceModifier;
+     return { size, quality, frame, mounting, printPrice, total };
    }
    
    function updatePrice() {
-     const { quality, frame, finish, mat, total } = calculatePrice();
+     const { quality, frame, mounting, total } = calculatePrice();
      const effectiveSize = getEffectiveSize();
      document.getElementById("sumSize").textContent = `${effectiveSize.label} · ${ORIENTATIONS.find((o) => o.id === customizerState.orientation).name}`;
      document.getElementById("sumQuality").textContent = quality.name;
      document.getElementById("sumFrame").textContent = frame.name;
-     document.getElementById("sumFinish").textContent = finish.name;
-     document.getElementById("sumMat").textContent = mat.name;
+     document.getElementById("sumMounting").textContent = mounting.name;
    
      // Never show ₹0 or a fake number for a size+quality that
      // hasn't been priced yet.
@@ -469,7 +464,12 @@
      });
    }
    
+   function renderQualityOptions() {
+     renderOptionGroup("qualityOptions", QUALITIES.map((q) => { const p = getPrintPrice(customizerState.sizeId, q.id); return { id: q.id, name: q.name, sub: q.description, price: p == null ? "Price on request" : formatINR(p) }; }), customizerState.qualityId, (id) => { customizerState.qualityId = id; refreshCustomizerUI(); });
+   }
+
    function refreshCustomizerUI() {
+     renderQualityOptions();
      updatePreview();
      updatePreviewSummary();
      if (customizerState.photoDataUrl) autoFitPhoto();
@@ -480,8 +480,7 @@
    function getFrame() { return FRAMES.find((f) => f.id === customizerState.frameId); }
    function getSize() { return SIZES.find((s) => s.id === customizerState.sizeId); }
    function getQuality() { return QUALITIES.find((q) => q.id === customizerState.qualityId); }
-   function getFinish() { return FINISHES.find((f) => f.id === customizerState.finishId); }
-   function getMat() { return MATS.find((m) => m.id === customizerState.matId); }
+   function getMounting() { return MOUNTINGS.find((m) => m.id === customizerState.mountingId); }
    
    /* Size as chosen, adjusted for the selected orientation — the
       printed sheet is the same paper size either way, just rotated,
@@ -517,7 +516,7 @@
        return;
      }
    
-     const { size, quality, frame, finish, mat, total } = calculatePrice();
+     const { size, quality, frame, mounting, total } = calculatePrice();
      if (total == null) {
        // Belt-and-braces: the Add to Cart buttons are already disabled
        // for this case, but never let a ₹0/fake-priced item into the cart.
@@ -532,7 +531,7 @@
        frameId: frame.id, frameName: frame.name, sizeId: size.id,
        sizeLabel: `${effectiveSize.label} · ${orientationName}`,
        qualityId: quality.id, qualityName: quality.name,
-       finishId: finish.id, finishName: finish.name, matId: mat.id, matName: mat.name,
+       mountingId: mounting.id, mountingName: mounting.name,
        unitPrice: total, quantity: 1,
      };
    
@@ -650,7 +649,7 @@
 
   function itemSpecs(item, withQty) {
     if (item.kind === "gift") return `Printed with your photo${withQty ? ` · Qty ${item.quantity}` : ""}`;
-    return `${item.sizeLabel} · ${item.qualityName}<br>${item.frameName} · ${item.finishName} · ${item.matName}${withQty ? ` · Qty ${item.quantity}` : ""}`;
+    return `${item.sizeLabel} · ${item.qualityName}<br>${item.frameName} · ${item.mountingName}${withQty ? ` · Qty ${item.quantity}` : ""}`;
   }
 
   /* ============================================================

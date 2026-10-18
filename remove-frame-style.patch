@@ -1,0 +1,55 @@
+diff --git a/js/shop.js b/js/shop.js
+index 10667cc..2c8e19f 100644
+--- a/js/shop.js
++++ b/js/shop.js
+@@ -87,7 +87,6 @@
+    
+      grid.querySelectorAll(".customize-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+-         customizerState.frameId = btn.dataset.frameId;
+          openCustomizer();
+        });
+      });
+@@ -133,7 +132,6 @@
+      // Quality step — deliberately no `price` field passed in, so
+      // renderOptionGroup never prints a price on these two cards.
+      renderQualityOptions();
+-     renderOptionGroup("frameOptions", FRAMES.map((f) => ({ id: f.id, name: f.name, price: f.priceModifier === 0 ? "+₹0" : `+${formatINR(f.priceModifier)}`, swatch: f.id })), customizerState.frameId, (id) => { customizerState.frameId = id; refreshCustomizerUI(); });
+      renderOptionGroup("mountingOptions", MOUNTINGS.map((m) => ({ id: m.id, name: m.name, sub: m.sub, price: m.priceModifier === 0 ? "+₹0" : `+${formatINR(m.priceModifier)}` })), customizerState.mountingId, (id) => { customizerState.mountingId = id; refreshCustomizerUI(); });
+    
+      initPhotoUpload();
+@@ -287,7 +285,7 @@
+      const frame = getFrame();
+      const size = getEffectiveSize();
+      const mounting = getMounting();
+-     el.textContent = `${size.label} \u00b7 ${frame.name} \u00b7 ${mounting.name}`;
++     el.textContent = `${size.label} \u00b7 ${mounting.name}`;
+    }
+  
+    function initPreviewToggle() {
+@@ -447,7 +445,6 @@
+      const effectiveSize = getEffectiveSize();
+      document.getElementById("sumSize").textContent = `${effectiveSize.label} · ${ORIENTATIONS.find((o) => o.id === customizerState.orientation).name}`;
+      document.getElementById("sumQuality").textContent = quality.name;
+-     document.getElementById("sumFrame").textContent = frame.name;
+      document.getElementById("sumMounting").textContent = mounting.name;
+    
+      // Never show ₹0 or a fake number for a size+quality that
+diff --git a/shop.html b/shop.html
+index 7feb552..fbc740d 100644
+--- a/shop.html
++++ b/shop.html
+@@ -176,13 +176,11 @@
+           <div class="control-block"><h2>Orientation</h2><div class="option-grid" id="orientationOptions" role="group" aria-label="Choose orientation"></div></div>
+           <div class="control-block"><h2>Size</h2><p class="shop-section-sub" style="margin:-6px 0 12px; font-size:12.5px;">Standard Indian frame sizes. Prices shown are for the print only; frame and mounting are extra.</p><div class="option-grid" id="sizeOptions" role="group" aria-label="Choose size"></div></div>
+           <div class="control-block"><h2>Quality</h2><p class="shop-section-sub" style="margin:-6px 0 12px; font-size:12.5px;">Choose the print quality for your photo.</p><div class="option-grid" id="qualityOptions" role="group" aria-label="Choose print quality"></div></div>
+-          <div class="control-block"><h2>Frame Style</h2><div class="option-grid" id="frameOptions" role="group" aria-label="Choose frame style"></div></div>
+           <div class="control-block"><h2>Mounting</h2><div class="option-grid" id="mountingOptions" role="group" aria-label="Choose mounting"></div></div>
+ 
+           <div class="control-block price-summary">
+             <div class="price-row"><span>Size</span><span id="sumSize">—</span></div>
+             <div class="price-row"><span>Quality</span><span id="sumQuality">—</span></div>
+-            <div class="price-row"><span>Frame</span><span id="sumFrame">—</span></div>
+             <div class="price-row"><span>Mounting</span><span id="sumMounting">—</span></div>
+             <div class="price-total"><span class="label">Total</span><span class="value" id="sumTotal">₹0</span></div>
+           </div>

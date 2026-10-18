@@ -1,0 +1,36 @@
+.hero-frame::before,
+.hero-frame::after,
+.hero-frame-inner::before,
+.hero-frame-inner::after {
+  content: none !important;
+  display: none !important;
+}
+.hero-founder { margin: 28px 0 0; }
+.hero-founder::before {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 1px;
+  background: #A8733A;
+  margin-bottom: 12px;
+}
+.hero-founder-role {
+  display: block;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #A8733A;
+}
+.hero-founder-name {
+  display: block;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 28px;
+  line-height: 1.2;
+  color: #111;
+  margin-top: 2px;
+}
+@media (max-width: 640px) {
+  .hero-founder { margin-top: 20px; }
+  .hero-founder-name { font-size: 24px; }
+}

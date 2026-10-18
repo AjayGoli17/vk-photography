@@ -1,0 +1,11 @@
+.teaser-video { padding: 80px 5vw; display: flex; justify-content: center; }
+.teaser-video video {
+  width: 100%;
+  max-width: 1100px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 16px;
+  background: #000;
+  display: block;
+}
+@media (max-width: 640px) { .teaser-video { padding: 48px 16px; } }

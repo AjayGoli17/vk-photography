@@ -87,7 +87,6 @@
    
      grid.querySelectorAll(".customize-btn").forEach((btn) => {
        btn.addEventListener("click", () => {
-         customizerState.frameId = btn.dataset.frameId;
          openCustomizer();
        });
      });
@@ -133,7 +132,6 @@
      // Quality step — deliberately no `price` field passed in, so
      // renderOptionGroup never prints a price on these two cards.
      renderQualityOptions();
-     renderOptionGroup("frameOptions", FRAMES.map((f) => ({ id: f.id, name: f.name, price: f.priceModifier === 0 ? "+₹0" : `+${formatINR(f.priceModifier)}`, swatch: f.id })), customizerState.frameId, (id) => { customizerState.frameId = id; refreshCustomizerUI(); });
      renderOptionGroup("mountingOptions", MOUNTINGS.map((m) => ({ id: m.id, name: m.name, sub: m.sub, price: m.priceModifier === 0 ? "+₹0" : `+${formatINR(m.priceModifier)}` })), customizerState.mountingId, (id) => { customizerState.mountingId = id; refreshCustomizerUI(); });
    
      initPhotoUpload();
@@ -287,7 +285,7 @@
      const frame = getFrame();
      const size = getEffectiveSize();
      const mounting = getMounting();
-     el.textContent = `${size.label} \u00b7 ${frame.name} \u00b7 ${mounting.name}`;
+     el.textContent = `${size.label} \u00b7 ${mounting.name}`;
    }
  
    function initPreviewToggle() {
@@ -447,7 +445,6 @@
      const effectiveSize = getEffectiveSize();
      document.getElementById("sumSize").textContent = `${effectiveSize.label} · ${ORIENTATIONS.find((o) => o.id === customizerState.orientation).name}`;
      document.getElementById("sumQuality").textContent = quality.name;
-     document.getElementById("sumFrame").textContent = frame.name;
      document.getElementById("sumMounting").textContent = mounting.name;
    
      // Never show ₹0 or a fake number for a size+quality that

@@ -1,0 +1,72 @@
+diff --git a/css/hero-tagline.css b/css/hero-tagline.css
+new file mode 100644
+index 0000000..0d94e96
+--- /dev/null
++++ b/css/hero-tagline.css
+@@ -0,0 +1,43 @@
++/* Remove the old "Founder & CEO / Vamshi" badge that overlaps the founder photo.
++   The badge is not in index.html, so it is drawn by CSS pseudo-elements (or JS).
++   If it comes from a different selector, delete that rule in css/home.css instead. */
++.hero-frame::before,
++.hero-frame::after,
++.hero-frame-inner::before,
++.hero-frame-inner::after {
++  content: none !important;
++  display: none !important;
++}
++
++/* New plain tagline below the hero paragraph */
++.hero-founder {
++  margin: 28px 0 0;
++}
++.hero-founder::before {
++  content: "";
++  display: block;
++  width: 36px;
++  height: 1px;
++  background: #A8733A; /* same brown as the View Work border */
++  margin-bottom: 12px;
++}
++.hero-founder-role {
++  display: block;
++  font-family: 'Space Mono', monospace;
++  font-size: 12px;
++  letter-spacing: 2px;
++  text-transform: uppercase;
++  color: #A8733A;
++}
++.hero-founder-name {
++  display: block;
++  font-family: 'Cormorant Garamond', Georgia, serif;
++  font-size: 28px;
++  line-height: 1.2;
++  color: #111;
++  margin-top: 2px;
++}
++@media (max-width: 640px) {
++  .hero-founder { margin-top: 20px; }
++  .hero-founder-name { font-size: 24px; }
++}
+diff --git a/index.html b/index.html
+index cde4c67..75a7cc4 100644
+--- a/index.html
++++ b/index.html
+@@ -10,6 +10,7 @@
+ <link rel="stylesheet" href="css/style.css">
+ <link rel="stylesheet" href="css/home.css">
+ <link rel="stylesheet" href="css/transition.css">
++<link rel="stylesheet" href="css/hero-tagline.css">
+ <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+ </head>
+ <body>
+@@ -53,6 +54,10 @@
+ <div class="hero-copy">
+ <h1 class="hero-title">Capturing Moments That <br> Last Forever</h1>
+ <p class="hero-lede">At VK Photography, we believe every moment has a story worth preserving. Through our lens, we capture genuine emotions, natural expressions, and unforgettable memories with creativity and passion. From weddings and portraits to special celebrations, our goal is to create timeless photographs that you'll cherish for a lifetime.</p>
++<div class="hero-founder">
++<span class="hero-founder-role">Founder &amp; CEO</span>
++<span class="hero-founder-name">Vamshi</span>
++</div>
+ <div class="hero-cta">
+ <a class="hero-btn solid" href="contact.html">Book a Session</a>
+ <a class="hero-btn" href="portfolio.html">View Work</a>

@@ -1,126 +1,89 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    const gallery = document.getElementById('gallery');
+    const totalPhotos = 39; // number of files: portfolio/portfolio1.webp ... portfolioN.webp
 
-    // Set Dynamic Year in Footer
-    const yearSpan = document.getElementById('current-year');
-    if (yearSpan) {
-        yearSpan.textContent = new Date().getFullYear();
+    // Load a photo and read its REAL size (tries .webp, then .png)
+    function loadPhoto(n) {
+        return new Promise(resolve => {
+            const tryLoad = (ext, fallback) => {
+                const im = new Image();
+                im.onload = () => resolve({ n, src: im.src, w: im.naturalWidth, h: im.naturalHeight });
+                im.onerror = () => fallback ? tryLoad('png', false) : resolve(null);
+                im.src = `portfolio/portfolio${n}.${ext}`;
+            };
+            tryLoad('webp', true);
+        });
     }
 
-    const gallery = document.getElementById('gallery');
-    const totalPhotos = 35;
+    const photos = (await Promise.all(
+        Array.from({ length: totalPhotos }, (_, k) => loadPhoto(k + 1))
+    )).filter(Boolean);
 
-    // 1. Build gallery items from your local photos (portfolio/image1.jpg ... image39.jpg)
-    //    Orientation (landscape/portrait) is auto-detected once each image loads.
-    for (let i = 1; i <= totalPhotos; i++) {
+    // Build masonry items (CSS columns place them)
+    photos.forEach((p, idx) => {
         const item = document.createElement('div');
-        item.className = 'gallery-item'; // orientation class added below once image loads
-
-        const imgUrl = `portfolio/image${i}.webp`;
-
+        item.className = 'gallery-item';
+        item.dataset.index = idx;
+        item.style.setProperty('--r', (p.w / p.h).toFixed(5));
         item.innerHTML = `
             <div class="gallery-image-wrapper">
-                <img src="${imgUrl}" class="parallax-img" alt="Editorial Concept ${i}" loading="lazy">
+                <img src="${p.src}" width="${p.w}" height="${p.h}" loading="lazy" class="parallax-img" alt="Photography portfolio ${p.n}">
             </div>
-            <div class="item-overlay">
-                <span>Archive No. ${i.toString().padStart(2, '0')}</span>
-            </div>
-        `;
-
-        const img = item.querySelector('img');
-
-        // If .webp fails to load, automatically try .png instead
-        img.addEventListener('error', () => {
-            if (!img.dataset.triedPng) {
-                img.dataset.triedPng = 'true';
-                img.src = `portfolio/image${i}.png`;
-            }
-        }, { once: false });
-
-        img.addEventListener('load', () => {
-            if (img.naturalWidth >= img.naturalHeight) {
-                item.classList.add('landscape');
-                // Photos wider than the 16:9 box would lose their sides to
-                // cropping, so give them a box that matches their own shape.
-                const ratio = img.naturalWidth / img.naturalHeight;
-                if (ratio > 16 / 9 + 0.05) {
-                    item.classList.add('wide');
-                    item.style.setProperty('--ar', ratio.toFixed(3));
-                }
-            } else {
-                item.classList.add('portrait');
-            }
-        });
-
+            <div class="item-overlay"><span>Archive No. ${String(p.n).padStart(2, '0')}</span></div>`;
         gallery.appendChild(item);
-    }
+    });
 
-    // 2. Scroll Reveal Animation (Intersection Observer)
-    const observerOptions = {
-        root: null,
-        rootMargin: '0px 0px -10% 0px',
-        threshold: 0.1
+    // Lightbox
+    const lb = document.createElement('div');
+    lb.className = 'lb';
+    lb.innerHTML = `<button class="lb-close" aria-label="Close">&times;</button>
+        <button class="lb-prev" aria-label="Previous">&#8249;</button>
+        <img alt="">
+        <button class="lb-next" aria-label="Next">&#8250;</button>
+        <div class="lb-count"></div>`;
+    document.body.appendChild(lb);
+    const lbImg = lb.querySelector('img'), lbCount = lb.querySelector('.lb-count');
+    let cur = 0;
+    const show = i => {
+        cur = (i + photos.length) % photos.length;
+        lbImg.src = photos[cur].src;
+        lbCount.textContent = `${cur + 1} / ${photos.length}`;
     };
+    const open = i => { show(i); lb.classList.add('open'); document.body.style.overflow = 'hidden'; };
+    const close = () => { lb.classList.remove('open'); document.body.style.overflow = ''; };
 
-    const observer = new IntersectionObserver((entries, observer) => {
+    gallery.addEventListener('click', e => {
+        const it = e.target.closest('.gallery-item');
+        if (it) open(+it.dataset.index);
+    });
+    lb.querySelector('.lb-close').onclick = close;
+    lb.querySelector('.lb-prev').onclick = () => show(cur - 1);
+    lb.querySelector('.lb-next').onclick = () => show(cur + 1);
+    lb.addEventListener('click', e => { if (e.target === lb) close(); });
+    document.addEventListener('keydown', e => {
+        if (!lb.classList.contains('open')) return;
+        if (e.key === 'Escape') close();
+        if (e.key === 'ArrowLeft') show(cur - 1);
+        if (e.key === 'ArrowRight') show(cur + 1);
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries, obs) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('is-visible');
-                observer.unobserve(entry.target);
+                obs.unobserve(entry.target);
             }
         });
-    }, observerOptions);
+    }, { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
 
-    const galleryItems = document.querySelectorAll('.gallery-item');
-    galleryItems.forEach((item, index) => {
-        // Stagger the load-in for items that appear in the viewport at the same time
-        item.style.transitionDelay = `${(index % 3) * 0.15}s`;
+    document.querySelectorAll('.gallery-item').forEach((item, idx) => {
+        item.style.transitionDelay = `${(idx % 3) * 0.12}s`;
         observer.observe(item);
     });
 
-    // Reveal the CTA heading and button as they scroll into view,
-    // with the button trailing slightly behind the heading
     const ctaHeading = document.querySelector('.cta-section h2');
     const ctaButton = document.querySelector('.cta-button');
-
-    if (ctaHeading) {
-        observer.observe(ctaHeading);
-    }
-    if (ctaButton) {
-        ctaButton.style.transitionDelay = '0.2s';
-        observer.observe(ctaButton);
-    }
-
+    if (ctaHeading) observer.observe(ctaHeading);
+    if (ctaButton) { ctaButton.style.transitionDelay = '0.2s'; observer.observe(ctaButton); }
 });
-// Mobile sidebar: opens from the side when the hamburger button is
-// tapped, closes via the X button, the overlay, Escape, or picking a link
-(() => {
-  const menuBtn = document.getElementById('menuBtn');
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('sidebarOverlay');
-  const closeBtn = document.getElementById('sidebarClose');
-  if (!menuBtn || !sidebar || !overlay) return;
-
-  function openSidebar() {
-    sidebar.classList.add('is-open');
-    overlay.classList.add('is-open');
-    document.body.classList.add('no-scroll');
-    menuBtn.setAttribute('aria-expanded', 'true');
-  }
-
-  function closeSidebar() {
-    sidebar.classList.remove('is-open');
-    overlay.classList.remove('is-open');
-    document.body.classList.remove('no-scroll');
-    menuBtn.setAttribute('aria-expanded', 'false');
-  }
-
-  menuBtn.addEventListener('click', openSidebar);
-  closeBtn.addEventListener('click', closeSidebar);
-  overlay.addEventListener('click', closeSidebar);
-  sidebar.querySelectorAll('.sidebar-links a').forEach(link => {
-    link.addEventListener('click', closeSidebar);
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeSidebar();
-  });
-})();

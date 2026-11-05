@@ -1,0 +1,64 @@
+document.addEventListener('DOMContentLoaded', async () => {
+    const gallery = document.getElementById('gallery');
+    const totalPhotos = 39; // number of files: portfolio/portfolio1.webp ... portfolioN.webp
+
+    // Load a photo and read its REAL size (tries .webp, then .png)
+    function loadPhoto(n) {
+        return new Promise(resolve => {
+            const tryLoad = (ext, fallback) => {
+                const im = new Image();
+                im.onload = () => resolve({ n, src: im.src, w: im.naturalWidth, h: im.naturalHeight });
+                im.onerror = () => fallback ? tryLoad('png', false) : resolve(null);
+                im.src = `portfolio/portfolio${n}.${ext}`;
+            };
+            tryLoad('webp', true);
+        });
+    }
+
+    const photos = (await Promise.all(
+        Array.from({ length: totalPhotos }, (_, k) => loadPhoto(k + 1))
+    )).filter(Boolean);
+
+    function makeItem(p) {
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        item.style.setProperty('--r', (p.w / p.h).toFixed(5)); // exact shape of the photo
+        item.innerHTML = `
+            <div class="gallery-image-wrapper">
+                <img src="${p.src}" width="${p.w}" height="${p.h}" class="parallax-img" alt="Editorial Concept ${p.n}">
+            </div>
+            <div class="item-overlay"><span>Archive No. ${String(p.n).padStart(2, '0')}</span></div>`;
+        return item;
+    }
+
+    // Rows of 2 photos. If the total is odd, the last row holds 3.
+    let i = 0;
+    while (i < photos.length) {
+        const n = (photos.length - i === 3) ? 3 : 2;
+        const row = document.createElement('div');
+        row.className = 'gallery-row';
+        photos.slice(i, i + n).forEach(p => row.appendChild(makeItem(p)));
+        gallery.appendChild(row);
+        i += n;
+    }
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                obs.unobserve(entry.target);
+            }
+        });
+    }, { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+
+    document.querySelectorAll('.gallery-item').forEach((item, idx) => {
+        item.style.transitionDelay = `${(idx % 2) * 0.15}s`;
+        observer.observe(item);
+    });
+
+    const ctaHeading = document.querySelector('.cta-section h2');
+    const ctaButton = document.querySelector('.cta-button');
+    if (ctaHeading) observer.observe(ctaHeading);
+    if (ctaButton) { ctaButton.style.transitionDelay = '0.2s'; observer.observe(ctaButton); }
+});

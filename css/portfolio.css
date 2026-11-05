@@ -74,8 +74,7 @@ h1, h2, h3 {
 .gallery {
     display: grid;
     /* Base column width */
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    grid-auto-flow: dense;
+    grid-template-columns: repeat(2, 1fr);
     gap: 2rem;
 }
 
@@ -89,25 +88,14 @@ h1, h2, h3 {
     will-change: opacity, transform;
 }
 
-/* Enforcing strict aspect ratios */
-.gallery-item.landscape {
-    grid-column: span 2;
-    aspect-ratio: 16 / 9;
+.gallery-item {
+    aspect-ratio: 4 / 3; /* 1 / 1 = square, 4 / 5 = taller */
 }
 
-.gallery-item.portrait {
-    grid-column: span 1;
-    aspect-ratio: 3 / 4;
-}
-
-/* Extra-wide photos: box matches the photo, and no extra image height,
-   so nothing is cropped off the sides */
-.gallery-item.wide {
-    aspect-ratio: var(--ar);
-}
-.gallery-item.wide img {
-    height: 100%;
-    top: 0;
+/* odd photo count: last photo spans both columns, no empty slot */
+.gallery-item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    aspect-ratio: 8 / 3;
 }
 
 /* Triggered by JS IntersectionObserver */
@@ -132,10 +120,10 @@ h1, h2, h3 {
 
 .gallery-item img {
     width: 100%;
-    height: 120%; /* Extra height to allow for parallax travel */
+    height: 100%;
     object-fit: cover;
     position: absolute;
-    top: -10%; /* Center the extra height */
+    top: 0;
     transition: filter 0.8s ease, transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
     filter: none;
     will-change: transform;
@@ -259,32 +247,7 @@ h1, h2, h3 {
 /* --- Responsive Adjustments --- */
 @media (max-width: 768px) {
     .gallery {
-        display: block;
-        columns: 2;
-        column-gap: 0.75rem;
-    }
-    .gallery-item {
-        display: block;
-        break-inside: avoid;
-        margin-bottom: 0.75rem;
-        width: 100%;
-    }
-    .gallery-item.landscape,
-    .gallery-item.portrait,
-    .gallery-item.wide {
-        grid-column: unset;
-        aspect-ratio: unset; /* height now comes from the natural image ratio */
-    }
-    .gallery-item.wide img {
-        height: auto;
-    }
-    .gallery-image-wrapper {
-        height: auto;
-    }
-    .gallery-item img {
-        position: static;
-        height: auto;
-        top: 0;
+        gap: 0.75rem;
     }
     .gallery-container {
         padding: 0.5rem 1rem 3rem 1rem;
@@ -309,10 +272,7 @@ h1, h2, h3 {
 
 @media (max-width: 480px) {
     .gallery {
-        column-gap: 0.5rem;
-    }
-    .gallery-item {
-        margin-bottom: 0.5rem;
+        gap: 0.5rem;
     }
     .item-overlay {
         padding: 1rem;

@@ -1,0 +1,246 @@
+diff --git a/css/shop.css b/css/shop.css
+index 2509d16..142b47d 100644
+--- a/css/shop.css
++++ b/css/shop.css
+@@ -208,22 +208,9 @@
+     transition: border-color 0.25s ease, transform 0.25s ease;
+   }
+   .frame-card:hover { border-color: var(--border-strong); transform: translateY(-3px); box-shadow: var(--shadow-card); }
+-  .frame-card .frame-thumb {
+-    aspect-ratio: 4 / 5;
+-    overflow: hidden;
+-    background: var(--accent-bg-deep);
+-    display: flex; align-items: center; justify-content: center;
+-    padding: 28px;
+-  }
+-  .thumb-frame { padding: 12px; box-shadow: 0 14px 30px rgba(43,38,32,0.16); border: 1px solid rgba(43,38,32,0.3); outline: 1px solid rgba(255,255,255,0.45); outline-offset: -1px; }
+-  .thumb-frame[data-frame="classic-black"] { background: #0c0c0c; }
+-  .thumb-frame[data-frame="natural-wood"]  { background: linear-gradient(135deg,#8a6644,#6b4c30); }
+-  .thumb-frame[data-frame="white-gallery"] { background: #efece4; }
+-  .thumb-frame[data-frame="premium-walnut"]{ background: linear-gradient(135deg,#5a3823,#3c2416); }
+-  .thumb-mat { background: #f4f1ea; display: flex; align-items: center; justify-content: center; }
+-  .thumb-frame[data-frame="white-gallery"] .thumb-mat { background: #ffffff; }
+-  .thumb-window { width: 100%; aspect-ratio: 4 / 5; min-width: 90px; background: #e8e5dd; display: flex; align-items: center; justify-content: center; }
+-  .thumb-window svg { width: 34%; height: 34%; stroke: #a39d90; }
++  .frame-card .frame-thumb { aspect-ratio: 4 / 5; overflow: hidden; background: var(--accent-bg-deep); }
++  .frame-card .frame-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
++  .frame-card:hover .frame-thumb img { transform: scale(1.03); }
+   .frame-card-body { padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+   .frame-card-body h3 { font-family: var(--font-display); font-weight: 500; font-size: 20px; color: var(--ink); }
+   .frame-card-body p { color: var(--gray); font-size: 13.5px; flex: 1; }
+@@ -257,10 +244,17 @@
+     box-shadow: var(--shadow-soft), 0 0 0 1px rgba(0,0,0,0.05);
+   }
+   .fp-frame { padding: 22px; transition: padding 0.25s ease, background 0.25s ease; }
+-  .fp-frame[data-frame="classic-black"] { background: #0c0c0c; }
+-  .fp-frame[data-frame="natural-wood"]  { background: linear-gradient(135deg,#8a6644,#6b4c30); }
+-  .fp-frame[data-frame="white-gallery"] { background: #efece4; }
+-  .fp-frame[data-frame="premium-walnut"]{ background: linear-gradient(135deg,#5a3823,#3c2416); }
++  /* Live-preview frame texture: a small strip cropped from each frame's real border. */
++  .fp-frame[data-frame="brick-brown"] { background: #54443f url("../frames/brick-brown-swatch.webp") center / 22px auto repeat; }
++  .fp-frame[data-frame="mahogany"] { background: #5e4a48 url("../frames/mahogany-swatch.webp") center / 22px auto repeat; }
++  .fp-frame[data-frame="grey-modern"] { background: #807f84 url("../frames/grey-modern-swatch.webp") center / 22px auto repeat; }
++  .fp-frame[data-frame="red-lattice"] { background: #6a4135 url("../frames/red-lattice-swatch.webp") center / 22px auto repeat; }
++  .fp-frame[data-frame="burgundy-hex"] { background: #563c3c url("../frames/burgundy-hex-swatch.webp") center / 22px auto repeat; }
++  .fp-frame[data-frame="gold-rope"] { background: #7b5b47 url("../frames/gold-rope-swatch.webp") center / 22px auto repeat; }
++  .fp-frame[data-frame="copper-quilt"] { background: #784836 url("../frames/copper-quilt-swatch.webp") center / 22px auto repeat; }
++  .fp-frame[data-frame="basket-weave"] { background: #5e3a2f url("../frames/basket-weave-swatch.webp") center / 22px auto repeat; }
++  .fp-frame[data-frame="onyx-lattice"] { background: #3a3a3c url("../frames/onyx-lattice-swatch.webp") center / 22px auto repeat; }
++  .fp-frame[data-frame="bamboo-rope"] { background: #63473f url("../frames/bamboo-rope-swatch.webp") center / 22px auto repeat; }
+   .fp-mat { background: var(--ink); padding: 0; transition: padding 0.25s ease; }
+   .fp-mat[data-mat="white-mat"] { padding: 26px; background: #f4f1ea; }
+   .fp-window { position: relative; overflow: hidden; background: #1c1b19; width: 340px; }
+@@ -331,10 +325,14 @@
+   @media (max-width: 480px) { #qualityOptions { grid-template-columns: 1fr; } }
+ 
+   .swatch { width: 100%; height: 34px; border-radius: 4px; margin-bottom: 6px; border: 1px solid var(--line); }
+-  .swatch.classic-black { background: #0c0c0c; }
+-  .swatch.natural-wood  { background: linear-gradient(135deg,#8a6644,#6b4c30); }
+-  .swatch.white-gallery { background: #efece4; }
+-  .swatch.premium-walnut{ background: linear-gradient(135deg,#5a3823,#3c2416); }
++  /* Frame picker strip in the customizer */
++  .frame-picker { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 10px; scroll-snap-type: x proximity; }
++  .frame-pick { flex: 0 0 78px; scroll-snap-align: start; display: flex; flex-direction: column; gap: 5px; padding: 4px; text-align: center; font: inherit; cursor: pointer; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
++  .frame-pick:hover { border-color: var(--border-strong); }
++  .frame-pick img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; display: block; border-radius: 3px; }
++  .frame-pick span { font-size: 10.5px; line-height: 1.2; color: var(--gray); }
++  .frame-pick[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
++  .frame-pick[aria-pressed="true"] span { color: var(--ink); font-weight: 600; }
+   
+   .price-summary { border-top: 1px solid var(--border-strong); padding-top: 22px; display: flex; flex-direction: column; gap: 10px; }
+   .price-row { display: flex; justify-content: space-between; font-size: 13.5px; color: var(--gray); }
+diff --git a/js/shop-pricing.js b/js/shop-pricing.js
+index c1a1b25..2eb08b3 100644
+--- a/js/shop-pricing.js
++++ b/js/shop-pricing.js
+@@ -22,11 +22,25 @@
+       root.VKPricing = factory();
+     }
+   })(typeof self !== "undefined" ? self : this, function () {
++    /* FRAME COLLECTION - one entry per frame photographed in /frames.
++       To add a frame: drop two images in /frames (<id>.webp = 640x800 card photo,
++       <id>-swatch.webp = small border texture for the live preview) and add one
++       entry below. Nothing else needs to change.
++
++       priceModifier = what this frame adds on top of the print price.
++       !! The numbers below are PLACEHOLDERS - set your real prices here. !!
++       (The server re-prices every order from this file, so this is the only place.) */
+     const FRAMES = [
+-      { id: "classic-black", name: "Classic Black", description: "A timeless matte-black frame that suits any photo, any room.", basePrice: 1499, priceModifier: 0 },
+-      { id: "natural-wood", name: "Natural Wood", description: "Warm, honest wood grain — a favorite for portraits and family photos.", basePrice: 1699, priceModifier: 200 },
+-      { id: "white-gallery", name: "White Gallery", description: "Clean gallery-white edges that let bright, airy photos breathe.", basePrice: 1599, priceModifier: 100 },
+-      { id: "premium-walnut", name: "Premium Walnut", description: "Deep walnut tones with a refined finish, for your most cherished shot.", basePrice: 1999, priceModifier: 500 },
++      { id: "brick-brown", name: "Brick Brown", description: "Dark brown brick-texture frame with a fine gold liner.", priceModifier: 100, image: "frames/brick-brown.webp", swatch: "frames/brick-brown-swatch.webp", swatchColor: "#54443f" },
++      { id: "mahogany", name: "Mahogany", description: "Smooth glossy mahogany with a black inner lip. Classic and understated.", priceModifier: 0, image: "frames/mahogany.webp", swatch: "frames/mahogany-swatch.webp", swatchColor: "#5e4a48" },
++      { id: "grey-modern", name: "Grey Modern", description: "Wide, flat gunmetal grey with a black edge. A clean, modern look.", priceModifier: 0, image: "frames/grey-modern.webp", swatch: "frames/grey-modern-swatch.webp", swatchColor: "#807f84" },
++      { id: "red-lattice", name: "Red Lattice", description: "Embossed diamond-lattice pattern in warm reddish brown.", priceModifier: 150, image: "frames/red-lattice.webp", swatch: "frames/red-lattice-swatch.webp", swatchColor: "#6a4135" },
++      { id: "burgundy-hex", name: "Burgundy Hex", description: "Deep burgundy with a fine honeycomb texture.", priceModifier: 150, image: "frames/burgundy-hex.webp", swatch: "frames/burgundy-hex-swatch.webp", swatchColor: "#563c3c" },
++      { id: "gold-rope", name: "Gold Rope", description: "Wine-brown frame edged with an ornate gold twisted-rope border.", priceModifier: 300, image: "frames/gold-rope.webp", swatch: "frames/gold-rope-swatch.webp", swatchColor: "#7b5b47" },
++      { id: "copper-quilt", name: "Copper Quilt", description: "Copper-toned quilted diamond pattern, like tufted leather.", priceModifier: 200, image: "frames/copper-quilt.webp", swatch: "frames/copper-quilt-swatch.webp", swatchColor: "#784836" },
++      { id: "basket-weave", name: "Basket Weave", description: "Rich brown woven-tile texture with dark grooves.", priceModifier: 200, image: "frames/basket-weave.webp", swatch: "frames/basket-weave-swatch.webp", swatchColor: "#5e3a2f" },
++      { id: "onyx-lattice", name: "Onyx Lattice", description: "Black frame with an embossed diamond-floral pattern and silver edge.", priceModifier: 200, image: "frames/onyx-lattice.webp", swatch: "frames/onyx-lattice-swatch.webp", swatchColor: "#3a3a3c" },
++      { id: "bamboo-rope", name: "Bamboo Rope", description: "Dark brown ribbed bamboo-style texture with woven knots.", priceModifier: 250, image: "frames/bamboo-rope.webp", swatch: "frames/bamboo-rope-swatch.webp", swatchColor: "#63473f" },
+     ];
+   
+     /* Standard sizes as sold by Indian photoframe/print shops.
+diff --git a/js/shop.js b/js/shop.js
+index 2c8e19f..1d4b7ea 100644
+--- a/js/shop.js
++++ b/js/shop.js
+@@ -34,7 +34,7 @@
+       CUSTOMIZER STATE
+       ------------------------------------------------------------ */
+    const customizerState = {
+-     frameId: "classic-black",
++     frameId: FRAMES[0].id,
+      sizeId: "12x18",
+      qualityId: "normal",
+      orientation: "portrait",
+@@ -68,18 +68,12 @@
+      grid.innerHTML = FRAMES.map((f) => `
+        <article class="frame-card">
+          <div class="frame-thumb">
+-           <div class="thumb-frame" data-frame="${f.id}" role="img" aria-label="${f.name} photoframe example">
+-             <div class="thumb-mat">
+-               <div class="thumb-window">
+-                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+-               </div>
+-             </div>
+-           </div>
++           <img src="${f.image}" alt="${f.name} photoframe" width="640" height="800" loading="lazy">
+          </div>
+          <div class="frame-card-body">
+            <h3>${f.name}</h3>
+            <p>${f.description}</p>
+-           <div class="frame-price">From <strong>${formatINR(f.basePrice)}</strong></div>
++           <div class="frame-price">From <strong>${formatINR(getFromPrice(f))}</strong></div>
+            <button class="shop-btn shop-btn-outline shop-btn-sm customize-btn" type="button" data-frame-id="${f.id}">Customize</button>
+          </div>
+        </article>
+@@ -87,7 +81,7 @@
+    
+      grid.querySelectorAll(".customize-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+-         openCustomizer();
++         openCustomizer(btn.dataset.frameId);
+        });
+      });
+    
+@@ -96,10 +90,20 @@
+      document.getElementById("backToCollection")?.addEventListener("click", () => switchView("Shop"));
+    }
+    
+-   function openCustomizer() {
++   function openCustomizer(frameId) {
++     // Remember which frame card was clicked (hero / footer buttons pass nothing
++     // and keep whatever frame is currently selected).
++     if (frameId && FRAMES.some((f) => f.id === frameId)) customizerState.frameId = frameId;
+      switchView("Customizer");
+      refreshCustomizerUI();
+    }
++
++   /* "From" price on a frame card = cheapest priced print (Normal quality)
++      + this frame's own price, so it always matches what the cart will charge. */
++   function getFromPrice(frame) {
++     const prints = SIZES.map((s) => getPrintPrice(s.id, "normal")).filter((p) => p != null);
++     return Math.min(...prints) + frame.priceModifier;
++   }
+    
+    function switchView(view) {
+      ["Shop", "Customizer", "Gift", "Checkout", "Payment", "Confirmation"].forEach((v) => {
+@@ -134,6 +138,7 @@
+      renderQualityOptions();
+      renderOptionGroup("mountingOptions", MOUNTINGS.map((m) => ({ id: m.id, name: m.name, sub: m.sub, price: m.priceModifier === 0 ? "+₹0" : `+${formatINR(m.priceModifier)}` })), customizerState.mountingId, (id) => { customizerState.mountingId = id; refreshCustomizerUI(); });
+    
++     renderFramePicker();
+      initPhotoUpload();
+      initCropControls();
+      initPreviewToggle();
+@@ -285,7 +290,7 @@
+      const frame = getFrame();
+      const size = getEffectiveSize();
+      const mounting = getMounting();
+-     el.textContent = `${size.label} \u00b7 ${mounting.name}`;
++     el.textContent = `${size.label} \u00b7 ${frame.name}`;
+    }
+  
+    function initPreviewToggle() {
+@@ -466,6 +471,7 @@
+    }
+ 
+    function refreshCustomizerUI() {
++     syncFramePicker();
+      renderQualityOptions();
+      updatePreview();
+      updatePreviewSummary();
+@@ -474,6 +480,37 @@
+      updateQuality();
+    }
+    
++   /* ---------------- Frame picker (customizer) ----------------
++      Lets the customer switch between all frames without going back
++      to the collection. Rendered once; syncFramePicker() just moves
++      the highlight so the strip never jumps while scrolling. */
++   function renderFramePicker() {
++     const el = document.getElementById("framePicker");
++     if (!el) return;
++     el.innerHTML = FRAMES.map((f) => `
++       <button type="button" class="frame-pick" data-id="${f.id}" aria-pressed="${f.id === customizerState.frameId}" title="${f.name}">
++         <img src="${f.image}" alt="" loading="lazy">
++         <span>${f.name}</span>
++       </button>
++     `).join("");
++     el.querySelectorAll(".frame-pick").forEach((btn) => {
++       btn.addEventListener("click", () => {
++         customizerState.frameId = btn.dataset.id;
++         refreshCustomizerUI();
++       });
++     });
++   }
++
++   function syncFramePicker() {
++     const el = document.getElementById("framePicker");
++     if (!el) return;
++     el.querySelectorAll(".frame-pick").forEach((btn) => {
++       const on = btn.dataset.id === customizerState.frameId;
++       btn.setAttribute("aria-pressed", String(on));
++       if (on) el.scrollLeft = btn.offsetLeft - (el.clientWidth - btn.offsetWidth) / 2;
++     });
++   }
++
+    function getFrame() { return FRAMES.find((f) => f.id === customizerState.frameId); }
+    function getSize() { return SIZES.find((s) => s.id === customizerState.sizeId); }
+    function getQuality() { return QUALITIES.find((q) => q.id === customizerState.qualityId); }
+diff --git a/shop.html b/shop.html
+index fbc740d..fd38913 100644
+--- a/shop.html
++++ b/shop.html
+@@ -156,6 +156,8 @@
+         </div>
+ 
+         <div class="controls-col">
++          <div class="control-block"><h2>Frame</h2><div class="frame-picker" id="framePicker" role="group" aria-label="Choose frame"></div></div>
++
+           <div class="control-block">
+             <h2>Upload Your Photo</h2>
+             <div class="upload-area" id="uploadArea">

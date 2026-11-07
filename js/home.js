@@ -135,6 +135,7 @@
     const clones = originalCards.map(card => {
       const clone = card.cloneNode(true);
       clone.setAttribute('aria-hidden', 'true');
+      clone.classList.add('in-view');
       track.appendChild(clone);
       return clone;
     });
@@ -157,6 +158,16 @@
     let pos = 0;
     let speed = 0.35;
     let paused = false;
+    // Auto-scroll only while the slider is actually on screen, and wait a
+    // moment the first time so card 1 is seen in full before it starts moving.
+    let inView = false;
+    let startAt = Infinity;
+    new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        inView = e.isIntersecting;
+        if (inView && startAt === Infinity) startAt = performance.now() + 1600;
+      });
+    }, { threshold: 0.25 }).observe(viewport);
     let resumeTimer = null;
     const gap = 22;
 
@@ -171,7 +182,7 @@
     window.addEventListener('load', () => { loopWidth = setWidth(); });
 
     function frame() {
-      if (!paused) {
+      if (!paused && inView && performance.now() >= startAt) {
         pos += speed;
         if (loopWidth > 0) pos %= loopWidth;
         track.style.transform = `translateX(${-pos}px)`;

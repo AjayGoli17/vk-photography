@@ -243,20 +243,59 @@
     border: 1px solid rgba(0,0,0,0.35); outline: 1px solid rgba(255,255,255,0.5); outline-offset: -1px;
     box-shadow: var(--shadow-soft), 0 0 0 1px rgba(0,0,0,0.05);
   }
-  .fp-frame { padding: 22px; transition: padding 0.25s ease, background 0.25s ease; }
-  /* Live-preview frame texture: a small strip cropped from each frame's real border. */
-  .fp-frame[data-frame="brick-brown"] { background: #54443f url("../frames/brick-brown-swatch.webp") center / 22px auto repeat; }
-  .fp-frame[data-frame="mahogany"] { background: #5e4a48 url("../frames/mahogany-swatch.webp") center / 22px auto repeat; }
-  .fp-frame[data-frame="grey-modern"] { background: #807f84 url("../frames/grey-modern-swatch.webp") center / 22px auto repeat; }
-  .fp-frame[data-frame="red-lattice"] { background: #6a4135 url("../frames/red-lattice-swatch.webp") center / 22px auto repeat; }
-  .fp-frame[data-frame="burgundy-hex"] { background: #563c3c url("../frames/burgundy-hex-swatch.webp") center / 22px auto repeat; }
-  .fp-frame[data-frame="gold-rope"] { background: #7b5b47 url("../frames/gold-rope-swatch.webp") center / 22px auto repeat; }
-  .fp-frame[data-frame="copper-quilt"] { background: #784836 url("../frames/copper-quilt-swatch.webp") center / 22px auto repeat; }
-  .fp-frame[data-frame="basket-weave"] { background: #5e3a2f url("../frames/basket-weave-swatch.webp") center / 22px auto repeat; }
-  .fp-frame[data-frame="onyx-lattice"] { background: #3a3a3c url("../frames/onyx-lattice-swatch.webp") center / 22px auto repeat; }
-  .fp-frame[data-frame="bamboo-rope"] { background: #63473f url("../frames/bamboo-rope-swatch.webp") center / 22px auto repeat; }
-  .fp-mat { background: var(--ink); padding: 0; transition: padding 0.25s ease; }
-  .fp-mat[data-mat="white-mat"] { padding: 26px; background: #f4f1ea; }
+    /* FRAME-DETAIL-START */
+  /* Real frame detailing: mitred textured moulding (built from each frame's photo),
+     dark inner lip, cream liner, gold line, bevel highlights and a soft glass sheen. */
+  .fp-frame {
+    --mold: 42px;               /* moulding thickness (set per frame below) */
+    --liner: 5px;               /* cream liner between moulding and photo */
+    box-sizing: content-box;
+    border: var(--mold) solid #4a3a34;
+    border-image-slice: 80;
+    border-image-width: var(--mold);
+    border-image-repeat: round;
+    padding: calc(var(--liner) + 2px);
+    background: #2a2220;
+    position: relative;
+    box-shadow:
+      inset 0 0 0 1px rgba(0,0,0,0.55),
+      inset 2px 2px 3px rgba(255,255,255,0.10),
+      inset -2px -2px 4px rgba(0,0,0,0.35),
+      0 14px 28px rgba(0,0,0,0.28), 0 2px 4px rgba(0,0,0,0.25);
+    transition: padding 0.25s ease;
+  }
+  .fp-frame[data-frame="bamboo-rope"] { border-image-source: url("../frames/bamboo-rope-border.webp"); border-image-slice: 83; --mold: 42px; }
+  .fp-frame[data-frame="onyx-lattice"] { border-image-source: url("../frames/onyx-lattice-border.webp"); border-image-slice: 86; --mold: 42px; }
+  .fp-frame[data-frame="basket-weave"] { border-image-source: url("../frames/basket-weave-border.webp"); border-image-slice: 89; --mold: 43px; }
+  .fp-frame[data-frame="copper-quilt"] { border-image-source: url("../frames/copper-quilt-border.webp"); border-image-slice: 78; --mold: 42px; }
+  .fp-frame[data-frame="gold-rope"] { border-image-source: url("../frames/gold-rope-border.webp"); border-image-slice: 75; --mold: 42px; }
+  .fp-frame[data-frame="burgundy-hex"] { border-image-source: url("../frames/burgundy-hex-border.webp"); border-image-slice: 78; --mold: 42px; }
+  .fp-frame[data-frame="red-lattice"] { border-image-source: url("../frames/red-lattice-border.webp"); border-image-slice: 77; --mold: 43px; }
+  .fp-frame[data-frame="grey-modern"] { border-image-source: url("../frames/grey-modern-border.webp"); border-image-slice: 75; --mold: 40px; }
+  .fp-frame[data-frame="mahogany"] { border-image-source: url("../frames/mahogany-border.webp"); border-image-slice: 76; --mold: 41px; }
+  .fp-frame[data-frame="brick-brown"] { border-image-source: url("../frames/brick-brown-border.webp"); border-image-slice: 79; --mold: 41px; }
+  /* outer bevel edge + inner lip shadow on the moulding */
+  .fp-frame::before {
+    content: ""; position: absolute; inset: calc(var(--mold) * -1); pointer-events: none;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,255,255,0.12);
+  }
+  .fp-mat {
+    background: var(--ink); padding: 0; transition: padding 0.25s ease;
+    /* gold liner line -> cream liner -> dark lip, working outwards from the photo */
+    box-shadow:
+      0 0 0 1px #c9a24a,
+      0 0 0 calc(var(--liner) + 1px) #efe6cf,
+      0 0 0 calc(var(--liner) + 2px) rgba(0,0,0,0.65);
+  }
+  .fp-window { box-shadow: inset 0 2px 6px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(0,0,0,0.35); }
+  /* soft glass reflection over the whole frame */
+  .fp-frame::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(115deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0) 38%, rgba(255,255,255,0) 100%);
+  }
+  /* FRAME-DETAIL-END */
+  .fp-mat[data-mat="white-mat"] { padding: 26px; background: #efe6cf; }
+  .fp-mat[data-mat="white-mat"] .fp-window { box-shadow: 0 0 0 1px #c9a24a, 0 0 0 2px rgba(0,0,0,0.25), inset 0 2px 6px rgba(0,0,0,0.35); }
   .fp-window { position: relative; overflow: hidden; background: #1c1b19; width: 340px; }
   .fp-window img {
     position: absolute; top: 50%; left: 50%; max-width: none; transform-origin: center;
@@ -476,6 +515,7 @@
   /* Responsive                                                    */
   /* ---------------------------------------------------------- */
   @media (max-width: 1024px) {
+    .preview-col:not(.expanded) .preview-compact-row .fp-frame { --mold: 6px; --liner: 1px; }
     .frame-grid { grid-template-columns: repeat(2, 1fr); }
     .customizer-grid, .checkout-grid { grid-template-columns: 1fr; gap: 40px; }
 

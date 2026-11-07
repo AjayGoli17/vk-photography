@@ -271,6 +271,7 @@
      const horizontalPadding =
        parseFloat(shellStyle.paddingLeft) + parseFloat(shellStyle.paddingRight) +
        parseFloat(frameStyle.paddingLeft) + parseFloat(frameStyle.paddingRight) +
+       parseFloat(frameStyle.borderLeftWidth) + parseFloat(frameStyle.borderRightWidth) +
        parseFloat(matStyle.paddingLeft) + parseFloat(matStyle.paddingRight);
  
      const availableW = shell.clientWidth - horizontalPadding;

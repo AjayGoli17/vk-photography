@@ -34,7 +34,7 @@
       CUSTOMIZER STATE
       ------------------------------------------------------------ */
    const customizerState = {
-     frameId: "classic-black",
+     frameId: FRAMES[0].id,
      sizeId: "12x18",
      qualityId: "normal",
      orientation: "portrait",
@@ -68,18 +68,12 @@
      grid.innerHTML = FRAMES.map((f) => `
        <article class="frame-card">
          <div class="frame-thumb">
-           <div class="thumb-frame" data-frame="${f.id}" role="img" aria-label="${f.name} photoframe example">
-             <div class="thumb-mat">
-               <div class="thumb-window">
-                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-               </div>
-             </div>
-           </div>
+           <img src="${f.image}" alt="${f.name} photoframe" width="640" height="800" loading="lazy">
          </div>
          <div class="frame-card-body">
            <h3>${f.name}</h3>
            <p>${f.description}</p>
-           <div class="frame-price">From <strong>${formatINR(f.basePrice)}</strong></div>
+           <div class="frame-price">From <strong>${formatINR(getFromPrice(f))}</strong></div>
            <button class="shop-btn shop-btn-outline shop-btn-sm customize-btn" type="button" data-frame-id="${f.id}">Customize</button>
          </div>
        </article>
@@ -87,7 +81,7 @@
    
      grid.querySelectorAll(".customize-btn").forEach((btn) => {
        btn.addEventListener("click", () => {
-         openCustomizer();
+         openCustomizer(btn.dataset.frameId);
        });
      });
    
@@ -96,9 +90,19 @@
      document.getElementById("backToCollection")?.addEventListener("click", () => switchView("Shop"));
    }
    
-   function openCustomizer() {
+   function openCustomizer(frameId) {
+     // Remember which frame card was clicked (hero / footer buttons pass nothing
+     // and keep whatever frame is currently selected).
+     if (frameId && FRAMES.some((f) => f.id === frameId)) customizerState.frameId = frameId;
      switchView("Customizer");
      refreshCustomizerUI();
+   }
+
+   /* "From" price on a frame card = cheapest priced print (Normal quality)
+      + this frame's own price, so it always matches what the cart will charge. */
+   function getFromPrice(frame) {
+     const prints = SIZES.map((s) => getPrintPrice(s.id, "normal")).filter((p) => p != null);
+     return Math.min(...prints) + frame.priceModifier;
    }
    
    function switchView(view) {
@@ -134,6 +138,7 @@
      renderQualityOptions();
      renderOptionGroup("mountingOptions", MOUNTINGS.map((m) => ({ id: m.id, name: m.name, sub: m.sub, price: m.priceModifier === 0 ? "+₹0" : `+${formatINR(m.priceModifier)}` })), customizerState.mountingId, (id) => { customizerState.mountingId = id; refreshCustomizerUI(); });
    
+     renderFramePicker();
      initPhotoUpload();
      initCropControls();
      initPreviewToggle();
@@ -285,7 +290,7 @@
      const frame = getFrame();
      const size = getEffectiveSize();
      const mounting = getMounting();
-     el.textContent = `${size.label} \u00b7 ${mounting.name}`;
+     el.textContent = `${size.label} \u00b7 ${frame.name}`;
    }
  
    function initPreviewToggle() {
@@ -466,6 +471,7 @@
    }
 
    function refreshCustomizerUI() {
+     syncFramePicker();
      renderQualityOptions();
      updatePreview();
      updatePreviewSummary();
@@ -474,6 +480,37 @@
      updateQuality();
    }
    
+   /* ---------------- Frame picker (customizer) ----------------
+      Lets the customer switch between all frames without going back
+      to the collection. Rendered once; syncFramePicker() just moves
+      the highlight so the strip never jumps while scrolling. */
+   function renderFramePicker() {
+     const el = document.getElementById("framePicker");
+     if (!el) return;
+     el.innerHTML = FRAMES.map((f) => `
+       <button type="button" class="frame-pick" data-id="${f.id}" aria-pressed="${f.id === customizerState.frameId}" title="${f.name}">
+         <img src="${f.image}" alt="" loading="lazy">
+         <span>${f.name}</span>
+       </button>
+     `).join("");
+     el.querySelectorAll(".frame-pick").forEach((btn) => {
+       btn.addEventListener("click", () => {
+         customizerState.frameId = btn.dataset.id;
+         refreshCustomizerUI();
+       });
+     });
+   }
+
+   function syncFramePicker() {
+     const el = document.getElementById("framePicker");
+     if (!el) return;
+     el.querySelectorAll(".frame-pick").forEach((btn) => {
+       const on = btn.dataset.id === customizerState.frameId;
+       btn.setAttribute("aria-pressed", String(on));
+       if (on) el.scrollLeft = btn.offsetLeft - (el.clientWidth - btn.offsetWidth) / 2;
+     });
+   }
+
    function getFrame() { return FRAMES.find((f) => f.id === customizerState.frameId); }
    function getSize() { return SIZES.find((s) => s.id === customizerState.sizeId); }
    function getQuality() { return QUALITIES.find((q) => q.id === customizerState.qualityId); }

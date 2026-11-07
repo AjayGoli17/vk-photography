@@ -22,11 +22,25 @@
       root.VKPricing = factory();
     }
   })(typeof self !== "undefined" ? self : this, function () {
+    /* FRAME COLLECTION - one entry per frame photographed in /frames.
+       To add a frame: drop two images in /frames (<id>.webp = 640x800 card photo,
+       <id>-swatch.webp = small border texture for the live preview) and add one
+       entry below. Nothing else needs to change.
+
+       priceModifier = what this frame adds on top of the print price.
+       !! The numbers below are PLACEHOLDERS - set your real prices here. !!
+       (The server re-prices every order from this file, so this is the only place.) */
     const FRAMES = [
-      { id: "classic-black", name: "Classic Black", description: "A timeless matte-black frame that suits any photo, any room.", basePrice: 1499, priceModifier: 0 },
-      { id: "natural-wood", name: "Natural Wood", description: "Warm, honest wood grain — a favorite for portraits and family photos.", basePrice: 1699, priceModifier: 200 },
-      { id: "white-gallery", name: "White Gallery", description: "Clean gallery-white edges that let bright, airy photos breathe.", basePrice: 1599, priceModifier: 100 },
-      { id: "premium-walnut", name: "Premium Walnut", description: "Deep walnut tones with a refined finish, for your most cherished shot.", basePrice: 1999, priceModifier: 500 },
+      { id: "brick-brown", name: "Brick Brown", description: "Dark brown brick-texture frame with a fine gold liner.", priceModifier: 100, image: "frames/brick-brown.webp", swatch: "frames/brick-brown-swatch.webp", swatchColor: "#54443f" },
+      { id: "mahogany", name: "Mahogany", description: "Smooth glossy mahogany with a black inner lip. Classic and understated.", priceModifier: 0, image: "frames/mahogany.webp", swatch: "frames/mahogany-swatch.webp", swatchColor: "#5e4a48" },
+      { id: "grey-modern", name: "Grey Modern", description: "Wide, flat gunmetal grey with a black edge. A clean, modern look.", priceModifier: 0, image: "frames/grey-modern.webp", swatch: "frames/grey-modern-swatch.webp", swatchColor: "#807f84" },
+      { id: "red-lattice", name: "Red Lattice", description: "Embossed diamond-lattice pattern in warm reddish brown.", priceModifier: 150, image: "frames/red-lattice.webp", swatch: "frames/red-lattice-swatch.webp", swatchColor: "#6a4135" },
+      { id: "burgundy-hex", name: "Burgundy Hex", description: "Deep burgundy with a fine honeycomb texture.", priceModifier: 150, image: "frames/burgundy-hex.webp", swatch: "frames/burgundy-hex-swatch.webp", swatchColor: "#563c3c" },
+      { id: "gold-rope", name: "Gold Rope", description: "Wine-brown frame edged with an ornate gold twisted-rope border.", priceModifier: 300, image: "frames/gold-rope.webp", swatch: "frames/gold-rope-swatch.webp", swatchColor: "#7b5b47" },
+      { id: "copper-quilt", name: "Copper Quilt", description: "Copper-toned quilted diamond pattern, like tufted leather.", priceModifier: 200, image: "frames/copper-quilt.webp", swatch: "frames/copper-quilt-swatch.webp", swatchColor: "#784836" },
+      { id: "basket-weave", name: "Basket Weave", description: "Rich brown woven-tile texture with dark grooves.", priceModifier: 200, image: "frames/basket-weave.webp", swatch: "frames/basket-weave-swatch.webp", swatchColor: "#5e3a2f" },
+      { id: "onyx-lattice", name: "Onyx Lattice", description: "Black frame with an embossed diamond-floral pattern and silver edge.", priceModifier: 200, image: "frames/onyx-lattice.webp", swatch: "frames/onyx-lattice-swatch.webp", swatchColor: "#3a3a3c" },
+      { id: "bamboo-rope", name: "Bamboo Rope", description: "Dark brown ribbed bamboo-style texture with woven knots.", priceModifier: 250, image: "frames/bamboo-rope.webp", swatch: "frames/bamboo-rope-swatch.webp", swatchColor: "#63473f" },
     ];
   
     /* Standard sizes as sold by Indian photoframe/print shops.

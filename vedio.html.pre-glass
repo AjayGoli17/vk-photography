@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>VK Photography — Loader Sample</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body { font-family: sans-serif; background: #000; }
+
+  /* ---------- LOADER ---------- */
+  #loader {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #000;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  }
+
+  #loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* the video plays full-screen here, AS the loading animation itself —
+     it never appears again once the loader is gone */
+  #loader-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ---------- HOMEPAGE CONTENT ---------- */
+  #content {
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  #content.visible {
+    opacity: 1;
+  }
+
+  /* ---------- HERO SECTION ---------- */
+  #hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  #hero .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, #2b2b2b 0%, #050505 100%);
+    /* swap this for your real hero image, e.g.:
+       background: url('your-hero-photo.jpg') center/cover; */
+  }
+
+  #hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.6) 100%);
+  }
+
+  .hero-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 32px 48px;
+    color: #f4f1ea;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+
+  .hero-nav .brand {
+    font-size: 20px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .hero-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 36px;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .hero-nav a {
+    color: #f4f1ea;
+    text-decoration: none;
+    opacity: 0.85;
+  }
+
+  .hero-nav a:hover { opacity: 1; }
+
+  .hero-copy {
+    position: absolute;
+    z-index: 2;
+    left: 48px;
+    bottom: 64px;
+    color: #f4f1ea;
+    max-width: 560px;
+  }
+
+  .hero-copy .eyebrow {
+    font-family: sans-serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 14px;
+  }
+
+  .hero-copy h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: 400;
+    font-size: 52px;
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+
+  .hero-copy p {
+    font-family: sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    opacity: 0.85;
+    margin-bottom: 28px;
+  }
+
+  .hero-copy .cta {
+    display: inline-block;
+    padding: 14px 30px;
+    border: 1px solid rgba(244,241,234,0.6);
+    color: #f4f1ea;
+    text-decoration: none;
+    font-family: sans-serif;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .hero-copy .cta:hover {
+    background: #f4f1ea;
+    color: #0d0d0d;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Loader: plays the video full-screen ONCE as the loading animation, then disappears for good -->
+  <div id="loader">
+    <video id="loader-video" src="loading-video.mp4" autoplay muted playsinline></video>
+  </div>
+
+  <!-- Actual homepage content — no video here, just your normal hero design -->
+  <div id="content">
+    <section id="hero">
+      <div class="hero-bg"></div>
+
+      <nav class="hero-nav">
+        <div class="brand">VK Photography</div>
+        <ul>
+          <li><a href="#">Portfolio</a></li>
+          <li><a href="#">Services</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="hero-copy">
+        <div class="eyebrow">Wedding &amp; Portrait Photography</div>
+        <h1>Moments, held<br />the way they happened.</h1>
+        <p>Candid, unposed, honest photography for weddings, engagements and portraits — shot on location, delivered with care.</p>
+        <a class="cta" href="#">View Portfolio</a>
+      </div>
+    </section>
+    <!-- rest of your homepage markup goes here -->
+  </div>
+
+  <script>
+    const loader      = document.getElementById('loader');
+    const content     = document.getElementById('content');
+    const loaderVideo = document.getElementById('loader-video');
+
+    const MAX_WAIT_TIME = 6000; // ms — safety net if the video never fires 'ended'
+    let revealed = false;
+
+    function revealHomepage() {
+      if (revealed) return;
+      revealed = true;
+      loader.classList.add('hidden');
+      content.classList.add('visible');
+    }
+
+    // Reveal the homepage once the loading video has finished playing through
+    loaderVideo.addEventListener('ended', revealHomepage, { once: true });
+
+    // Safety net: force-reveal even if 'ended' never fires
+    setTimeout(revealHomepage, MAX_WAIT_TIME);
+  </script>
+
+</body>
+</html>

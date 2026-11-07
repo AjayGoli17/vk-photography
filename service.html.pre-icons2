@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services & Pricing - Sam Shoot Studio</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500;600;700&family=Jost:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,300..900;1,300..900&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/service.css">
+    <link rel="stylesheet" href="css/transition.css">
+<link rel="stylesheet" href="css/nav-glass.css?v=3">
+</head>
+<body>
+
+    <div class="page-transition-overlay"></div>
+
+    <nav class="vk-nav" id="mainNav">
+      <div class="vk-nav-brand">
+        <a href="index.html" class="vk-nav-logo-chip">
+      <video src="loading-video.mp4" autoplay muted loop playsinline></video>
+    </a>
+        <div class="vk-nav-brand-text"><b>VK</b> Photography</div>
+      </div>
+      <div class="vk-nav-right">
+        <div class="vk-nav-links">
+          <a href="index.html">Home</a>
+          <a href="portfolio.html">Portfolio</a>
+          <a href="service.html">Services</a>
+          <a href="shop.html">Shop</a>
+          <a href="quotation.html">Quotation</a>
+          <a href="contact.html">Contact</a>
+        </div>
+        <div class="vk-nav-cta">
+          <a href="quotation.html" class="vk-btn vk-btn-ghost">Get Quote</a>
+          <button class="vk-nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+        </div>
+      </div>
+    </nav>
+    <div class="vk-nav-mobile" id="navMobile">
+      <a href="index.html">Home</a>
+      <a href="portfolio.html">Portfolio</a>
+      <a href="service.html">Services</a>
+      <a href="shop.html">Shop</a>
+      <a href="quotation.html">Quotation</a>
+      <a href="contact.html">Contact</a>
+      <a href="quotation.html" class="vk-btn vk-btn-ghost vk-nav-mobile-cta">Get Quote</a>
+    </div>
+
+    <main class="container">
+        <section class="hero">
+            <div class="hero-subtitle gold-text">OUR SERVICES</div>
+            <h1>SERVICES CRAFTED AROUND<br>YOUR STORY.</h1>
+            <p>From initial concept to flawless execution, we provide end-to-end event design and management tailored to your vision.</p>
+        </section>
+
+        <section class="mb-large">
+            <h2 class="section-title-huge">WEDDINGS</h2>
+            <div class="section-underline"></div>
+            <div class="row">
+                <div class="col-half card reveal">
+                    <span class="img-wrap"><img src="portfolio/portfolio7.webp" alt="Wedding & Pre Wedding Shoot"></span>
+
+                    <h3 class="card-title">Wedding &amp; Pre Wedding Shoots</h3>
+                    <p class="muted-text">Turning your love story into timeless memories you'll cherish forever.</p>
+                    <div class="price-tag">Starting at ₹25,000</div>
+                    <a href="quotation.html" class="btn btn-small">Get a Quotation</a>
+                </div>
+                <div class="col-half card align-end reveal">
+                    <span class="img-wrap"><img src="portfolio/portfolio27.webp" alt="Haldi Event Decor"></span>
+                    <h3 class="card-title">Haldi's</h3>
+                    <p class="muted-text">Capturing every color, laugh, and tradition of your special celebration..</p>
+                    <div class="price-tag">Starting at ₹8,000</div>
+                    <a href="quotation.html" class="btn btn-small">Get a Quotation</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-large">
+            <h2 class="section-title-huge">PERSONAL</h2>
+            <div class="section-underline"></div>
+            
+            <div class="row">
+                <div class="col-half card reveal">
+                    <span class="img-wrap"><img src="birtdhayposter.png" alt="Birthday Party Celebration"></span>
+                    <h3 class="card-title">Birthday Party's</h3>
+                    <p class="muted-text">Preserving the joy, excitement, and unforgettable moments of your big day.</p>
+                    <div class="price-tag">Starting at ₹6,000</div>
+                    <a href="quotation.html" class="btn btn-small">Get a Quotation</a>
+                </div>
+                <div class="col-half card align-end desktop-offset reveal">
+                    <span class="img-wrap"><img src="anniversary.jpeg" alt="Anniversary Celebration"></span>
+                    <h3 class="card-title">Anniversary Reels</h3>
+                    <p class="muted-text">Beautifully crafted reels that celebrate your journey together.</p>
+                    <div class="price-tag">Starting at ₹5,000</div>
+                    <a href="quotation.html" class="btn btn-small">Get a Quotation</a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-half text-block reveal">
+                    <h3 class="card-title">Couple Shoots</h3>
+                    <p class="muted-text">Natural, romantic moments captured with creativity and care.</p>
+                    <div class="price-tag">Starting at ₹4,000</div>
+                    <a href="quotation.html" class="btn btn-small">Get a Quotation</a>
+                </div>
+                <div class="col-half card reveal">
+                    <span class="img-wrap"><img src="portfolio/image6.webp" alt="Couple Shoot"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-half card reveal">
+                    <span class="img-wrap" style="max-width: 60%;"><img src="house.webp" alt="House Warming"></span>
+                    <h3 class="card-title">House Warming</h3>
+                    <p class="muted-text">Documenting the happiness and blessings of your new beginning.</p>
+                    <div class="price-tag">Starting at ₹4,500</div>
+                    <a href="quotation.html" class="btn btn-small">Get a Quotation</a>
+                </div>
+                <div class="col-half card align-end desktop-offset reveal">
+                    <span class="img-wrap"><img src="namingceremony.jpeg" alt="House Warming Ceremony"></span>
+                    <h3 class="card-title">Naming Ceremony</h3>
+                    <p class="muted-text">Heartfelt coverage of your little one's special first milestone.</p>
+                    <div class="price-tag">Starting at ₹5,500</div>
+                    <a href="quotation.html" class="btn btn-small">Get a Quotation</a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-half text-block reveal">
+                    <h3 class="card-title">Personal Reels</h3>
+                    <p class="muted-text">Creative reels that showcase your personality and style.</p>
+                    <div class="price-tag">Starting at ₹2,500</div>
+                    <a href="quotation.html" class="btn btn-small">Get a Quotation</a>
+                </div>
+                <div class="col-half card reveal">
+                    <span class="img-wrap"><img src="portfolio/portfolio32.webp" alt="Personal Reels"></span>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section text-center reveal">
+            <h3>TELL US ABOUT YOUR NEXT<br>PROJECT.</h3>
+            <a href="contact.html" class="btn">GET IN TOUCH</a>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+<div class="footer-top">
+<div class="footer-brand">
+<a href="#" class="logo">
+<span class="logo-text">VK Photography</span>
+</a>
+<p class="footer-tagline">A studio built around light, story and craft — capturing moments that last a lifetime.</p>
+<div class="footer-social">
+<a href="https://www.instagram.com/vkphotography_58/" aria-label="Instagram">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"></line></svg>
+</a>
+<a href="https://wa.me/917207046157" aria-label="WhatsApp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l1.65-4.9A9 9 0 1 1 8 19.4L3 21z"></path><path d="M9 9.2c0 3 2.8 5.8 5.8 5.8l1-1.6-2-1-.8.8c-.8-.4-1.6-1.2-2-2l.8-.8-1-2-1.8.8z"></path></svg></a>
+<a href="https://www.youtube.com/@vkphotography1601" aria-label="YouTube" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="4"></rect><path d="M10 9.5l5 2.5-5 2.5z"></path></svg></a>
+</div>
+</div>
+<div class="footer-col">
+<h4>Navigate</h4>
+<nav class="footer-links">
+<a href="#">Home</a>
+<a href="portfolio.html">Portfolio</a>
+<a href="#services">Services</a>
+<a href="#testimonials">Testimonials</a>
+<a href="#">Contact</a>
+</nav>
+</div>
+<div class="footer-col">
+<h4>Services</h4>
+<nav class="footer-links">
+<a href="#services">Portrait Photography</a>
+<a href="#services">Wedding Photography</a>
+<a href="#services">Commercial &amp; Product</a>
+<a href="#services">Brand Retainers</a>
+<a href="#services">Fine Art Prints</a>
+</nav>
+</div>
+<div class="footer-col">
+<h4>Get in touch</h4>
+<div class="contact-card">
+<div class="contact-row">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+<span>Rampally, Hyderabad</span>
+</div>
+<div class="contact-row">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 3a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.5c1 .3 2 .5 3 .7a2 2 0 0 1 1.7 2z"></path></svg>
+<a href="tel:+917207046157">+91 72070 46157</a>
+</div>
+<div class="contact-row">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg>
+<span>Mon&ndash;Sat, 10:00 AM &ndash; 8:30 PM</span>
+</div>
+<a href="#" class="contact-directions-btn">
+Get Directions
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+</a>
+</div>
+</div>
+</div>
+<div class="footer-bottom">
+<p>&copy; <span id="footerYear"></span> VK Photography. All rights reserved.</p>
+<div class="footer-legal">
+<a href="#">Privacy Policy</a>
+<a href="#">Terms of Service</a>
+</div>
+</div>
+</footer>
+
+    <script src="js/service.js"></script>
+    <script>
+      var navToggle = document.getElementById('navToggle');
+      var navMobile = document.getElementById('navMobile');
+      if (navToggle && navMobile) {
+        navToggle.addEventListener('click', function () {
+          navToggle.classList.toggle('open');
+          navMobile.classList.toggle('open');
+        });
+      }
+    </script>
+    <script src="js/transition.js"></script>
+<script src="js/cursor.js"></script>
+</body>
+</html>

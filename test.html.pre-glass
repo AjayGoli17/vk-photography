@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Background Video Playlist Demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  .bg-video-fixed {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100dvh;
+    z-index: 0;
+    overflow: hidden;
+    background: #000; /* shows briefly between clips while the next one loads */
+  }
+
+  .bg-video-fixed video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* just so you can see content sits on top, like your hero section does */
+  .demo-overlay {
+    position: relative;
+    z-index: 1;
+    height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-family: sans-serif;
+    font-size: 1.5rem;
+    text-shadow: 0 2px 10px rgba(0,0,0,.6);
+  }
+</style>
+</head>
+<body>
+
+  <div class="bg-video-fixed">
+    <video id="bgVideo" muted playsinline autoplay></video>
+  </div>
+
+  <div class="demo-overlay">Your content goes here</div>
+
+  <script>
+    // Publicly hosted sample clips (Google's open test-video bucket).
+    // Each entry defines which SEGMENT of the source video to use as your
+    // "5-6 sec clip" — start/end are in seconds.
+    const playlist = [
+      { src: "main.mp4", start: 10, end: 16 },
+      { src: "loading-video.mp4", start: 20, end: 26 },
+      { src: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", start: 5,  end: 11 }
+    ];
+
+    let current = 0;
+    const video = document.getElementById("bgVideo");
+
+    function playClip(index) {
+      const clip = playlist[index];
+      video.src = clip.src;
+
+      // Once metadata is loaded, jump to the clip's start point
+      video.onloadedmetadata = () => {
+        video.currentTime = clip.start;
+        video.play().catch(() => {
+          // Autoplay can get blocked if the tab isn't focused yet — safe to ignore
+        });
+      };
+    }
+
+    // Watch playback and cut to the next clip once we hit this clip's "end"
+    video.addEventListener("timeupdate", () => {
+      const clip = playlist[current];
+      if (video.currentTime >= clip.end) {
+        current = (current + 1) % playlist.length;
+        playClip(current);
+      }
+    });
+
+    // Kick things off
+    playClip(current);
+  </script>
+
+</body>
+</html>

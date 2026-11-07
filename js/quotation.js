@@ -531,10 +531,10 @@ renderServiceGrid();
 renderAddons();
 updateSummary();
 
-const WHATSAPP_NUMBER = '918978367995'; // country code 91 + 8978367995
+const WHATSAPP_NUMBER = '917207046157'; // country code 91 + 7207046157
 const STUDIO_NAME = 'VK Photography';
 const STUDIO_ADDRESS = 'VK Colour Lab Digital Photo Studio, Hyderabad';
-const STUDIO_PHONE = '+91 89783 67995';
+const STUDIO_PHONE = '+91 72070 46157';
 
 // ---- Preload logo so it's ready by the time the PDF is generated ----
 let logoBase64 = null;

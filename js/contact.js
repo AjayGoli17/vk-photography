@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const bookingForm = document.getElementById('bookingForm');
     const submitButton = bookingForm.querySelector('.submit-button');
-    const whatsappNumber = '918978367995';
+    const whatsappNumber = '917207046157';
 
     bookingForm.addEventListener('submit', (e) => {
         e.preventDefault();

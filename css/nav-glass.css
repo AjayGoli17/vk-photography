@@ -1,0 +1,69 @@
+/* ===== Apple-style liquid glass navbar (loads last, overrides style.css/home.css) ===== */
+nav.vk-nav{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,.08) 55%, rgba(255,255,255,.18)) !important;
+  border:1px solid rgba(255,255,255,.55) !important;
+  -webkit-backdrop-filter:blur(22px) saturate(190%) !important;
+  backdrop-filter:blur(22px) saturate(190%) !important;
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.12),
+    0 1px 3px rgba(0,0,0,.08),
+    inset 0 1px 0 rgba(255,255,255,.9),
+    inset 0 -1px 0 rgba(255,255,255,.25),
+    inset 0 0 20px rgba(255,255,255,.12) !important;
+}
+nav.vk-nav::after{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0) 50%),
+    radial-gradient(120% 90% at 20% -40%, rgba(255,255,255,.4), transparent 60%) !important;
+  opacity:.7;
+}
+.vk-nav-brand-text{ color:#111 !important; }
+.vk-nav-brand-text b{ color:#B9793E !important; }
+.vk-nav-links a{ color:rgba(0,0,0,.78) !important; }
+.vk-nav-links a:hover,.vk-nav-links a:focus-visible{
+  color:#000 !important;
+  background:rgba(255,255,255,.45) !important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.7), inset 0 1px 0 rgba(255,255,255,.9) !important;
+}
+.vk-btn-ghost{
+  background:rgba(0,0,0,.72) !important;
+  border:1px solid rgba(255,255,255,.25) !important;
+  -webkit-backdrop-filter:blur(10px) !important;
+  backdrop-filter:blur(10px) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3) !important;
+}
+.vk-btn-ghost:hover{ background:rgba(0,0,0,.85) !important; }
+.vk-nav-toggle{ background:rgba(255,255,255,.35) !important; border:1px solid rgba(255,255,255,.6) !important; }
+.vk-nav-toggle span{ background:#111 !important; }
+.vk-nav-mobile{
+  background:rgba(255,255,255,.35) !important;
+  border-left:1px solid rgba(255,255,255,.6) !important;
+  -webkit-backdrop-filter:blur(30px) saturate(190%) !important;
+  backdrop-filter:blur(30px) saturate(190%) !important;
+}
+.vk-nav-mobile a{ color:#111 !important; }
+.vk-nav-mobile a:hover{ background:rgba(255,255,255,.5) !important; }
+
+/* ===== v3: visible hover states on white backgrounds ===== */
+.vk-nav-links a{
+  transition: color .25s, background-color .25s, box-shadow .25s, transform .25s !important;
+}
+.vk-nav-links a:hover,
+.vk-nav-links a:focus-visible{
+  color:#000 !important;
+  background:rgba(0,0,0,.09) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.10),
+    inset 0 1px 0 rgba(255,255,255,.7),
+    0 2px 8px rgba(0,0,0,.08) !important;
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+}
+.vk-nav-links a:active{ background:rgba(0,0,0,.14) !important; transform:scale(.97); }
+.vk-nav-mobile a:hover{ background:rgba(0,0,0,.08) !important; }
+.vk-nav-toggle:hover{ background:rgba(0,0,0,.08) !important; }
+.vk-btn-ghost:hover{
+  background:rgba(0,0,0,.9) !important;
+  box-shadow:0 6px 18px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3) !important;
+}

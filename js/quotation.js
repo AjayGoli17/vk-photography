@@ -841,6 +841,26 @@ async function sendQuotePDFByEmail() {
         file_name: fileName
     };
 
+    // Also keep a record in the studio database (does not affect the email below).
+    fetch('/.netlify/functions/save-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+        body: JSON.stringify({
+            source: 'quotation',
+            name: data.name,
+            phone: data.phone,
+            email: data.email,
+            service: data.displayCategories.join(', '),
+            eventDate: data.date,
+            location: data.location,
+            guests: data.guests,
+            estimatedTotal: data.total,
+            message: data.requirements,
+            details: { quoteNumber, items: data.items }
+        })
+    }).catch(() => {});
+
     try {
         const res = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',

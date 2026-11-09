@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "VK Photography site — Shop checkout powered by Razorpay Standard Checkout via Netlify Functions.",
   "dependencies": {
-    "@supabase/supabase-js": "^2.119.0",
+    "@supabase/supabase-js": "^2.45.4",
     "razorpay": "^2.9.8"
   }
 }

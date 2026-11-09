@@ -87,3 +87,79 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (ctaHeading) observer.observe(ctaHeading);
     if (ctaButton) { ctaButton.style.transitionDelay = '0.2s'; observer.observe(ctaButton); }
 });
+
+/* === VK-CAPTIONS: per-photo captions (shown in the hover overlay) === */
+(function () {
+    const captions = {
+        1:  { t: "Rooted in Love",               c: "Maternity" },
+        2:  { t: "Golden Hour Promise",          c: "Maternity" },
+        4:  { t: "The Quiet Glow",               c: "Maternity" },
+        5:  { t: "After the Rain",               c: "Maternity" },
+        6:  { t: "A Night to Remember",          c: "Couple" },
+        7:  { t: "Palace Evenings",              c: "Couple" },
+        8:  { t: "Close Enough to Whisper",      c: "Couple" },
+        9:  { t: "Timeless Elegance",            c: "Portrait" },
+        10: { t: "Grace in Silk",                c: "Maternity" },
+        11: { t: "Written in the Clouds",        c: "Couple" },
+        12: { t: "Under the Streetlight",        c: "Couple" },
+        13: { t: "Our Little Surprise",          c: "Family" },
+        14: { t: "Pure Happiness",               c: "Pre-Wedding" },
+        15: { t: "Together, Always",             c: "Couple" },
+        16: { t: "Hold Me Close",                c: "Couple" },
+        17: { t: "City Lights and Us",           c: "Pre-Wedding" },
+        18: { t: "Shy Smile",                    c: "Portrait" },
+        19: { t: "Waiting in the Glow",          c: "Maternity" },
+        20: { t: "Joy in Every Frame",           c: "Haldi" },
+        21: { t: "Silhouette of Grace",          c: "Portrait" },
+        22: { t: "Back to Back, Heart to Heart", c: "Pre-Wedding" },
+        23: { t: "Soft Whispers",                c: "Couple" },
+        24: { t: "Under Two Rainbows",           c: "Proposal" },
+        25: { t: "Little Steps, Big Smile",      c: "Kids" },
+        26: { t: "Village Tales",                c: "Traditional" },
+        27: { t: "A Kiss of Blessing",           c: "Haldi" },
+        28: { t: "Daddy's Little Girl",          c: "Family" },
+        29: { t: "Wide-Eyed Wonder",             c: "Kids" },
+        30: { t: "The Yellow Squad",             c: "Haldi" },
+        31: { t: "Little Pianist",               c: "Kids" },
+        32: { t: "Hand in Hand",                 c: "Kids" },
+        33: { t: "Among the Wild Grass",         c: "Kids" },
+        34: { t: "Butterfly Wishes",             c: "Kids" },
+        35: { t: "Old-World Romance",            c: "Couple" },
+        36: { t: "Art Meets Motherhood",         c: "Maternity" },
+        37: { t: "Swinging into Joy",            c: "Kids" },
+        38: { t: "Rays of Love",                 c: "Couple" },
+        39: { t: "Little Gentleman",             c: "Kids" }
+    };
+
+    function applyCaption(item) {
+        if (item.dataset.captioned) return;
+        const img = item.querySelector('img');
+        const span = item.querySelector('.item-overlay span');
+        if (!img || !span) return;
+        const m = /portfolio(\d+)\./.exec(img.getAttribute('src') || '');
+        const cap = m && captions[Number(m[1])];
+        if (!cap) return;
+        span.textContent = cap.t;
+        const old = item.querySelector('.item-overlay small');
+        if (old) old.remove();
+        const small = document.createElement('small');
+        small.textContent = cap.c;
+        span.after(small);
+        img.alt = cap.t + ' - ' + cap.c + ' photography';
+        item.dataset.captioned = '1';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const gallery = document.getElementById('gallery');
+        if (!gallery) return;
+        gallery.querySelectorAll('.gallery-item').forEach(applyCaption);
+        new MutationObserver(function (muts) {
+            muts.forEach(function (mu) {
+                mu.addedNodes.forEach(function (n) {
+                    if (n.nodeType === 1 && n.classList.contains('gallery-item')) applyCaption(n);
+                });
+            });
+        }).observe(gallery, { childList: true });
+    });
+})();
+/* === END VK-CAPTIONS === */

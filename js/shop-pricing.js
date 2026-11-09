@@ -31,16 +31,16 @@
        !! The numbers below are PLACEHOLDERS - set your real prices here. !!
        (The server re-prices every order from this file, so this is the only place.) */
     const FRAMES = [
-      { id: "brick-brown", name: "Brick Brown", description: "Dark brown brick-texture frame with a fine gold liner.", priceModifier: 100, image: "frames/brick-brown.webp", swatch: "frames/brick-brown-swatch.webp", swatchColor: "#54443f" },
-      { id: "mahogany", name: "Mahogany", description: "Smooth glossy mahogany with a black inner lip. Classic and understated.", priceModifier: 0, image: "frames/mahogany.webp", swatch: "frames/mahogany-swatch.webp", swatchColor: "#5e4a48" },
-      { id: "grey-modern", name: "Grey Modern", description: "Wide, flat gunmetal grey with a black edge. A clean, modern look.", priceModifier: 0, image: "frames/grey-modern.webp", swatch: "frames/grey-modern-swatch.webp", swatchColor: "#807f84" },
-      { id: "red-lattice", name: "Red Lattice", description: "Embossed diamond-lattice pattern in warm reddish brown.", priceModifier: 150, image: "frames/red-lattice.webp", swatch: "frames/red-lattice-swatch.webp", swatchColor: "#6a4135" },
-      { id: "burgundy-hex", name: "Burgundy Hex", description: "Deep burgundy with a fine honeycomb texture.", priceModifier: 150, image: "frames/burgundy-hex.webp", swatch: "frames/burgundy-hex-swatch.webp", swatchColor: "#563c3c" },
-      { id: "gold-rope", name: "Gold Rope", description: "Wine-brown frame edged with an ornate gold twisted-rope border.", priceModifier: 300, image: "frames/gold-rope.webp", swatch: "frames/gold-rope-swatch.webp", swatchColor: "#7b5b47" },
-      { id: "copper-quilt", name: "Copper Quilt", description: "Copper-toned quilted diamond pattern, like tufted leather.", priceModifier: 200, image: "frames/copper-quilt.webp", swatch: "frames/copper-quilt-swatch.webp", swatchColor: "#784836" },
-      { id: "basket-weave", name: "Basket Weave", description: "Rich brown woven-tile texture with dark grooves.", priceModifier: 200, image: "frames/basket-weave.webp", swatch: "frames/basket-weave-swatch.webp", swatchColor: "#5e3a2f" },
-      { id: "onyx-lattice", name: "Onyx Lattice", description: "Black frame with an embossed diamond-floral pattern and silver edge.", priceModifier: 200, image: "frames/onyx-lattice.webp", swatch: "frames/onyx-lattice-swatch.webp", swatchColor: "#3a3a3c" },
-      { id: "bamboo-rope", name: "Bamboo Rope", description: "Dark brown ribbed bamboo-style texture with woven knots.", priceModifier: 250, image: "frames/bamboo-rope.webp", swatch: "frames/bamboo-rope-swatch.webp", swatchColor: "#63473f" },
+      { id: "brick-brown", name: "Classic Brown", description: "Dark brown frame with a thin gold line inside. Simple and timeless.", priceModifier: 100, image: "frames/brick-brown.webp", swatch: "frames/brick-brown-swatch.webp", swatchColor: "#54443f" },
+      { id: "mahogany", name: "Polished Wood", description: "Glossy reddish-brown wood finish with a black inner edge. Classic and elegant.", priceModifier: 0, image: "frames/mahogany.webp", swatch: "frames/mahogany-swatch.webp", swatchColor: "#5e4a48" },
+      { id: "grey-modern", name: "Modern Grey", description: "Flat, smooth grey frame with a slim black edge. Clean and contemporary.", priceModifier: 0, image: "frames/grey-modern.webp", swatch: "frames/grey-modern-swatch.webp", swatchColor: "#807f84" },
+      { id: "red-lattice", name: "Red Diamond", description: "Warm red-brown frame with a raised diamond pattern.", priceModifier: 150, image: "frames/red-lattice.webp", swatch: "frames/red-lattice-swatch.webp", swatchColor: "#6a4135" },
+      { id: "burgundy-hex", name: "Wine Red", description: "Deep wine-red frame with a fine dotted texture.", priceModifier: 150, image: "frames/burgundy-hex.webp", swatch: "frames/burgundy-hex-swatch.webp", swatchColor: "#563c3c" },
+      { id: "gold-rope", name: "Royal Gold", description: "Dark wine frame with a twisted gold rope edge. A great pick for weddings and festive gifts.", priceModifier: 300, image: "frames/gold-rope.webp", swatch: "frames/gold-rope-swatch.webp", swatchColor: "#7b5b47" },
+      { id: "copper-quilt", name: "Copper Glow", description: "Shiny copper-coloured frame with a soft, cushioned diamond look.", priceModifier: 200, image: "frames/copper-quilt.webp", swatch: "frames/copper-quilt-swatch.webp", swatchColor: "#784836" },
+      { id: "basket-weave", name: "Woven Brown", description: "Rich brown frame with a woven, tile-like texture.", priceModifier: 200, image: "frames/basket-weave.webp", swatch: "frames/basket-weave-swatch.webp", swatchColor: "#5e3a2f" },
+      { id: "onyx-lattice", name: "Black Diamond", description: "Black frame with a raised diamond pattern and a silver edge. Bold and stylish.", priceModifier: 200, image: "frames/onyx-lattice.webp", swatch: "frames/onyx-lattice-swatch.webp", swatchColor: "#3a3a3c" },
+      { id: "bamboo-rope", name: "Natural Bamboo", description: "Dark brown frame with a ribbed, bamboo-like texture.", priceModifier: 250, image: "frames/bamboo-rope.webp", swatch: "frames/bamboo-rope-swatch.webp", swatchColor: "#63473f" },
     ];
   
     /* Standard sizes as sold by Indian photoframe/print shops.

@@ -61,6 +61,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
 
+        // Also keep a record in the studio database (does not affect WhatsApp).
+        fetch('/.netlify/functions/save-lead', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            keepalive: true,
+            body: JSON.stringify({ source: 'contact', name, phone, service, eventDate, location, message })
+        }).catch(() => {});
+
         submitButton.classList.add('is-loading');
         submitButton.querySelector('.btn-label').textContent = 'Opening whatsapp';
         submitButton.disabled = true;

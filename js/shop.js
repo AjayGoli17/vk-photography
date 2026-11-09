@@ -568,6 +568,13 @@
        qualityId: quality.id, qualityName: quality.name,
        mountingId: mounting.id, mountingName: mounting.name,
        unitPrice: total, quantity: 1,
+       orientation: customizerState.orientation,
+       photoW: customizerState.photoNaturalW, photoH: customizerState.photoNaturalH,
+       crop: {
+         unit: "px", x: customizerState.transform.x, y: customizerState.transform.y, scale: customizerState.transform.scale,
+         windowW: document.getElementById("fpWindow")?.offsetWidth || null,
+         windowH: document.getElementById("fpWindow")?.offsetHeight || null,
+       },
      };
    
      const cart = Store.getCart();
@@ -944,6 +951,8 @@
       id: `item_${Date.now()}`, kind: "gift", photo: giftState.photoDataUrl,
       productId: product.id, productName: product.name,
       unitPrice: product.price, quantity: giftState.quantity,
+      photoW: giftState.photoNaturalW, photoH: giftState.photoNaturalH,
+      crop: { unit: "fraction", x: giftState.transform.x, y: giftState.transform.y, scale: giftState.transform.scale },
     });
     Store.setCart(cart);
     updateCartCount();
@@ -1101,16 +1110,23 @@
  
      try {
        await loadRazorpayScript();
+
+       setPaymentState("loading", "Uploading your photo…");
+       await uploadOrderPhotos(order);
+       setPaymentState("loading", "Preparing secure checkout…");
  
        const createRes = await fetch(`${RAZORPAY_FN_BASE}/create-order`, {
          method: "POST",
          headers: { "Content-Type": "application/json" },
          body: JSON.stringify({
            orderRef: order.orderId,
-           items: order.items.map((i) => i.kind === "gift"
-            ? { productId: i.productId, quantity: i.quantity }
-            : { sizeId: i.sizeId, qualityId: i.qualityId, frameId: i.frameId, finishId: i.finishId, matId: i.matId, quantity: i.quantity }),
-           customer: { name: order.customer.name, email: order.customer.email, phone: order.customer.phone },
+           items: order.items.map((i) => {
+             const common = { itemId: i.id, quantity: i.quantity, photoPath: i.photoPath, photoW: i.photoW, photoH: i.photoH, crop: i.crop };
+             return i.kind === "gift"
+               ? { ...common, productId: i.productId }
+               : { ...common, sizeId: i.sizeId, qualityId: i.qualityId, frameId: i.frameId, mountingId: i.mountingId, orientation: i.orientation };
+           }),
+           customer: order.customer,
          }),
        });
  
@@ -1160,6 +1176,40 @@
      }
    }
  
+   /* Uploads each item's photo to the private order-photos bucket through a
+      short-lived signed URL. Already-uploaded photos are skipped, so retrying
+      after a cancelled or failed payment doesn't upload everything again. */
+   async function uploadOrderPhotos(order) {
+     for (const item of order.items) {
+       if (item.photoPath) continue;
+
+       const blob = await (await fetch(item.photo)).blob();
+       const urlRes = await fetch(`${RAZORPAY_FN_BASE}/upload-photo-url`, {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({ orderRef: order.orderId, itemId: item.id, contentType: blob.type }),
+       });
+       if (!urlRes.ok) {
+         const err = await safeJson(urlRes);
+         throw new Error(err?.error || "Couldn't upload your photo. Please try again.");
+       }
+       const { path, signedUrl, anonKey } = await urlRes.json();
+
+       const form = new FormData();
+       form.append("cacheControl", "3600");
+       form.append("", blob);
+       const upRes = await fetch(signedUrl, {
+         method: "PUT",
+         headers: { "x-upsert": "true", ...(anonKey ? { apikey: anonKey, Authorization: `Bearer ${anonKey}` } : {}) },
+         body: form,
+       });
+       if (!upRes.ok) throw new Error("Couldn't upload your photo. Please check your connection and try again.");
+
+       item.photoPath = path;
+       Store.setOrder(order); // remember it, so a retry skips this upload
+     }
+   }
+
    async function verifyAndConfirm(razorpayResponse, orderRef) {
      setPaymentState("loading", "Verifying your payment…");
      try {
@@ -1245,7 +1295,13 @@
       UTILITIES
       ============================================================ */
    function formatINR(amount) { return "₹" + Math.round(amount).toLocaleString("en-IN"); }
-   function generateOrderId() { const n = Math.floor(1000 + Math.random() * 9000); return `VK${n}`; }
+   function generateOrderId() {
+     // VK + 6 random characters (no look-alikes) so two customers never share an order ref.
+     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+     const bytes = new Uint8Array(6);
+     crypto.getRandomValues(bytes);
+     return "VK" + Array.from(bytes, (b) => chars[b % chars.length]).join("");
+   }
    function showFieldError(el, message) { if (!el) return; el.textContent = message; el.hidden = false; }
    
    let toastTimer;

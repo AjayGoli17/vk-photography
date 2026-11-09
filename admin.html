@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<title>VK Photography – Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F5F4F1;--card:#fff;--ink:#26231F;--mut:#7A746A;--line:#E6E2DA;--gold:#A67C3D;--goldbg:#F3EBDD;
+--ok:#2F7D5B;--okbg:#DDEFE6;--warn:#B7791F;--warnbg:#F6E8CC;--info:#2F5D9E;--infobg:#DCE7F6;--bad:#B4453A;--badbg:#F4DCD8;
+--shadow:0 1px 2px rgba(38,35,31,.05),0 6px 20px rgba(38,35,31,.04);--serif:"Cormorant Garamond",Georgia,serif;--sans:Inter,system-ui,sans-serif}
+:root[data-theme=dark]{--bg:#1B1916;--card:#25221E;--ink:#F0ECE4;--mut:#A39B8E;--line:#37332D;--goldbg:#3A3226;--gold:#D2A863;
+--okbg:#1F3A2E;--ok:#6FCF9F;--warnbg:#3F3318;--warn:#E6B65A;--infobg:#1E2E45;--info:#7FAEEA;--badbg:#44211D;--bad:#F08A7E;--shadow:none}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+aside{background:var(--card);border-right:1px solid var(--line);padding:24px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.brand{font:600 26px var(--serif);padding:0 10px 22px}.brand span{color:var(--gold)}
+nav{flex:1}
+nav button{display:flex;align-items:center;gap:11px;width:100%;padding:9px 12px;margin-bottom:2px;border:0;background:none;color:var(--mut);font:500 14px var(--sans);border-radius:9px;cursor:pointer;text-align:left;position:relative;transition:background .15s,color .15s}
+nav button svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav button:hover{color:var(--ink);background:var(--bg)}
+nav button.on{background:var(--goldbg);color:var(--ink)}
+nav button.on::before{content:"";position:absolute;left:-14px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--gold)}
+nav i{font-style:normal;margin-left:auto;background:var(--gold);color:#fff;border-radius:99px;padding:0 7px;font-size:12px;min-width:20px;text-align:center}
+.foot{padding:12px 10px 0;border-top:1px solid var(--line);color:var(--mut);font-size:12px}
+main{padding:0 32px 56px;min-width:0}
+header{display:flex;gap:10px;align-items:center;padding:16px 0;position:sticky;top:0;z-index:4;background:var(--bg)}
+.search{position:relative;flex:1;max-width:440px}
+.search input{width:100%;padding:9px 62px 9px 36px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--mut);fill:none;stroke-width:2;stroke-linecap:round;pointer-events:none}
+.search kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);font:500 11px var(--sans);color:var(--mut);border:1px solid var(--line);border-radius:5px;padding:1px 6px;pointer-events:none}
+.search button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:var(--line);color:var(--ink);width:22px;height:22px;border-radius:99px;cursor:pointer;display:none;line-height:1}
+.search.has button{display:block}.search.has kbd{display:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;font:500 13px var(--sans);cursor:pointer;text-decoration:none;transition:background .15s,border-color .15s}
+.btn:hover{border-color:var(--mut)}
+.btn.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}.btn.pri:hover{opacity:.9}
+.btn.full{width:100%}
+.me{margin-left:auto;color:var(--mut);font-size:13px;white-space:nowrap}
+.note{display:flex;gap:12px;align-items:center;background:var(--goldbg);border-radius:10px;padding:8px 8px 8px 14px;margin-bottom:20px;font-size:13px}
+.note button{margin-left:auto;border:0;background:none;color:var(--mut);cursor:pointer;font-size:18px;padding:0 8px;line-height:1}
+h1{font:600 36px var(--serif);margin-bottom:2px;line-height:1.15}.sub{color:var(--mut);margin-bottom:20px}
+h2{font:600 22px var(--serif);margin-bottom:12px}
+.grid{display:grid;gap:16px}.g4{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+.card h2{display:flex;justify-content:space-between;align-items:baseline}
+.card h2 small{font:400 13px var(--sans);color:var(--mut)}
+button.card{text-align:left;color:inherit;font:inherit;cursor:pointer;transition:transform .15s,border-color .15s}
+button.card:hover{transform:translateY(-2px);border-color:var(--gold)}
+.stat b{display:block;font:600 34px var(--serif);margin-top:2px;line-height:1.2}.stat span{color:var(--mut)}
+.stat em{display:block;font-style:normal;font-size:12px;color:var(--mut);margin-top:2px}
+.stat.hot{background:var(--ink);color:var(--bg);border-color:var(--ink)}.stat.hot span,.stat.hot em{color:var(--bg);opacity:.7}
+.bars{display:flex;align-items:flex-end;gap:7px;height:160px;margin:26px 0 30px;border-bottom:1px solid var(--line)}
+.bars div{flex:1;background:var(--gold);border-radius:4px 4px 0 0;opacity:.8;position:relative;min-height:3px;transition:opacity .15s}
+.bars div:hover{opacity:1}
+.bars div:hover::after{content:attr(data-v);position:absolute;top:-24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:11px;padding:1px 7px;border-radius:5px;white-space:nowrap}
+.bars small{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--mut);white-space:nowrap}
+.row{display:flex;justify-content:space-between;gap:10px;padding:10px 6px;margin:0 -6px;border-top:1px solid var(--line);align-items:center;border-radius:8px}
+.row[tabindex]{cursor:pointer}.row[tabindex]:hover{background:var(--bg)}
+.row:first-of-type{border-top:0}.row small{color:var(--mut);display:block}
+.meter{height:6px;border-radius:99px;background:var(--line);margin-top:6px;overflow:hidden}.meter i{display:block;height:100%;background:var(--gold)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{padding:6px 13px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--mut);font:500 13px var(--sans);cursor:pointer}
+.tabs button:hover{color:var(--ink)}
+.tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tabs span{opacity:.65;margin-left:3px}
+.tw{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;min-width:680px}
+th{text-align:left;font-weight:500;color:var(--mut);padding:0;border-bottom:1px solid var(--line);white-space:nowrap;font-size:13px}
+th button{all:unset;box-sizing:border-box;display:block;width:100%;padding:12px 16px;cursor:pointer}
+th button:hover{color:var(--ink)}th button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+th .ar{opacity:.35;margin-left:4px;font-size:10px}th[aria-sort] .ar{opacity:1;color:var(--gold)}
+th.plain{padding:12px 16px}
+td{padding:12px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tbody tr.c{cursor:pointer}tbody tr.c:hover td,tbody tr.c:focus-visible td{background:var(--bg)}
+tbody tr.c:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+td:first-child,th:first-child{position:sticky;left:0;background:var(--card)}
+.b{padding:2px 10px;border-radius:99px;font-size:12px;font-weight:500;background:var(--line);color:var(--mut);text-transform:capitalize;white-space:nowrap}
+.s-paid,.s-booked,.s-delivered,.s-connected{background:var(--okbg);color:var(--ok)}
+.s-processing,.s-contacted,.s-awaiting_payment,.s-pending{background:var(--warnbg);color:var(--warn)}
+.s-shipped,.s-new{background:var(--infobg);color:var(--info)}
+.s-payment_failed,.s-lost,.s-cancelled{background:var(--badbg);color:var(--bad)}
+select,.field{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;width:100%}
+select.lead{width:auto;font-weight:500;border-radius:99px;padding:3px 10px;font-size:12px;text-transform:capitalize}
+select.lead.s-new{border-color:var(--info)}select.lead.s-contacted{border-color:var(--warn)}select.lead.s-booked{border-color:var(--ok)}select.lead.s-lost{border-color:var(--bad)}
+.empty{padding:44px 20px;text-align:center;color:var(--mut)}.empty b{display:block;color:var(--ink);font:600 20px var(--serif);margin-bottom:4px}.empty .btn{margin-top:14px}
+.scrim{position:fixed;inset:0;background:rgba(20,18,15,.4);opacity:0;pointer-events:none;transition:opacity .25s;z-index:5}
+.scrim.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(460px,100%);background:var(--card);border-left:1px solid var(--line);padding:24px 26px;overflow:auto;transform:translateX(100%);visibility:hidden;transition:transform .25s,visibility .25s;z-index:6}
+.drawer.open{transform:none;visibility:visible}
+.dh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.x{width:32px;height:32px;border-radius:99px;padding:0;font-size:18px;line-height:1}
+.drawer h2{font-size:28px;margin:0}.drawer .sub{margin:0 0 10px}
+.drawer h3{font:600 12px var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:22px 0 8px}
+.drawer dl{display:grid;grid-template-columns:96px 1fr;gap:8px 12px;margin:0}.drawer dt{color:var(--mut)}.drawer dd{overflow-wrap:anywhere}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}
+.steps{display:flex;margin:6px 0 0}
+.steps div{flex:1;text-align:center;font-size:12px;color:var(--mut);position:relative;padding-top:20px}
+.steps div::before{content:"";position:absolute;top:5px;left:0;right:0;height:2px;background:var(--line)}
+.steps div::after{content:"";position:absolute;top:0;left:calc(50% - 6px);width:12px;height:12px;border-radius:99px;background:var(--card);border:2px solid var(--line)}
+.steps div:first-child::before{left:50%}.steps div:last-child::before{right:50%}
+.steps .done{color:var(--ink)}.steps .done::before,.steps .done::after{background:var(--gold);border-color:var(--gold)}
+.steps .done.cur{font-weight:600}
+.photo{height:150px;border-radius:10px;background:linear-gradient(135deg,var(--goldbg),var(--line));display:grid;place-items:center;color:var(--mut);margin:0 0 10px}
+.drawer label{display:block;color:var(--mut);font-size:13px;margin-bottom:12px}.drawer label select,.drawer label input{margin-top:5px;color:var(--ink)}
+.msg{background:var(--bg);border-radius:10px;padding:12px 14px;white-space:pre-wrap}
+#toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;align-items:center;z-index:9}
+.toast{background:var(--ink);color:var(--bg);padding:10px 14px 10px 18px;border-radius:10px;display:flex;gap:14px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:up .2s}
+.toast button{border:0;background:none;color:var(--gold);font:600 13px var(--sans);cursor:pointer}
+@keyframes up{from{opacity:0;transform:translateY(8px)}}
+.tog{display:flex;align-items:center;gap:8px;cursor:pointer}
+.wa{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;background:#25D366;color:#fff;font:500 12px var(--sans);text-decoration:none}
+.wa:hover{background:#1EBE5A}
+.acts .wa{padding:8px 14px;font-size:13px;border-radius:9px}
+.price{display:flex;align-items:center;gap:6px}.price .field{width:100px}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media(max-width:820px){
+.app{grid-template-columns:1fr}
+aside{position:static;height:auto;padding:12px;border-right:0;border-bottom:1px solid var(--line)}
+nav{display:flex;overflow-x:auto;gap:4px;flex:none}nav button{white-space:nowrap;width:auto}nav button.on::before{display:none}
+.brand{padding-bottom:10px}.foot{display:none}
+main{padding:0 16px 40px}.me{display:none}.search kbd{display:none}h1{font-size:30px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+[hidden]{display:none!important}
+.login{min-height:100vh;display:grid;place-items:center;padding:20px}
+.login form{width:min(380px,100%);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px;box-shadow:var(--shadow)}
+.login .brand{padding:0 0 4px}.login p{color:var(--mut);margin-bottom:18px}
+.login label{display:block;color:var(--mut);font-size:13px;margin-bottom:12px}.login .field{margin-top:5px}
+.err{color:var(--bad);min-height:20px;margin-bottom:8px;font-size:13px}
+.photo{height:auto;min-height:120px}.photo img{display:block;max-width:100%;max-height:260px;border-radius:10px}
+.ph{margin:0 0 16px}.ph figcaption{color:var(--mut);font-size:12px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="login" id="login" hidden><form id="lf"><div class="brand">VK <span>Photography</span></div><p>Admin sign in</p>
+<label>Email<input class="field" id="lem" type="email" autocomplete="username" required></label>
+<label>Password<input class="field" id="lpw" type="password" autocomplete="current-password" required></label>
+<div class="err" id="lerr" role="alert"></div><button class="btn pri full" id="lgo">Sign in</button></form></div>
+<div class="app" id="app" hidden>
+<aside><div class="brand">VK <span>Photography</span></div><nav id="nav" aria-label="Main"></nav><div class="foot">Live data</div></aside>
+<main>
+<header>
+<div class="search" id="sw"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.500-3.500"/></svg><input id="q" placeholder="Search orders, customers and enquiries" aria-label="Search" autocomplete="off"><kbd>/</kbd><button data-act="clear" aria-label="Clear search">×</button></div>
+<button class="btn" data-act="refresh">Refresh</button><button class="btn" id="theme" data-act="theme">Dark mode</button><span class="me" id="me"></span>
+</header>
+<div class="note" id="note" hidden><span id="notet"></span><button data-act="dismiss" aria-label="Dismiss">×</button></div>
+<section id="view" aria-live="polite"></section>
+</main>
+</div>
+<div class="scrim" id="scrim" data-act="close"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Details"></aside>
+<div id="toasts"></div>
+<script>
+/* Paste your project values. The anon key is public by design; row level security protects the data. */
+const SUPABASE_URL='https://dhqlykgyzpypacgozriw.supabase.co',SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRocWx5a2d5enB5cGFjZ296cml3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQyMTQwNDYsImV4cCI6MjEwOTc5MDA0Nn0.VzIVYDNw9oPMO3MoNExuRFZMXL019m0cWVEgVBQbD8w',BUCKET='order-photos';
+const cfg=!/YOUR_/.test(SUPABASE_URL+SUPABASE_ANON_KEY),sb=cfg?supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
+let orders=[],leads=[],products=[],pm={},rev=[],hook={n:0,last:null},store=true,me='',busy=false;
+const dk=d=>new Date(d).toLocaleDateString('en-CA');
+const tel=p=>'tel:'+String(p||'').replace(/[^\d+]/g,'');
+const itemDesc=i=>{const n=id=>pm[id]?.name||id||'Item';return i.kind=='gift'?`${n(i.product_id)} × ${i.quantity}`:[n(i.frame_id)+' frame',i.size_label,i.quality_id,i.mounting_id&&'mounting: '+i.mounting_id,'qty '+i.quantity].filter(Boolean).join(', ')};
+const mapOrder=r=>({id:r.id,ref:r.order_ref,name:r.customer_name,phone:r.customer_phone,email:r.customer_email,city:r.city,addr:[r.address,r.city,r.state].filter(Boolean).join(', ')+(r.pincode?' '+r.pincode:''),total:r.total,status:r.status,date:dk(r.created_at),paidAt:r.paid_at||r.created_at,pay:r.razorpay_payment_id||'',track:r.tracking_number||'',shippedAt:r.shipped_at,lines:(r.order_items||[]).map(i=>({...i,desc:itemDesc(i)})),items:(r.order_items||[]).map(itemDesc)});
+const mapLead=r=>({id:r.id,src:r.source,name:r.name,phone:r.phone||'',service:r.service||'',date:r.event_date||'',loc:r.location||'',guests:r.guests||0,total:r.estimated_total||0,msg:r.message||'',status:r.status,details:r.details});
+async function loadAll(){
+const[o,l,p,w,st]=await Promise.all([sb.from('orders').select('*, order_items(*)').order('created_at',{ascending:false}).limit(1000),sb.from('leads').select('*').order('created_at',{ascending:false}).limit(1000),sb.from('products').select('*').order('sort_order'),sb.from('webhook_events').select('received_at',{count:'exact'}).order('received_at',{ascending:false}).limit(1),sb.storage.from(BUCKET).list('',{limit:1})]);
+for(const r of[o,l,p])if(r.error)throw r.error;
+products=p.data.map(r=>({id:r.id,n:r.name,k:r.kind,p:r.price??r.price_modifier??0,on:r.active}));pm=Object.fromEntries(p.data.map(r=>[r.id,r]));
+orders=o.data.map(mapOrder);leads=l.data.map(mapLead);hook={n:w.error?0:w.count,last:w.data?.[0]?.received_at};store=!st.error;
+rev=Array.from({length:14},(_,i)=>{const k=dk(Date.now()-(13-i)*864e5);return orders.filter(x=>sold(x)&&dk(x.paidAt)==k).reduce((a,x)=>a+x.total,0)})}
+const det=o=>typeof o!='object'?esc(o):`<dl>${Object.entries(o).map(([k,v])=>`<dt>${esc(lab(k))}</dt><dd>${esc(v&&typeof v=='object'?JSON.stringify(v):v)}</dd>`).join('')}</dl>`;
+const conn=()=>`<div class="row"><span>Razorpay webhook${hook.last?`<small>Last event ${esc(new Date(hook.last).toLocaleString('en-IN'))}</small>`:''}</span>${hook.n?badge('connected',hook.n+' events'):badge('pending','no events yet')}</div><div class="row"><span>Photo storage</span>${store?badge('connected','private bucket'):badge('pending','unreachable')}</div>`;
+const OS=['paid','processing','shipped','delivered','awaiting_payment','payment_failed','cancelled','refunded'];
+const LS=['new','contacted','booked','lost'];
+const FLOW=['paid','processing','shipped','delivered'];
+const NEXT={paid:['processing','Start packing'],processing:['shipped','Mark as shipped'],shipped:['delivered','Mark as delivered']};
+const ICON={overview:'<path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/>',orders:'<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>',payments:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',quotes:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6M8 13h8M8 17h5"/>',enquiries:'<path d="M21 12a8 8 0 0 1-11.600 7.100L3 21l1.900-5.400A8 8 0 1 1 21 12z"/>',customers:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6"/>',products:'<path d="M3 12V3h9l9 9-9 9z"/><circle cx="7.500" cy="7.500" r="1.500"/>',settings:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>'};
+const $=s=>document.querySelector(s),inr=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const lab=s=>s.replaceAll('_',' ');
+const cap=s=>s[0].toUpperCase()+s.slice(1);
+const badge=(s,t)=>`<span class="b s-${s}">${esc(t||lab(s))}</span>`;
+const sold=o=>FLOW.includes(o.status);
+const waNum=p=>{const d=String(p).replace(/\D/g,'');return d.length==10?'91'+d:d};
+const wa=(phone,msg)=>!phone?'':`<a class="wa" href="https://wa.me/${waNum(phone)}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener" aria-label="WhatsApp ${esc(phone)}"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.500 15.200L2 22l4.900-1.500A10 10 0 1 0 12 2zm5.200 14.100c-.2.600-1.300 1.200-1.800 1.200-.5.100-1 .2-3.300-.7-2.800-1.100-4.600-4-4.700-4.200-.1-.2-1.100-1.500-1.100-2.800 0-1.300.7-1.900.9-2.200.2-.3.500-.3.700-.3h.5c.2 0 .4 0 .6.500l.8 2c.1.200.1.400 0 .5l-.4.600c-.1.200-.3.300-.1.600.2.300.8 1.300 1.700 2.100 1.100 1 2 1.300 2.300 1.400.3.100.5.100.6-.1l.9-1.100c.2-.3.400-.2.600-.1l1.900.9c.3.100.5.200.5.300.1.200.1.800-.1 1.400z"/></svg>WhatsApp</a>`;
+const NAV=[['overview','Overview'],['orders','Orders'],['payments','Payments'],['quotes','Quotes'],['enquiries','Enquiries'],['customers','Customers'],['products','Products'],['settings','Settings']];
+let view='overview',tab='all',q='',sort=null,cur=null,opener=null;
+
+function toast(t,undo){const e=document.createElement('div');e.className='toast';e.setAttribute('role','status');e.append(t);
+if(undo){const b=document.createElement('button');b.textContent='Undo';b.onclick=()=>{undo();e.remove()};e.append(b)}
+$('#toasts').append(e);setTimeout(()=>e.remove(),undo?5000:2200)}
+
+function nav(){const todo=orders.filter(o=>['paid','processing'].includes(o.status)).length,nl=k=>leads.filter(l=>l.src==k&&l.status=='new').length;
+const c={orders:todo,quotes:nl('quotation'),enquiries:nl('contact')};
+$('#nav').innerHTML=NAV.map(([k,t])=>`<button data-v="${k}" class="${k==view?'on':''}" ${k==view?'aria-current="page"':''}><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>${t}${c[k]?`<i>${c[k]}</i>`:''}</button>`).join('')}
+
+function sortRows(cols,rows){if(!sort)return rows;const c=cols[sort.i];if(!c||!c.v)return rows;
+return[...rows].sort((a,b)=>{const x=c.v(a),y=c.v(b),r=typeof x=='number'?x-y:String(x).localeCompare(String(y));return sort.d*r})}
+
+function table(cols,rows,rowAttr){
+if(!rows.length)return`<div class="card empty"><b>${q?'No matches for “'+esc(q)+'”':'Nothing here yet'}</b>${q?'Try a different name, phone number or order ID.':'New items will appear here as they come in.'}${q?'<br><button class="btn" data-act="clear">Clear search</button>':(tab!='all'?'<br><button class="btn" data-t="all">Show all</button>':'')}</div>`;
+rows=sortRows(cols,rows);
+return`<div class="tw"><table><thead><tr>${cols.map((c,i)=>c.v?`<th scope="col" ${sort&&sort.i==i?`aria-sort="${sort.d>0?'ascending':'descending'}"`:''}><button data-sort="${i}">${c.h}<span class="ar" aria-hidden="true">${sort&&sort.i==i?(sort.d>0?'▲':'▼'):'↕'}</span></button></th>`:`<th scope="col" class="plain">${c.h}</th>`).join('')}</tr></thead>
+<tbody>${rows.map(r=>{const a=rowAttr?rowAttr(r):'';return`<tr ${a?`class="c" tabindex="0" ${a}`:''}>${cols.map(c=>`<td>${c.r(r)}</td>`).join('')}</tr>`}).join('')}</tbody></table></div>`}
+
+const match=o=>!q||JSON.stringify(o).toLowerCase().includes(q);
+function tabs(list,counts){return`<div class="tabs" role="tablist">${['all',...list].map(t=>`<button role="tab" aria-selected="${t==tab}" data-t="${t}" class="${t==tab?'on':''}">${t=='all'?'All':cap(lab(t))}<span>${counts(t)}</span></button>`).join('')}</div>`}
+function head(t,s){return`<h1>${t}</h1><p class="sub">${s}</p>`}
+const orderAttr=o=>`data-id="${o.ref}" aria-label="Open order ${o.ref}"`;
+
+function overview(){const paid=orders.filter(sold),sum=a=>a.reduce((x,o)=>x+o.total,0);const mk=dk(new Date()).slice(0,7),mo=paid.filter(o=>dk(o.paidAt).startsWith(mk));
+const todo=orders.filter(o=>['paid','processing'].includes(o.status)),fails=orders.filter(o=>o.status=='payment_failed'),nl=leads.filter(l=>l.status=='new');
+const max=Math.max(...rev,1),h=new Date().getHours(),hi=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+const day=i=>{const d=new Date();d.setDate(d.getDate()-(13-i));return d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})};
+const att=[...todo.map(o=>`<div class="row" tabindex="0" data-open="${o.ref}"><span>${esc(o.name)}<small>${o.ref} · ${o.status=='paid'?'ready to pack':'packing in progress'}</small></span>${badge(o.status)}</div>`),
+...fails.map(o=>`<div class="row" tabindex="0" data-open="${o.ref}"><span>${esc(o.name)}<small>Payment failed · call ${esc(o.phone)}</small></span>${badge(o.status)}</div>`),
+...nl.map(l=>`<div class="row" tabindex="0" data-go="${l.src=='quotation'?'quotes':'enquiries'}"><span>${esc(l.name)}<small>${esc(l.service)}</small></span>${badge('new')}</div>`)];
+const bm={};paid.forEach(o=>o.lines.forEach(i=>{const k=i.kind=='gift'?i.product_id:i.frame_id;bm[k]=(bm[k]||0)+i.quantity}));const best=Object.entries(bm).map(([k,c])=>[pm[k]?.name||k,c]).sort((a,b)=>b[1]-a[1]).slice(0,4);
+return head(hi,'Here’s what needs you today · '+new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'}))+`<div class="grid g4">
+<button class="card stat hot" data-go="orders"><span>Orders to fulfil</span><b>${todo.length}</b><em>View orders →</em></button>
+<button class="card stat" data-go="payments" data-tab="paid"><span>Revenue this month</span><b>${inr(sum(mo))}</b><em>${mo.length} paid orders</em></button>
+<button class="card stat" data-go="quotes"><span>New quotes and enquiries</span><b>${nl.length}</b><em>Reply within a day</em></button>
+<div class="card stat"><span>Average order value</span><b>${paid.length?inr(sum(paid)/paid.length):'–'}</b></div></div>
+<div class="grid g2" style="margin-top:16px">
+<div class="card"><h2>Revenue, last 14 days<small>${inr(rev.reduce((a,b)=>a+b,0))}</small></h2><div class="bars" role="img" aria-label="Daily revenue bar chart">${rev.map((v,i)=>`<div style="height:${v/max*100}%" data-v="${inr(v)}"><small>${i%3==0?day(i):''}</small></div>`).join('')}</div></div>
+<div class="card"><h2>Needs attention<small>${att.length} items</small></h2>${att.join('')||'<div class="empty">All caught up 🎉</div>'}</div></div>
+<div class="grid g2" style="margin-top:16px">
+<div class="card"><h2>Latest orders</h2>${[...orders].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5).map(o=>`<div class="row" tabindex="0" data-open="${o.ref}"><span>${esc(o.name)}<small>${o.ref} · ${o.date}</small></span><b>${inr(o.total)}</b></div>`).join('')}</div>
+<div class="card"><h2>Best sellers</h2>${best.map(([n,c])=>`<div class="row" style="display:block"><div style="display:flex;justify-content:space-between"><span>${n}</span><b>${c} sold</b></div><div class="meter"><i style="width:${c/best[0][1]*100}%"></i></div></div>`).join('')}</div></div>`}
+
+function ordersV(){const rows=orders.filter(o=>(tab=='all'||o.status==tab)&&match(o));
+return head('Orders','Pack, ship and track every shop order.')+tabs(OS,t=>orders.filter(o=>t=='all'||o.status==t).length)+
+table([{h:'Order',r:o=>`<b>${o.ref}</b>`,v:o=>o.ref},{h:'Customer',r:o=>esc(o.name),v:o=>o.name},{h:'City',r:o=>esc(o.city),v:o=>o.city},{h:'Items',r:o=>o.items.length,v:o=>o.items.length},{h:'Total',r:o=>inr(o.total),v:o=>o.total},{h:'Status',r:o=>badge(o.status),v:o=>o.status},{h:'Date',r:o=>o.date,v:o=>o.date},{h:'Contact',r:o=>wa(o.phone,`Hi ${o.name}, this is VK Photography about your order ${o.ref}.`)}],rows,orderAttr)}
+
+function paymentsV(){const s=a=>a.reduce((x,o)=>x+o.total,0),by=t=>orders.filter(o=>o.status==t);
+const rows=orders.filter(o=>(tab=='all'||(tab=='paid'?sold(o):o.status==tab))&&match(o));
+return head('Payments','Money in, and payments that need a follow-up.')+`<div class="grid g4" style="margin-bottom:18px">
+<div class="card stat"><span>Collected</span><b>${inr(s(orders.filter(sold)))}</b></div><div class="card stat"><span>Awaiting payment</span><b>${inr(s(by('awaiting_payment')))}</b></div>
+<div class="card stat"><span>Failed</span><b>${by('payment_failed').length}</b></div><div class="card stat"><span>Refunded</span><b>${by('refunded').length}</b></div></div>`+
+tabs(['paid','payment_failed','awaiting_payment','refunded'],t=>orders.filter(o=>t=='all'||(t=='paid'?sold(o):o.status==t)).length)+
+table([{h:'Order',r:o=>`<b>${o.ref}</b>`,v:o=>o.ref},{h:'Customer',r:o=>esc(o.name),v:o=>o.name},{h:'Amount',r:o=>inr(o.total),v:o=>o.total},{h:'Razorpay payment',r:o=>o.pay?`<code>${o.pay}</code>`:'–',v:o=>o.pay},{h:'Status',r:o=>badge(sold(o)?'paid':o.status),v:o=>sold(o)?'paid':o.status},{h:'Contact',r:o=>wa(o.phone,o.status=='payment_failed'||o.status=='awaiting_payment'?`Hi ${o.name}, your payment for order ${o.ref} (${inr(o.total)}) is pending. Can we help you complete it?`:`Hi ${o.name}, thank you for your payment for order ${o.ref}.`)}],rows,orderAttr)}
+
+function leadsV(src){const rows=leads.filter(l=>l.src==src&&(tab=='all'||l.status==tab)&&match(l));
+const nm=src=='quotation'?'Quotes':'Enquiries',qt=src=='quotation';
+return head(nm,qt?'People who sent a quote request.':'People who used the contact form.')+tabs(LS,t=>leads.filter(l=>l.src==src&&(t=='all'||l.status==t)).length)+
+table([{h:'Name',r:l=>`<b>${esc(l.name)}</b>`,v:l=>l.name},{h:'Phone',r:l=>l.phone?`<a href="${tel(l.phone)}">${esc(l.phone)}</a>`:'–'},{h:'Service',r:l=>esc(l.service),v:l=>l.service},{h:'Event date',r:l=>l.date,v:l=>l.date},{h:'Location',r:l=>esc(l.loc),v:l=>l.loc},
+qt?{h:'Estimate',r:l=>inr(l.total),v:l=>l.total}:{h:'Message',r:l=>esc(l.msg.length>28?l.msg.slice(0,28)+'…':l.msg)},
+{h:'Status',r:l=>`<select class="lead s-${l.status}" data-lead="${l.id}" aria-label="Status for ${esc(l.name)}">${LS.map(s=>`<option ${s==l.status?'selected':''}>${s}</option>`).join('')}</select>`,v:l=>l.status},
+{h:'Contact',r:l=>wa(l.phone,`Hi ${l.name}, this is VK Photography regarding your ${l.service.toLowerCase()} ${qt?'quote':'enquiry'}.`)}],rows,l=>`data-lid="${l.id}" aria-label="Open ${esc(l.name)}"`)}
+
+function customersV(){const m={};orders.forEach(o=>{const c=m[o.phone]||(m[o.phone]={name:o.name,phone:o.phone,city:o.city,n:0,spent:0,last:o.date});c.n++;if(sold(o))c.spent+=o.total;if(o.date>c.last)c.last=o.date});
+return head('Customers','Everyone who has ordered, grouped by phone number.')+table([{h:'Name',r:c=>`<b>${esc(c.name)}</b>`,v:c=>c.name},{h:'Phone',r:c=>esc(c.phone)},{h:'City',r:c=>esc(c.city),v:c=>c.city},{h:'Orders',r:c=>c.n,v:c=>c.n},{h:'Total spent',r:c=>inr(c.spent),v:c=>c.spent},{h:'Last order',r:c=>c.last,v:c=>c.last},{h:'Contact',r:c=>wa(c.phone,`Hi ${c.name}, this is VK Photography.`)}],Object.values(m).filter(match))}
+
+function productsV(){const rows=products.map((p,i)=>({...p,i})).filter(p=>!q||p.n.toLowerCase().includes(q));
+return head('Products','Read-only for now. The shop still prices from js/shop-pricing.js. Frame prices are add-ons.')+table([{h:'Name',r:p=>`<b>${esc(p.n)}</b>`,v:p=>p.n},{h:'Type',r:p=>cap(p.k),v:p=>p.k},{h:'Price',r:p=>(p.k=='frame'?'+':'')+inr(p.p),v:p=>p.p},{h:'Status',r:p=>badge(p.on?'paid':'cancelled',p.on?'Active':'Hidden'),v:p=>p.on?1:0}],rows)}
+
+function settingsV(){return head('Settings','Account, exports and connections.')+`<div class="grid g2">
+<div class="card"><h2>Export</h2><p class="sub">Download all orders as a spreadsheet file.</p><button class="btn pri" data-act="csv">Export orders (CSV)</button></div>
+<div class="card"><h2>Connections</h2>${conn()}</div>
+<div class="card"><h2>Account</h2><p class="sub">Signed in as ${esc(me)}</p><button class="btn" data-act="out">Sign out</button></div></div>`}
+
+function render(){nav();const v={overview,orders:ordersV,payments:paymentsV,quotes:()=>leadsV('quotation'),enquiries:()=>leadsV('contact'),customers:customersV,products:productsV,settings:settingsV};
+$('#view').innerHTML=v[view]();$('#sw').classList.toggle('has',!!q)}
+
+function go(v,t){view=v;tab=t||'all';sort=null;render();window.scrollTo({top:0})}
+
+/* drawer */
+function openDrawer(html,from){opener=from||document.activeElement;const d=$('#drawer');d.innerHTML=html;d.classList.add('open');$('#scrim').classList.add('open');setTimeout(()=>d.querySelector('.x')?.focus(),50)}
+function closeDrawer(){$('#drawer').classList.remove('open');$('#scrim').classList.remove('open');cur=null;opener&&opener.isConnected&&opener.focus()}
+function copyBtn(v,l){return`<button class="btn" data-act="copy" data-copy="${esc(v)}">${l}</button>`}
+function openOrder(ref,from){const o=orders.find(x=>x.ref==ref);cur=ref;const ix=FLOW.indexOf(o.status),nx=NEXT[o.status];
+openDrawer(`<div class="dh"><div><h2>${esc(o.name)}</h2><p class="sub">${o.ref} · ${o.date}</p>${badge(o.status)}</div><button class="btn x" data-act="close" aria-label="Close">×</button></div>
+<div class="acts">${wa(o.phone,`Hi ${o.name}, this is VK Photography about your order ${o.ref}.`)}<a class="btn" href="${tel(o.phone)}">Call</a>${copyBtn(o.addr,'Copy address')}</div>
+${ix>=0?`<h3>Progress</h3><div class="steps">${FLOW.map((s,i)=>`<div class="${i<=ix?'done':''} ${i==ix?'cur':''}">${cap(s)}</div>`).join('')}</div>`:''}
+${nx?`<button class="btn pri full" style="margin-top:16px" data-act="next" data-to="${nx[0]}">${nx[1]}</button>`:''}
+<h3>Details</h3><dl><dt>Phone</dt><dd><a href="${tel(o.phone)}">${esc(o.phone)}</a></dd><dt>Email</dt><dd>${esc(o.email)}</dd><dt>Address</dt><dd>${esc(o.addr)}</dd><dt>Items</dt><dd>${o.items.map(esc).join('<br>')}</dd><dt>Total</dt><dd><b>${inr(o.total)}</b></dd><dt>Payment</dt><dd>${o.pay?`<code>${o.pay}</code>`:'Not paid yet'}</dd></dl>
+<h3>Photos</h3><div id="photos">Loading…</div>
+<h3>Update</h3><label>Status<select id="st">${OS.map(s=>`<option value="${s}" ${s==o.status?'selected':''}>${cap(lab(s))}</option>`).join('')}</select></label>
+<label>Tracking number<input class="field" id="tr" value="${esc(o.track||'')}" placeholder="Add a tracking number"></label>
+<button class="btn pri full" data-act="save">Save changes</button>`,from);loadPhotos(o)}
+function openLead(id,from){const l=leads.find(x=>x.id==id);cur=id;
+openDrawer(`<div class="dh"><div><h2>${esc(l.name)}</h2><p class="sub">${l.src=='quotation'?'Quote request':'Contact enquiry'}</p>${badge(l.status)}</div><button class="btn x" data-act="close" aria-label="Close">×</button></div>
+<div class="acts">${wa(l.phone,`Hi ${l.name}, this is VK Photography regarding your ${l.service.toLowerCase()}.`)}<a class="btn" href="${tel(l.phone)}">Call</a></div>
+<h3>Message</h3><div class="msg">${esc(l.msg)}</div>
+<h3>Details</h3><dl><dt>Phone</dt><dd>${esc(l.phone)}</dd><dt>Service</dt><dd>${esc(l.service)}</dd><dt>Event date</dt><dd>${l.date}</dd><dt>Location</dt><dd>${esc(l.loc)}</dd>${l.guests?`<dt>Guests</dt><dd>${l.guests}</dd>`:''}${l.total?`<dt>Estimate</dt><dd><b>${inr(l.total)}</b></dd>`:''}</dl>
+${l.details?`<h3>Request details</h3>${det(l.details)}`:''}<h3>Status</h3><select id="ls" data-lead="${l.id}">${LS.map(s=>`<option ${s==l.status?'selected':''}>${s}</option>`).join('')}</select>`,from)}
+
+async function save(o,p){const{data,error}=await sb.from('orders').update(p).eq('id',o.id).select('id');
+if(error||!data.length){toast('Couldn’t save: '+(error?.message||'not allowed'));return false}
+if('status'in p)o.status=p.status;if('tracking_number'in p)o.track=p.tracking_number||'';if('shipped_at'in p)o.shippedAt=p.shipped_at;return true}
+async function setStatus(o,s,msg,x={}){const pv={status:o.status,tracking_number:o.track||null,shipped_at:o.shippedAt||null},p={status:s,...x};
+if(s=='shipped'&&!o.shippedAt)p.shipped_at=new Date().toISOString();
+if(!await save(o,p))return false;render();
+toast(msg||`Order ${o.ref} marked ${lab(s)}`,async()=>{if(await save(o,pv)){render();if(cur==o.ref)openOrder(o.ref,opener);toast('Change undone')}});return true}
+async function loadPhotos(o){const box=$('#photos'),ls=o.lines.filter(l=>l.photo_path);
+if(!ls.length){box.textContent='No photos attached.';return}
+const ps=ls.map(l=>l.photo_path),bk=sb.storage.from(BUCKET),[a,b]=await Promise.all([bk.createSignedUrls(ps,900),bk.createSignedUrls(ps,900,{download:true})]);
+if(cur!=o.ref||!$('#photos'))return;if(a.error){box.textContent='Couldn’t load photos: '+a.error.message;return}
+const u=(r,p)=>r.data?.find(x=>x.path==p)?.signedUrl||'';
+box.innerHTML=ls.map(l=>`<figure class="ph"><div class="photo"><img src="${esc(u(a,l.photo_path))}" alt="Customer photo" loading="lazy"></div><figcaption>${esc(l.desc)}${l.photo_width?` · ${l.photo_width}×${l.photo_height}px`:''}</figcaption><a class="btn full" href="${esc(u(b,l.photo_path))}">Download original</a></figure>`).join('')}
+
+document.addEventListener('click',e=>{
+if(e.target.closest('a,select,input,label'))return;
+const t=e.target.closest('[data-v],[data-t],[data-id],[data-lid],[data-open],[data-go],[data-sort],[data-act]');if(!t)return;const d=t.dataset;
+if(d.act){const a=d.act;
+if(a=='close')closeDrawer();
+else if(a=='clear'){q='';$('#q').value='';render();$('#q').focus()}
+else if(a=='theme')setTheme(document.documentElement.dataset.theme!='dark');
+else if(a=='dismiss')$('#note').hidden=true;
+else if(a=='refresh')refresh().then(()=>toast('Updated'));
+else if(a=='out')signOut();
+else if(a=='copy'){try{navigator.clipboard.writeText(d.copy).then(()=>toast('Copied'),()=>toast('Couldn’t copy'))}catch(_){toast('Couldn’t copy')}}
+else if(a=='next'){const o=orders.find(x=>x.ref==cur);setStatus(o,d.to).then(k=>k&&openOrder(o.ref,opener))}
+else if(a=='save'){const o=orders.find(x=>x.ref==cur),s=$('#st').value,tr=$('#tr').value.trim(),x=tr!=o.track?{tracking_number:tr||null}:{};
+(s!=o.status?setStatus(o,s,'Changes saved',x):Object.keys(x).length?save(o,x).then(r=>r&&(render(),toast('Changes saved'),true)):Promise.resolve(true)).then(r=>r&&closeDrawer())}
+else if(a=='csv'){const f=v=>{let t=String(v??'');if(/^[=+\-@]/.test(t))t="'"+t;return`"${t.replace(/"/g,'""')}"`},r=['Order,Name,Phone,Email,Address,Total,Status,Tracking,Payment,Date',...orders.map(o=>[o.ref,o.name,o.phone,o.email,o.addr,o.total,o.status,o.track,o.pay,o.date].map(f).join(','))];const x=document.createElement('a');x.href=URL.createObjectURL(new Blob(['\ufeff'+r.join('\n')],{type:'text/csv'}));x.download='orders.csv';x.click();toast('Orders exported')}
+return}
+if(d.sort!==undefined){const i=+d.sort;sort=sort&&sort.i==i?(sort.d>0?{i,d:-1}:null):{i,d:1};render()}
+else if(d.v||d.go)go(d.v||d.go,d.tab);
+else if(d.t){tab=d.t;sort=null;render()}
+else if(d.id||d.open)openOrder(d.id||d.open,t);
+else if(d.lid)openLead(d.lid,t)});
+
+document.addEventListener('keydown',e=>{
+if(e.key=='Escape'){if($('#drawer').classList.contains('open'))closeDrawer();else if(document.activeElement==$('#q')&&q){q='';$('#q').value='';render()}}
+else if(e.key=='/'&&!e.target.matches('input,select,textarea')){e.preventDefault();$('#q').focus()}
+else if(e.key=='Enter'&&e.target.matches('tr.c,.row[tabindex]'))e.target.click()});
+
+document.addEventListener('change',async e=>{const t=e.target;if(!t.dataset.lead)return;
+const l=leads.find(x=>x.id==t.dataset.lead),prev=l.status,set=async s=>{const{data,error}=await sb.from('leads').update({status:s}).eq('id',l.id).select('id');
+if(error||!data.length){toast('Couldn’t save: '+(error?.message||'not allowed'));return false}l.status=s;render();if(cur==l.id)openLead(l.id,opener);return true};
+if(await set(t.value))toast(`${l.name} marked ${l.status}`,()=>set(prev));else render()});
+
+$('#q').oninput=e=>{q=e.target.value.trim().toLowerCase();if(!['orders','payments','quotes','enquiries','customers','products'].includes(view)){view='orders';tab='all'}render()};
+
+function setTheme(dark){document.documentElement.dataset.theme=dark?'dark':'light';$('#theme').textContent=dark?'Light mode':'Dark mode';try{localStorage.setItem('vk-theme',dark?'dark':'light')}catch(_){}}
+let saved=null;try{saved=localStorage.getItem('vk-theme')}catch(_){}
+setTheme(saved?saved=='dark':matchMedia('(prefers-color-scheme:dark)').matches);
+function showLogin(m){$('#app').hidden=true;$('#login').hidden=false;$('#lerr').textContent=m||'';$('#lpw').value=''}
+async function enter(user){const{data,error}=await sb.rpc('is_admin');
+if(error||data!==true){await sb.auth.signOut();return showLogin(error?'Couldn’t verify access: '+error.message:'This account isn’t an admin. Add its user id to the admins table.')}
+me=user.email;$('#me').textContent=me;$('#login').hidden=true;$('#app').hidden=false;$('#view').innerHTML='<div class="empty">Loading…</div>';await refresh()}
+async function refresh(){if(busy)return;busy=true;
+try{await loadAll();$('#note').hidden=true;render()}
+catch(e){if(/JWT|401|PGRST30/.test((e.code||'')+(e.message||'')+(e.status||''))){await sb.auth.signOut();showLogin('Session expired. Please sign in again.')}
+else{$('#notet').textContent='Couldn’t load data: '+(e.message||e);$('#note').hidden=false;if(!orders.length&&!leads.length)$('#view').innerHTML=''}}
+finally{busy=false}}
+async function signOut(){await sb.auth.signOut();orders=[];leads=[];showLogin()}
+$('#lf').onsubmit=async e=>{e.preventDefault();const b=$('#lgo');b.disabled=true;$('#lerr').textContent='';
+const{data,error}=await sb.auth.signInWithPassword({email:$('#lem').value.trim(),password:$('#lpw').value});b.disabled=false;
+if(error){$('#lerr').textContent=error.status==400?'Incorrect email or password.':error.message;return}await enter(data.user)};
+if(!cfg){showLogin('Add your Supabase URL and anon key at the top of the script in admin.html.');$('#lgo').disabled=true}
+else{sb.auth.onAuthStateChange(ev=>{if(ev=='SIGNED_OUT'&&!$('#app').hidden){orders=[];leads=[];showLogin()}});
+sb.auth.getSession().then(({data})=>data.session?enter(data.session.user):showLogin());
+setInterval(()=>{if(!$('#app').hidden&&!document.hidden&&!$('#drawer').classList.contains('open'))refresh()},120000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!$('#app').hidden)refresh()})}
+</script>
+</body>
+</html>

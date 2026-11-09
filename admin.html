@@ -159,7 +159,7 @@ main{padding:0 16px 40px}.me{display:none}.search kbd{display:none}h1{font-size:
 <div id="toasts"></div>
 <script>
 /* Paste your project values. The anon key is public by design; row level security protects the data. */
-const SUPABASE_URL='https://YOUR_PROJECT_REF.supabase.co',SUPABASE_ANON_KEY='YOUR_SUPABASE_ANON_KEY',BUCKET='order-photos';
+const SUPABASE_URL='https://dhqlykgyzpypacgozriw.supabase.co',SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRocWx5a2d5enB5cGFjZ296cml3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQyMTQwNDYsImV4cCI6MjEwOTc5MDA0Nn0.VzIVYDNw9oPMO3MoNExuRFZMXL019m0cWVEgVBQbD8w',BUCKET='order-photos';
 const cfg=!/YOUR_/.test(SUPABASE_URL+SUPABASE_ANON_KEY),sb=cfg?supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
 let orders=[],leads=[],products=[],pm={},rev=[],hook={n:0,last:null},store=true,me='',busy=false;
 const dk=d=>new Date(d).toLocaleDateString('en-CA');

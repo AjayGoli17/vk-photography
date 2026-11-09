@@ -1265,3 +1265,8 @@ nav.vk-nav::after{
       transition:background .2s, border-color .2s, color .2s, transform .2s;
     }
     .tc-cta-btn:hover{background:transparent; border-color:var(--ink); color:var(--ink); transform: translateY(-3px);}
+/* ===== desktop masonry fix: no gaps between tiles ===== */
+.grid.mj { display: flex; gap: 18px; align-items: flex-start; column-count: auto; }
+.grid.mj.js-hidden { display: none; }
+.grid-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+.grid-col > .tile { margin-bottom: 0; }

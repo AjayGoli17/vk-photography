@@ -8,13 +8,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/home.css?v=2">
 <link rel="stylesheet" href="css/transition.css">
 <link rel="stylesheet" href="css/hero-tagline.css">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/teaser-video.css">
 <link rel="stylesheet" href="css/nav-glass.css?v=3">
 <link rel="stylesheet" href="css/social-icons.css?v=2">
+<link rel="stylesheet" href="css/shop-teaser.css">
 </head>
 <body>
 <div class="page-transition-overlay"></div>
@@ -85,6 +86,13 @@
 <div class="tile t5" data-w="700" data-h="1100"><img src="portfolio5.jpg" alt="Camera gear laid out before a sunrise shoot"><div class="tile-overlay"><span class="tag">Behind the Scenes</span><span class="title">Before Sunrise</span></div></div>
 <div class="tile t6" data-w="700" data-h="700"><img src="portfolio6.jpg" alt="Close texture detail from a product shoot"><div class="tile-overlay"><span class="tag">Detail</span><span class="title">Texture &amp; Tone</span></div></div>
 <div class="tile t7" data-w="1300" data-h="700"><img src="portfolio7.jpg" alt="Wide editorial shot at golden hour"><div class="tile-overlay"><span class="tag">Editorial</span><span class="title">Golden Frame</span></div></div>
+<div class="tile t7" data-w="1300" data-h="700"><img src="portfolio7.jpg" alt="Wide editorial shot at golden hour"><div class="tile-overlay"><span class="tag">Editorial</span><span class="title">Golden Frame</span></div></div>
+<div class="tile t7" data-w="1300" data-h="700"><img src="portfolio8.jpg" alt="Wide editorial shot at golden hour"><div class="tile-overlay"><span class="tag">Editorial</span><span class="title">Golden Frame</span></div></div>
+<div class="tile t7" data-w="1300" data-h="700"><img src="portfolio9.jpg" alt="Wide editorial shot at golden hour"><div class="tile-overlay"><span class="tag">Editorial</span><span class="title">Golden Frame</span></div></div>
+<div class="tile t7" data-w="1300" data-h="700"><img src="portfolio10.jpg" alt="Wide editorial shot at golden hour"><div class="tile-overlay"><span class="tag">Editorial</span><span class="title">Golden Frame</span></div></div>
+<div class="tile t7" data-w="1300" data-h="700"><img src="portfolio11.jpg" alt="Wide editorial shot at golden hour"><div class="tile-overlay"><span class="tag">Editorial</span><span class="title">Golden Frame</span></div></div>
+
+
 </div>
 <div class="masonry" id="masonry"></div>
 </section>
@@ -127,7 +135,7 @@
 </div>
 </div>
 <div class="service-card">
-<img src="birtdhayposter.png" alt="Birthday celebration photography">
+<img src="birthday.jpg" alt="Birthday celebration photography">
 <div class="card-info">
 <span class="num">03</span>
 <h3>Birthday Photography</h3>
@@ -143,7 +151,7 @@
 </div>
 </div>
 <div class="service-card">
-<img src="house.webp" alt="Housewarming ceremony photography">
+<img src="housewarming.jpg" alt="Housewarming ceremony photography">
 <div class="card-info">
 <span class="num">05</span>
 <h3>Housewarming Photography</h3>
@@ -164,6 +172,34 @@
 <div class="mobile-progress-dots" id="mobileProgressDots"></div>
 <div class="mobile-progress-count" id="mobileProgressCount">01 / 06</div>
 </div>
+</section>
+<section class="shop-teaser" id="shop-teaser">
+<div class="shop-teaser-head">
+<div>
+<p class="overline">Shop</p>
+<h2>Turn your moments into something you can keep.</h2>
+<p>Upload your favorite photo, choose your frame and size, preview it live, and order your personalized photoframe or photo gift.</p>
+</div>
+<a class="shop-teaser-btn" href="shop.html">Create Your Frame &rarr;</a>
+</div>
+<div class="shop-teaser-grid">
+<a class="shop-card" href="shop.html#collection">
+<div class="shop-thumb"><img src="frames/mahogany.webp" alt="Polished Wood photoframe" loading="lazy"><span class="shop-num">01</span></div>
+<h3>Polished Wood Frame</h3>
+<div class="shop-row"><span class="shop-sub">With or without mounting</span><span class="shop-view">View</span></div>
+</a>
+<a class="shop-card" href="shop.html#gifts">
+<div class="shop-thumb"><img src="gifts/photo-mug.jpg" alt="Personalized photo mug" loading="lazy"><span class="shop-num">02</span></div>
+<h3>Personalized Photo Mug</h3>
+<div class="shop-row"><span class="shop-sub">Upload &amp; preview live</span><span class="shop-view">View</span></div>
+</a>
+<a class="shop-card" href="shop.html#gifts">
+<div class="shop-thumb"><img src="gifts/heart-pillow.jpg" alt="Heart photo pillow" loading="lazy"><span class="shop-num">03</span></div>
+<h3>Heart Photo Pillow</h3>
+<div class="shop-row"><span class="shop-sub">Upload &amp; preview live</span><span class="shop-view">View</span></div>
+</a>
+</div>
+<div class="shop-teaser-more"><a class="shop-explore" href="shop.html">Explore Frames</a></div>
 </section>
 <section class="videos" id="videos">
 <div class="videos-head">
@@ -291,6 +327,8 @@ Get Directions
 </div>
 </footer>
 <script src="js/home.js"></script>
+<script src="js/portfolio-masonry.js"></script>
+<script src="js/desktop-masonry.js?v=2"></script>
 <script src="js/transition.js"></script>
 <script>
   var navToggle = document.getElementById('navToggle');
@@ -348,7 +386,7 @@ window.requestAnimationFrame(function () { update(); ticking = false; });
 window.addEventListener('resize', update);
 update();
 })();
-</script>s
+</script>
 <script src="js/cursor.js"></script>
 </body>
 </html>

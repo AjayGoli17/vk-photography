@@ -25,11 +25,54 @@
       ------------------------------------------------------------ */
    const Store = {
      getCart() { try { return JSON.parse(localStorage.getItem("vk_cart")) || []; } catch { return []; } },
-     setCart(cart) { localStorage.setItem("vk_cart", JSON.stringify(cart)); },
+     setCart(cart) { return safeSet("vk_cart", cart); },
      getOrder() { try { return JSON.parse(localStorage.getItem("vk_order")); } catch { return null; } },
-     setOrder(order) { localStorage.setItem("vk_order", JSON.stringify(order)); },
+     setOrder(order) { return safeSet("vk_order", order); },
    };
-   
+   // localStorage is ~5MB on phones and throws when full. Never let that break checkout.
+   function safeSet(key, value) {
+     try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+     catch (err) { console.error("Storage failed for", key, err); showToast("Your browser is low on storage. Please clear some space and try again."); return false; }
+   }
+
+   /* Full-resolution photos live in IndexedDB (hundreds of MB available), not localStorage.
+      The cart only keeps a small thumbnail + a key pointing at the original. */
+   const PhotoDB = {
+     _db: null,
+     open() {
+       if (this._db) return Promise.resolve(this._db);
+       return new Promise((resolve, reject) => {
+         const req = indexedDB.open("vk_photos", 1);
+         req.onupgradeneeded = () => req.result.createObjectStore("photos");
+         req.onsuccess = () => { this._db = req.result; resolve(this._db); };
+         req.onerror = () => reject(req.error);
+       });
+     },
+     async put(key, blob) {
+       const db = await this.open();
+       return new Promise((res, rej) => { const tx = db.transaction("photos", "readwrite"); tx.objectStore("photos").put(blob, key); tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
+     },
+     async get(key) {
+       const db = await this.open();
+       return new Promise((res, rej) => { const r = db.transaction("photos").objectStore("photos").get(key); r.onsuccess = () => res(r.result || null); r.onerror = () => rej(r.error); });
+     },
+   };
+   function makeThumb(img, maxSide) {
+     const ratio = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+     const c = document.createElement("canvas");
+     c.width = Math.max(1, Math.round(img.naturalWidth * ratio));
+     c.height = Math.max(1, Math.round(img.naturalHeight * ratio));
+     c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+     return c.toDataURL("image/jpeg", 0.8);
+   }
+   // Saves the original file; returns { key, thumb }. Falls back to the thumb-only path if IndexedDB is unavailable.
+   async function stashPhoto(file, img) {
+     const key = `photo_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+     let stored = true;
+     try { await PhotoDB.put(key, file); } catch (e) { console.warn("IndexedDB unavailable", e); stored = false; }
+     return { key: stored ? key : null, thumb: makeThumb(img, 600) };
+   }
+
    /* ------------------------------------------------------------
       CUSTOMIZER STATE
       ------------------------------------------------------------ */
@@ -56,6 +99,7 @@
      initCartDrawer();
      initCheckoutForm();
      initPaymentPage();
+     resumePendingPayment();
    });
    
    /* ------------------------------------------------------------
@@ -208,7 +252,9 @@
      const reader = new FileReader();
      reader.onload = (e) => {
        const img = new Image();
-       img.onload = () => {
+       img.onload = async () => {
+         const stash = await stashPhoto(file, img);
+         customizerState.photoKey = stash.key; customizerState.photoThumb = stash.thumb;
          customizerState.photoDataUrl = e.target.result;
          customizerState.photoNaturalW = img.naturalWidth;
          customizerState.photoNaturalH = img.naturalHeight;
@@ -562,7 +608,7 @@
      const effectiveSize = getEffectiveSize();
      const orientationName = ORIENTATIONS.find((o) => o.id === customizerState.orientation).name;
      const item = {
-       id: `item_${Date.now()}`, photo: customizerState.photoDataUrl,
+       id: `item_${Date.now()}`, photo: customizerState.photoThumb || customizerState.photoDataUrl, photoKey: customizerState.photoKey,
        frameId: frame.id, frameName: frame.name, sizeId: size.id,
        sizeLabel: `${effectiveSize.label} · ${orientationName}`,
        qualityId: quality.id, qualityName: quality.name,
@@ -579,7 +625,7 @@
    
      const cart = Store.getCart();
      cart.push(item);
-     Store.setCart(cart);
+     if (!Store.setCart(cart)) return;
      updateCartCount();
      showToast("Added to cart");
      openCart();
@@ -795,7 +841,9 @@
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
-      img.onload = () => {
+      img.onload = async () => {
+        const stash = await stashPhoto(file, img);
+        giftState.photoKey = stash.key; giftState.photoThumb = stash.thumb;
         giftState.photoDataUrl = e.target.result;
         giftState.photoNaturalW = img.naturalWidth;
         giftState.photoNaturalH = img.naturalHeight;
@@ -948,13 +996,13 @@
 
     const cart = Store.getCart();
     cart.push({
-      id: `item_${Date.now()}`, kind: "gift", photo: giftState.photoDataUrl,
+      id: `item_${Date.now()}`, kind: "gift", photo: giftState.photoThumb || giftState.photoDataUrl, photoKey: giftState.photoKey,
       productId: product.id, productName: product.name,
       unitPrice: product.price, quantity: giftState.quantity,
       photoW: giftState.photoNaturalW, photoH: giftState.photoNaturalH,
       crop: { unit: "fraction", x: giftState.transform.x, y: giftState.transform.y, scale: giftState.transform.scale },
     });
-    Store.setCart(cart);
+    if (!Store.setCart(cart)) return;
     updateCartCount();
     showToast("Added to cart");
     openCart();
@@ -1056,6 +1104,7 @@
      document.getElementById("paymentAmount").textContent = formatINR(order.total);
      document.getElementById("paymentOrderRef").textContent = order.orderId;
      setPaymentState("idle");
+     loadRazorpayScript().catch(() => {}); // preload so Pay Now opens instantly on mobile
    }
  
    /* idle | loading | cancelled | failed — "success" is not a state
@@ -1137,6 +1186,7 @@
        const { keyId, razorpayOrderId, amount, currency, orderRef } = await createRes.json();
  
        payInFlight = false; // Razorpay Checkout has its own UI lock from here
+       order.razorpayOrderId = razorpayOrderId; Store.setOrder(order); // so we can recover if the browser reloads while the UPI app is open
  
        const rzp = new window.Razorpay({
          key: keyId,
@@ -1183,7 +1233,7 @@
      for (const item of order.items) {
        if (item.photoPath) continue;
 
-       const blob = await (await fetch(item.photo)).blob();
+       const blob = (item.photoKey && await PhotoDB.get(item.photoKey).catch(() => null)) || await (await fetch(item.photo)).blob();
        const urlRes = await fetch(`${RAZORPAY_FN_BASE}/upload-photo-url`, {
          method: "POST",
          headers: { "Content-Type": "application/json" },
@@ -1246,6 +1296,28 @@
      }
    }
  
+   /* On phones, the UPI app (GPay/PhonePe/Paytm) takes over the screen. When the customer comes back,
+      the browser may have reloaded this page and the Razorpay callback is gone. Ask the server
+      (the webhook records payment even if the page was closed) and continue from there. */
+   async function resumePendingPayment() {
+     const order = Store.getOrder();
+     if (!order || order.paymentStatus !== "pending" || !order.razorpayOrderId) return;
+     switchView("Payment"); renderPayment();
+     setPaymentState("loading", "Checking your payment…");
+     for (let i = 0; i < 8; i++) {
+       try {
+         const res = await fetch(`${RAZORPAY_FN_BASE}/order-status?orderRef=${encodeURIComponent(order.orderId)}`);
+         const data = await safeJson(res);
+         if (data?.status === "paid") {
+           order.paymentStatus = "paid"; order.orderStatus = "confirmed"; order.razorpayPaymentId = data.razorpayPaymentId;
+           Store.setOrder(order); switchView("Confirmation"); showConfirmation(); return;
+         }
+       } catch (e) { /* retry */ }
+       await new Promise((r) => setTimeout(r, 2500));
+     }
+     setPaymentState("idle");
+   }
+
    async function safeJson(res) {
      try { return await res.json(); } catch { return null; }
    }

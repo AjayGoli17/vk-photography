@@ -438,3 +438,20 @@ textarea.input-field { resize: none; min-height: 150px; }
 .btn-retry:hover { opacity: 0.9; }
 .btn-call { background-color: transparent; color: var(--on-surface); border: 1px solid var(--outline-variant); }
 .btn-call:hover { background-color: #fafaf9; }
+
+/* ---- Per-sheet quantity stepper (Canvera Album card) ---- */
+.service-card .qty-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.service-card .qty-label { font-size: 0.75rem; color: var(--on-surface-variant); margin-right: 2px; }
+.service-card .qty-btn {
+    width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.35);
+    background: transparent; font-size: 1rem; line-height: 1; cursor: pointer; color: #000;
+}
+.service-card .qty-btn:hover { background: #000; color: #fff; }
+.service-card .qty-input {
+    width: 56px; height: 28px; text-align: center; border: 1px solid rgba(210,197,177,0.8);
+    border-radius: 8px; font: 600 0.85rem 'Inter', sans-serif; background: #fff; color: #000;
+    -moz-appearance: textfield;
+}
+.service-card .qty-input::-webkit-outer-spin-button,
+.service-card .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.service-card .qty-total { font-size: 0.8rem; font-weight: 600; color: var(--primary-container); }

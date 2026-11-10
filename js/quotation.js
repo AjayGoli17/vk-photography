@@ -299,6 +299,28 @@ const stageData = {
     }
 };
 
+// ---- Canvera Album: priced PER SHEET, added as a card to every stage ----
+const CANVERA_ALBUM = {
+    name: 'Canvera Album',
+    price: 500,
+    unit: 'sheet',
+    icon: 'book',
+    desc: 'Premium Canvera photo album, priced per sheet.'
+};
+const DEFAULT_SHEETS = 20;
+// Stages that are already album products — no Canvera card there.
+const CANVERA_SKIP_STAGES = ['coffee-table-album', 'standard-album', 'digital-album'];
+Object.keys(stageData).forEach(stageKey => {
+    if (CANVERA_SKIP_STAGES.includes(stageKey)) return;
+    stageData[stageKey].services.push(Object.assign({}, CANVERA_ALBUM));
+});
+// Number of sheets chosen per stage (only used by per-sheet services).
+const sheetQty = {};
+function qtyFor(stageKey, svc) {
+    if (!svc.unit) return 1;
+    return (sheetQty[stageKey] && sheetQty[stageKey][svc.name]) || DEFAULT_SHEETS;
+}
+
 // Add-on prices are placeholders — adjust to your actual rates.
 const addonData = [
     { name: 'Heirloom Album', price: 6000, icon: 'book' },
@@ -368,8 +390,33 @@ function renderServiceGrid() {
             <div>
                 <h4>${svc.name}</h4>
                 <p>${svc.desc}</p>
-                <p class="price">₹${svc.price.toLocaleString('en-IN')}</p>
+                <p class="price">₹${svc.price.toLocaleString('en-IN')}${svc.unit ? ' per ' + svc.unit : ''}</p>
+                ${svc.unit ? `<div class="qty-row" data-qty-row>
+                    <span class="qty-label">Sheets</span>
+                    <button type="button" class="qty-btn" data-dec aria-label="Fewer sheets">&minus;</button>
+                    <input type="number" class="qty-input" min="1" max="500" value="${qtyFor(currentStage, svc)}" aria-label="Number of sheets">
+                    <button type="button" class="qty-btn" data-inc aria-label="More sheets">+</button>
+                    <span class="qty-total"></span>
+                </div>` : ''}
             </div>`;
+        if (svc.unit) {
+            const stageKey = currentStage;
+            const row = card.querySelector('[data-qty-row]');
+            const input = row.querySelector('.qty-input');
+            const totalEl = row.querySelector('.qty-total');
+            const setQty = (n) => {
+                n = Math.max(1, Math.min(500, parseInt(n, 10) || 1));
+                input.value = n;
+                (sheetQty[stageKey] = sheetQty[stageKey] || {})[svc.name] = n;
+                totalEl.textContent = '= ₹' + (n * svc.price).toLocaleString('en-IN');
+                updateSummary();
+            };
+            totalEl.textContent = '= ₹' + (qtyFor(stageKey, svc) * svc.price).toLocaleString('en-IN');
+            row.addEventListener('click', e => e.stopPropagation());   // don't toggle the card
+            row.querySelector('[data-dec]').addEventListener('click', () => setQty(+input.value - 1));
+            row.querySelector('[data-inc]').addEventListener('click', () => setQty(+input.value + 1));
+            input.addEventListener('change', () => setQty(input.value));
+        }
         card.addEventListener('click', () => {
             if (selections[currentStage].has(svc.name)) {
                 selections[currentStage].delete(svc.name);
@@ -466,13 +513,18 @@ function updateSummary() {
         const stagePrices = stageData[stageKey].services;
         chosen.forEach(name => {
             const svc = stagePrices.find(s => s.name === name);
-            if (svc) total += svc.price;
+            if (svc) total += svc.price * qtyFor(stageKey, svc);
         });
         const row = document.createElement('div');
         row.className = 'summary-item';
         const serviceText = chosen.map(name => {
             const svc = stagePrices.find(s => s.name === name);
-            return svc ? `${name} (₹${svc.price.toLocaleString('en-IN')})` : name;
+            if (!svc) return name;
+            if (svc.unit) {
+                const q = qtyFor(stageKey, svc);
+                return `${name} (${q} ${svc.unit}s × ₹${svc.price.toLocaleString('en-IN')} = ₹${(q * svc.price).toLocaleString('en-IN')})`;
+            }
+            return `${name} (₹${svc.price.toLocaleString('en-IN')})`;
         }).join(', ');
         row.innerHTML = `<span class="label">${stageData[stageKey].label}</span><span class="value">${serviceText}</span>`;
         summaryServices.appendChild(row);
@@ -577,7 +629,7 @@ function collectQuoteData() {
             chosen.forEach(svcName => {
                 const svc = stagePrices.find(s => s.name === svcName);
                 if (svc) {
-                    items.push({ category: catName, desc: `${stageData[stageKey].label} — ${svc.name}`, qty: 1, unit: svc.price });
+                    items.push({ category: catName, desc: `${stageData[stageKey].label} — ${svc.name}${svc.unit ? ' (per ' + svc.unit + ')' : ''}`, qty: qtyFor(stageKey, svc), unit: svc.price });
                 }
             });
         });

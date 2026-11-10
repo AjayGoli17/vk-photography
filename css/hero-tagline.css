@@ -34,3 +34,6 @@
   .hero-founder { margin-top: 20px; }
   .hero-founder-name { font-size: 24px; }
 }
+
+/* Remove film-strip rail from hero */
+.hero-rail { display: none !important; }

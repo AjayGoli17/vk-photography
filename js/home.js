@@ -317,10 +317,10 @@
   // else on the page.
   (() => {
     const items=[
-      {quote:"Absolutely loved the photos. Every moment was captured beautifully.",name:"Emma Watson",role:"Bride"},
-      {quote:"Creative team with an eye for detail. Fantastic experience.",name:"Michael Ross",role:"Groom"},
-      {quote:"Portraits looked cinematic and editing was flawless.",name:"Sophia Lee",role:"Model"},
-      {quote:"Professional from booking to delivery. Highly recommended!",name:"Daniel Kim",role:"Entrepreneur"}
+      {quote:"Excellent work. Quality is too good. Cinematic video and candid photography also superb. Thanks VK for capturing my precious wedding and reception memories.",name:"Kranthi kumar's",role:"Wedding Client · Google Review"},
+      {quote:"Big thanks to Vamshi and team – the mosaic, photo frames and even our reunion invite video came out just awesome! Loved the creativity and finish. Totally worth it.",name:"Mahesh D",role:"Local Guide · Google Review"},
+      {quote:"Excellent photography! Every picture is captured beautifully. Great creativity, perfect timing, and professional work. Really loved the photos. Highly recommended!",name:"Cheera Shiva Prasad",role:"Google Review"},
+      {quote:"The work was so good and their hospitality was excellent. Unable to express in words, so thankful for this.",name:"Ramani Rams",role:"Google Review"}
     ];
 
     const w=document.getElementById('tcW');

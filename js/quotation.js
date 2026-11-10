@@ -15,7 +15,7 @@ const ICONS = {
 // (prices carried over from the original checkbox-based quotation.html)
 const categoryData = {
     'Wedding Photography': {
-        stages: ['pre-wedding', 'engagement', 'haldi', 'rituals', 'sangeet', 'wedding-day', 'reception']
+        stages: ['pre-wedding', 'engagement', 'haldi', 'rituals', 'sangeet', 'wedding-day', 'reception', 'event-birthday', 'event-saree-ceremony', 'event-house-warming', 'event-naming-ceremony']
     },
     'Baby Photography': {
         stages: ['babyshower', 'baby-shoot', 'birthday']
@@ -298,6 +298,40 @@ const stageData = {
         ]
     }
 };
+
+// ---- Extra event stages: Birthday, Saree Ceremony, House Warming, Naming Ceremony ----
+// Same cards for each: Regular, Cinematic, Candid (+ Canvera Album per sheet, added below).
+const COMMON_EVENT_SERVICES = () => [
+    { name: 'Cinematic', price: 10000, icon: 'video', desc: 'High-end storytelling film in 4K.' },
+    { name: 'Candid', price: 7000, icon: 'camera', desc: 'Natural moments and editorial style.' },
+    { name: 'Regular Photography', price: 5000, icon: 'camera', desc: 'Standard photo coverage of the event.' },
+    { name: 'Regular Video', price: 5000, icon: 'video', desc: 'Standard video coverage of the event.' }
+];
+Object.assign(stageData, {
+    'event-birthday': {
+        title: 'Birthday Services',
+        label: 'Birthday',
+        services: COMMON_EVENT_SERVICES()
+    },
+    'event-saree-ceremony': {
+        title: 'Saree Ceremony Services',
+        label: 'Saree Ceremony',
+        services: COMMON_EVENT_SERVICES().concat([
+            // Only the Saree Ceremony has a separate Haldi card. Price is a placeholder - edit it.
+            { name: 'Haldi', price: 5000, icon: 'camera', desc: 'Haldi ceremony photo and video coverage.' }
+        ])
+    },
+    'event-house-warming': {
+        title: 'House Warming Services',
+        label: 'House Warming',
+        services: COMMON_EVENT_SERVICES()
+    },
+    'event-naming-ceremony': {
+        title: 'Naming Ceremony Services',
+        label: 'Naming Ceremony',
+        services: COMMON_EVENT_SERVICES()
+    }
+});
 
 // ---- Canvera Album: priced PER SHEET, added as a card to every stage ----
 const CANVERA_ALBUM = {

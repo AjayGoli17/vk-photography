@@ -1,0 +1,11 @@
+/* Scroll reveal for home page sections (added by scroll-reveal.js) */
+.sr { opacity: 0; }
+.sr-in.sr-up   { animation: srUp   .9s cubic-bezier(.19,1,.22,1) both; }
+.sr-in.sr-zoom { animation: srZoom 1s  cubic-bezier(.19,1,.22,1) both; }
+.sr-in.sr-fade { animation: srFade .9s ease both; }
+@keyframes srUp   { from { opacity: 0; translate: 0 34px; } to { opacity: 1; translate: 0 0; } }
+@keyframes srZoom { from { opacity: 0; translate: 0 24px; scale: .96; } to { opacity: 1; translate: 0 0; scale: 1; } }
+@keyframes srFade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .sr { opacity: 1 !important; animation: none !important; }
+}

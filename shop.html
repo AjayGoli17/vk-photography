@@ -317,17 +317,17 @@
 
       <div class="checkout-grid">
         <form id="checkoutForm" novalidate>
-          <div class="form-row"><label for="custName">Name</label><input type="text" id="custName" name="name" autocomplete="name" required><p class="field-error" data-error-for="custName" hidden></p></div>
+          <div class="form-row"><label for="custName">Name</label><input type="text" id="custName" name="name" autocomplete="name" placeholder="Full name" autocapitalize="words" enterkeyhint="next" required><p class="field-error" data-error-for="custName" hidden></p></div>
           <div class="form-row-2">
-            <div class="form-row"><label for="custPhone">Phone</label><input type="tel" id="custPhone" name="phone" autocomplete="tel" required><p class="field-error" data-error-for="custPhone" hidden></p></div>
-            <div class="form-row"><label for="custEmail">Email</label><input type="email" id="custEmail" name="email" autocomplete="email" required><p class="field-error" data-error-for="custEmail" hidden></p></div>
+            <div class="form-row"><label for="custPhone">Phone</label><input type="tel" id="custPhone" name="phone" autocomplete="tel-national" inputmode="tel" placeholder="10-digit mobile number" enterkeyhint="next" required><p class="field-error" data-error-for="custPhone" hidden></p></div>
+            <div class="form-row"><label for="custEmail">Email</label><input type="email" id="custEmail" name="email" autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="you@example.com" enterkeyhint="next" required><p class="field-error" data-error-for="custEmail" hidden></p></div>
           </div>
-          <div class="form-row"><label for="custAddress">Address</label><textarea id="custAddress" name="address" rows="3" required></textarea><p class="field-error" data-error-for="custAddress" hidden></p></div>
+          <div class="form-row"><label for="custAddress">Address</label><textarea id="custAddress" name="address" rows="3" autocomplete="street-address" autocapitalize="sentences" placeholder="House / flat no., street, area, landmark" required></textarea><p class="field-error" data-error-for="custAddress" hidden></p></div>
           <div class="form-row-2">
-            <div class="form-row"><label for="custCity">City</label><input type="text" id="custCity" name="city" required><p class="field-error" data-error-for="custCity" hidden></p></div>
-            <div class="form-row"><label for="custState">State</label><input type="text" id="custState" name="state" required><p class="field-error" data-error-for="custState" hidden></p></div>
+            <div class="form-row"><label for="custCity">City</label><input type="text" id="custCity" name="city" autocomplete="address-level2" autocapitalize="words" placeholder="City / town" required><p class="field-error" data-error-for="custCity" hidden></p></div>
+            <div class="form-row"><label for="custState">State</label><input type="text" id="custState" name="state" autocomplete="address-level1" autocapitalize="words" placeholder="Start typing your state" required><p class="field-error" data-error-for="custState" hidden></p></div>
           </div>
-          <div class="form-row"><label for="custPincode">Pincode</label><input type="text" id="custPincode" name="pincode" inputmode="numeric" maxlength="6" required><p class="field-error" data-error-for="custPincode" hidden></p></div>
+          <div class="form-row"><label for="custPincode">Pincode</label><input type="text" id="custPincode" name="pincode" inputmode="numeric" maxlength="6" autocomplete="postal-code" placeholder="6-digit pincode" required><p class="field-error" data-error-for="custPincode" hidden></p></div>
           <button type="submit" class="shop-btn shop-btn-primary shop-btn-block" style="margin-top:10px;">Continue to Payment</button>
         </form>
 
@@ -479,7 +479,7 @@
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg>
 <span>Mon&ndash;Sat, 10:00 AM &ndash; 8:30 PM</span>
 </div>
-<a href="#" class="contact-directions-btn">
+<a href="https://www.google.com/maps/place/VK+COLOUR+LAB+DIGITAL+PHOTO+STUDIO/@17.4668031,78.6435291,17z/data=!4m6!3m5!1s0x3bcb9d49e08a1e95:0xf1be58ca2323458f!8m2!3d17.4668031!4d78.6435291!16s%2Fg%2F11vrlqt1f4" target="_blank" rel="noopener" class="contact-directions-btn">
 Get Directions
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
 </a>
@@ -497,6 +497,7 @@ Get Directions
 
 <script src="js/shop-pricing.js"></script>
 <script src="js/shop.js"></script>
+<script src="js/checkout-assist.js"></script>
 <script>
   var navToggle = document.getElementById('navToggle');
   var navMobile = document.getElementById('navMobile');

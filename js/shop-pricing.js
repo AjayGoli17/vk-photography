@@ -124,7 +124,7 @@
   
     const MOUNTINGS = [
       { id: "without-mounting", name: "Without Mounting", sub: "Print only, no mounting board", priceModifier: 0 },
-      { id: "with-mounting", name: "With Mounting", sub: "Mounted on board, ready to display", priceModifier: 300 },
+      { id: "with-mounting", name: "With Mounting", sub: "Mounted on board, ready to display", priceModifier: 120 },
     ];
   
   
@@ -164,6 +164,17 @@
     const MAX_QTY_PER_ITEM = 20;
     const MAX_ITEMS_PER_ORDER = 20;
   
+    /* Mounting price. Default is the "With Mounting" priceModifier (120);
+       sizes listed in MOUNTING_SIZE_PRICES override it. Add more sizes here. */
+    const MOUNTING_SIZE_PRICES = { "20x30": 300 };
+    function getMountingPrice(mountingId, sizeId) {
+      const m = MOUNTINGS.find((x) => x.id === mountingId);
+      if (!m) return null;
+      if (m.priceModifier === 0) return 0;
+      const o = MOUNTING_SIZE_PRICES[sizeId];
+      return typeof o === "number" ? o : m.priceModifier;
+    }
+    
     /* Server-trusted unit price for one item, given selected option
        ids (now including qualityId). Returns null if any id is
        invalid OR if that size+quality combination has no confirmed
@@ -177,7 +188,7 @@
       if (!size || !quality || !frame || !mounting) return null;
       const printPrice = getPrintPrice(sizeId, qualityId);
       if (printPrice == null) return null;
-      return printPrice + frame.priceModifier + mounting.priceModifier;
+      return printPrice + frame.priceModifier + getMountingPrice(mountingId, sizeId);
     }
   
     /* Server-trusted unit price for a photo gift, or null if the id
@@ -199,6 +210,6 @@
     return {
       FRAMES, SIZES, ORIENTATIONS, MOUNTINGS, QUALITIES, PRINT_PRICES, PRODUCTS,
       SHIPPING_FEE, CURRENCY, MAX_QTY_PER_ITEM, MAX_ITEMS_PER_ORDER,
-      getPrintPrice, getUnitPrice, getProductPrice, getItemUnitPrice,
+      getPrintPrice, getUnitPrice, getProductPrice, getItemUnitPrice, getMountingPrice, MOUNTING_SIZE_PRICES,
     };
   });

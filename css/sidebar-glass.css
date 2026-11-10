@@ -1,0 +1,11 @@
+/* Frosted-glass mobile sidebar for pages with a plain light background */
+.vk-nav-mobile {
+  background:
+    radial-gradient(120% 60% at 15% 0%,  rgba(205,164,94,.38) 0%, rgba(205,164,94,0) 60%),
+    radial-gradient(100% 55% at 100% 55%, rgba(110,84,66,.30)  0%, rgba(110,84,66,0)  65%),
+    radial-gradient(90% 50% at 10% 100%,  rgba(150,120,160,.20) 0%, rgba(150,120,160,0) 65%),
+    linear-gradient(160deg, rgba(255,255,255,.55), rgba(255,255,255,.22)) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(190%) !important;
+  backdrop-filter: blur(30px) saturate(190%) !important;
+  border-left: 1px solid rgba(255,255,255,.75) !important;
+}

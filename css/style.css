@@ -569,3 +569,10 @@
   background: transparent;
   border: 1px solid #fff;
 }
+/* Mobile sidebar CTA white text */
+.vk-nav-mobile a.vk-btn,
+.vk-nav-mobile a.vk-nav-mobile-cta,
+.vk-nav-mobile button.vk-btn { color: #fff !important; }
+.vk-nav-mobile a.vk-btn:hover,
+.vk-nav-mobile a.vk-nav-mobile-cta:hover,
+.vk-nav-mobile button.vk-btn:hover { color: #fff !important; background: rgba(0,0,0,.9) !important; }

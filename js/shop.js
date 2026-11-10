@@ -10,7 +10,7 @@
    Razorpay order-creation function always agree on prices.
    Change prices/add frames/sizes in js/shop-pricing.js only.
    ------------------------------------------------------------ */
-   const { FRAMES, SIZES, ORIENTATIONS, MOUNTINGS, QUALITIES, PRODUCTS, SHIPPING_FEE, MAX_QTY_PER_ITEM, getPrintPrice } = window.VKPricing;
+   const { FRAMES, SIZES, ORIENTATIONS, MOUNTINGS, QUALITIES, PRODUCTS, SHIPPING_FEE, MAX_QTY_PER_ITEM, getPrintPrice, getMountingPrice } = window.VKPricing;
 
    /* Razorpay Checkout — the public Key ID is safe to expose to the
       browser and is returned by the create-order function on each
@@ -180,7 +180,7 @@
      // Quality step — deliberately no `price` field passed in, so
      // renderOptionGroup never prints a price on these two cards.
      renderQualityOptions();
-     renderOptionGroup("mountingOptions", MOUNTINGS.map((m) => ({ id: m.id, name: m.name, sub: m.sub, price: m.priceModifier === 0 ? "+₹0" : `+${formatINR(m.priceModifier)}` })), customizerState.mountingId, (id) => { customizerState.mountingId = id; refreshCustomizerUI(); });
+     renderOptionGroup("mountingOptions", MOUNTINGS.map((m) => ({ id: m.id, name: m.name, sub: m.sub, price: getMountingPrice(m.id, customizerState.sizeId) === 0 ? "+₹0" : `+${formatINR(getMountingPrice(m.id, customizerState.sizeId))}` })), customizerState.mountingId, (id) => { customizerState.mountingId = id; refreshCustomizerUI(); });
    
      renderFramePicker();
      initPhotoUpload();
@@ -488,7 +488,7 @@
    function calculatePrice() {
      const size = getSize(), quality = getQuality(), frame = getFrame(), mounting = getMounting();
      const printPrice = getPrintPrice(size.id, quality.id);
-     const total = printPrice == null ? null : printPrice + frame.priceModifier + mounting.priceModifier;
+     const total = printPrice == null ? null : printPrice + frame.priceModifier + getMountingPrice(mounting.id, size.id);
      return { size, quality, frame, mounting, printPrice, total };
    }
    
@@ -517,7 +517,18 @@
      renderOptionGroup("qualityOptions", QUALITIES.map((q) => { const p = getPrintPrice(customizerState.sizeId, q.id); return { id: q.id, name: q.name, sub: q.description, price: p == null ? "Price on request" : formatINR(p) }; }), customizerState.qualityId, (id) => { customizerState.qualityId = id; refreshCustomizerUI(); });
    }
 
+   function updateMountingPrices() {
+     const box = document.getElementById("mountingOptions");
+     if (!box) return;
+     box.querySelectorAll(".option-card").forEach((btn) => {
+       const p = getMountingPrice(btn.dataset.id, customizerState.sizeId);
+       const el = btn.querySelector(".option-price");
+       if (el && p != null) el.textContent = p === 0 ? "+₹0" : "+" + formatINR(p);
+     });
+   }
+   
    function refreshCustomizerUI() {
+     updateMountingPrices();
      syncFramePicker();
      renderQualityOptions();
      updatePreview();

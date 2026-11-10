@@ -676,3 +676,61 @@
       transition-duration: 0.001ms !important;
     }
   }
+/* =========================================================
+   RESPONSIVE FIXES (customizer / mobile)
+   ========================================================= */
+
+/* Root cause of the sideways overflow: 1fr can't shrink below its content */
+html, body { max-width: 100%; overflow-x: hidden; }
+.customizer-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); }
+.customizer-grid > *,
+.controls-col,
+.control-block,
+.option-grid,
+.frame-picker { min-width: 0; max-width: 100%; }
+.option-card { min-width: 0; overflow-wrap: anywhere; }
+.fp-window { max-width: 100%; }
+
+@media (max-width: 1024px) {
+  .customizer-grid, .checkout-grid { grid-template-columns: minmax(0, 1fr); }
+  .preview-col:not(.expanded) { top: 84px; }
+  .preview-col.expanded { top: 0; }
+}
+
+@media (max-width: 640px) {
+  #viewCustomizer .shop-section,
+  #viewGift .shop-section,
+  #viewCheckout .shop-section { padding-top: calc(var(--nav-h) + 20px) !important; }
+
+  .customizer-head { margin-bottom: 20px; gap: 10px; }
+  .customizer-head h1 { font-size: 26px; }
+  .controls-col { gap: 26px; }
+
+  .frame-picker {
+    margin: 0 -20px; padding: 2px 20px 10px;
+    -webkit-overflow-scrolling: touch; scroll-padding-left: 20px;
+    scroll-snap-type: x mandatory;
+  }
+  .frame-pick { flex: 0 0 72px; }
+
+  #sizeOptions, #orientationOptions, #mountingOptions { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .option-card { padding: 10px 12px; }
+  .option-name { font-size: 13px; }
+  .option-price, .option-sub { font-size: 11.5px; }
+
+  .upload-area { padding: 26px 14px; }
+  .price-total .value { font-size: 24px; }
+  #viewCustomizer .add-to-cart-row { display: none; }
+
+  .mobile-sticky-cta { padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
+  body.has-sticky-cta { padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
+  .cart-fab { right: 14px; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
+  .toast, .shop-toast { max-width: calc(100vw - 32px); }
+}
+
+@media (max-width: 380px) {
+  .shop-container { padding: 0 16px; }
+  .frame-picker { margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
+  .option-grid { gap: 6px; }
+  .mobile-sticky-cta .shop-btn { padding: 13px 18px; }
+}

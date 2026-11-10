@@ -576,3 +576,6 @@
 .vk-nav-mobile a.vk-btn:hover,
 .vk-nav-mobile a.vk-nav-mobile-cta:hover,
 .vk-nav-mobile button.vk-btn:hover { color: #fff !important; background: rgba(0,0,0,.9) !important; }
+
+/* vk-footer-legal-wrap: let the legal links wrap on small screens */
+.footer-legal{flex-wrap:wrap;gap:10px 26px}

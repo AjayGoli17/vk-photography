@@ -97,11 +97,11 @@
   "8x12": { normal: 399, premium: 649 },
   "10x12": { normal: 699, premium: 999 },
   "12x15": { normal: 899, premium: 1199 },
-      "10x15": { normal: null, premium: null },
+      "10x15": { normal: 399, premium: 1000 },
   "12x18": { normal: 1199, premium: 1599 },
   "16x20": { normal: 1399, premium: 1999 },
   "16x24": { normal: 1899, premium: 2599 },
-      "24x40": { normal: null, premium: null },
+      "24x40": { normal: 4599, premium: 6799 },
   "20x24": { normal: 1599, premium: 2499 },
   "20x30": { normal: 2199, premium: 2999 },
     };

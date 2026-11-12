@@ -169,3 +169,77 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 })();
 /* === END VK-CAPTIONS === */
+
+/* === VK-JUSTIFIED: gap-free gallery (every row fills the full width) === */
+(function () {
+    const st = document.createElement('style');
+    st.textContent = `
+      #gallery { display:flex !important; flex-wrap:wrap !important; align-items:flex-start;
+                 columns:auto !important; column-count:auto !important; grid-template-columns:none !important; }
+      #gallery .gallery-item { flex:none !important; margin:0 !important; aspect-ratio:auto !important;
+                 grid-column:auto !important; break-inside:auto !important; }`;
+    document.head.appendChild(st);
+
+    const gapPx = () => innerWidth <= 480 ? 8 : innerWidth <= 768 ? 12 : 16;
+    const targetH = () => { const w = innerWidth; return w > 1400 ? 360 : w > 1000 ? 300 : w > 700 ? 240 : 150; };
+
+    function layout() {
+        const g = document.getElementById('gallery');
+        if (!g) return;
+        const items = Array.from(g.querySelectorAll('.gallery-item'));
+        const W = g.clientWidth;
+        if (!items.length || !W) return;
+        const gap = gapPx(), target = targetH();
+        g.style.setProperty('gap', gap + 'px', 'important');
+
+        const ratios = items.map(it => {
+            const im = it.querySelector('img');
+            const w = im ? +im.getAttribute('width') : 0, h = im ? +im.getAttribute('height') : 0;
+            return w && h ? w / h : 1.5;
+        });
+
+        // 1) pack photos into rows
+        const rows = []; let row = [], sum = 0;
+        ratios.forEach((r, i) => {
+            row.push(i); sum += r;
+            if (sum * target + gap * (row.length - 1) >= W) { rows.push(row); row = []; sum = 0; }
+        });
+        if (row.length) rows.push(row);
+
+        // 2) if the last row is too short to fill the width nicely, merge it into the row above
+        if (rows.length > 1) {
+            const last = rows[rows.length - 1];
+            const s = last.reduce((a, i) => a + ratios[i], 0);
+            if ((W - gap * (last.length - 1)) / s > target * 1.35) {
+                rows.pop();
+                rows[rows.length - 1] = rows[rows.length - 1].concat(last);
+            }
+        }
+
+        // 3) size every row so it exactly fills the width
+        rows.forEach(r => {
+            const s = r.reduce((a, i) => a + ratios[i], 0);
+            const h = (W - gap * (r.length - 1)) / s;
+            let used = 0;
+            r.forEach((idx, k) => {
+                const w = k === r.length - 1 ? W - used : Math.floor(ratios[idx] * h);
+                items[idx].style.setProperty('width', w + 'px', 'important');
+                items[idx].style.setProperty('height', h.toFixed(2) + 'px', 'important');
+                used += w + gap;
+            });
+        });
+    }
+
+    let t;
+    const schedule = () => { clearTimeout(t); t = setTimeout(layout, 30); };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const g = document.getElementById('gallery');
+        if (!g) return;
+        new MutationObserver(schedule).observe(g, { childList: true });
+        schedule();
+    });
+    window.addEventListener('load', schedule);
+    window.addEventListener('resize', schedule);
+})();
+/* === END VK-JUSTIFIED === */

@@ -1,17 +1,22 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const gallery = document.getElementById('gallery');
-    const totalPhotos = 39; // number of files: portfolio/portfolio1.webp ... portfolioN.webp
+    const totalPhotos = 40; // number of files: portfolio/portfolio1.webp ... portfolioN.webp
 
-    // Load a photo and read its REAL size (tries .webp, then .png)
+    // Load a photo and read its REAL size (tries .webp, .jpg, .jpeg, .png)
     function loadPhoto(n) {
         return new Promise(resolve => {
-            const tryLoad = (ext, fallback) => {
+            const exts = ['webp', 'jpg', 'jpeg', 'png'];
+            const tryLoad = i => {
+                if (i >= exts.length) {
+                    console.warn('portfolio' + n + ' not found in portfolio/');
+                    return resolve(null);
+                }
                 const im = new Image();
                 im.onload = () => resolve({ n, src: im.src, w: im.naturalWidth, h: im.naturalHeight });
-                im.onerror = () => fallback ? tryLoad('png', false) : resolve(null);
-                im.src = `portfolio/portfolio${n}.${ext}`;
+                im.onerror = () => tryLoad(i + 1);
+                im.src = `portfolio/portfolio${n}.${exts[i]}`;
             };
-            tryLoad('webp', true);
+            tryLoad(0);
         });
     }
 
@@ -128,7 +133,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         36: { t: "Art Meets Motherhood",         c: "Maternity" },
         37: { t: "Swinging into Joy",            c: "Kids" },
         38: { t: "Rays of Love",                 c: "Couple" },
-        39: { t: "Little Gentleman",             c: "Kids" }
+        39: { t: "Little Gentleman",             c: "Kids" },
+        40: { t: "Moments Worth Keeping",        c: "Portrait" }
     };
 
     function applyCaption(item) {

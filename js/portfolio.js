@@ -3,7 +3,7 @@
    category filters, lightbox with swipe, scroll reveal. */
 document.addEventListener('DOMContentLoaded', async () => {
     const gallery = document.getElementById('gallery');
-    const filterBar = document.getElementById('filters');
+    const filterBar = document.getElementById('filters') || document.createElement('div');
     const totalPhotos = 40; // portfolio/portfolio1 ... portfolio40 (missing numbers are skipped)
 
     const captions = {

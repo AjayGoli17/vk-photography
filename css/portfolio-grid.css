@@ -1,9 +1,19 @@
-html body #gallery.gallery{display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:4px !important;columns:auto !important;column-count:auto !important;align-items:stretch !important}
-html body #gallery.gallery .gallery-item{width:100% !important;height:auto !important;margin:0 !important;aspect-ratio:1 / 1 !important;position:relative !important;overflow:hidden !important;background:var(--surface-1,#eee) !important}
-html body #gallery.gallery .gallery-item .gallery-image-wrapper{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important}
-html body #gallery.gallery .gallery-item img{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;object-fit:cover !important;display:block !important}
-html body .gallery-container{max-width:1400px !important;padding:1rem 1rem 2rem !important}
-@media (max-width:768px){
-  html body #gallery.gallery{gap:3px !important}
-  html body .gallery-container{padding:.5rem .5rem 1.5rem !important}
+html body .gallery-container{max-width:1280px;padding:1rem 1.25rem 3rem}
+html body #gallery.gallery{display:flex;flex-wrap:nowrap;align-items:flex-start;gap:10px;margin:0}
+html body #gallery.gallery .gallery-col{flex:0 0 auto;min-width:0;display:flex;flex-direction:column;gap:10px}
+html body #gallery.gallery .gallery-item{width:100%;height:auto;margin:0;overflow:hidden;position:relative;flex:none}
+html body #gallery.gallery .gallery-item img{display:block;width:100%;height:auto;object-fit:contain;transition:filter .4s ease,transform .6s cubic-bezier(.16,1,.3,1)}
+@media (hover:hover) and (pointer:fine){
+  html body #gallery.gallery:has(.gallery-item:hover) .gallery-item:not(:hover) img{filter:grayscale(1)}
+  html body #gallery.gallery .gallery-item:hover img{filter:none;transform:scale(1.06)}
 }
+@media (max-width:999px){
+  html body #gallery.gallery, html body #gallery.gallery .gallery-col{gap:8px}
+}
+@media (max-width:600px){
+  html body .gallery-container{padding:.5rem .5rem 2rem}
+  html body #gallery.gallery, html body #gallery.gallery .gallery-col{gap:6px}
+}
+
+html body #gallery.gallery .gallery-item{opacity:1 !important;transform:none !important;transition:none !important;width:100%}
+html body #gallery.gallery .gallery-item img{width:100%;height:auto;transform-origin:center}

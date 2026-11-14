@@ -10,3 +10,7 @@ node_modules/
 
 .env.*
 !.env.example
+
+# build output and perf-setup backups
+dist/
+.perf-backup-*/

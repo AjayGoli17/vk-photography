@@ -2,13 +2,14 @@
   "name": "vk-photography",
   "private": true,
   "version": "1.0.0",
-  "description": "VK Photography site \u2014 Shop checkout powered by Razorpay Standard Checkout via Netlify Functions.",
+  "description": "VK Photography site — Shop checkout powered by Razorpay Standard Checkout via Netlify Functions.",
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
     "razorpay": "^2.9.8"
   },
   "scripts": {
     "check": "node scripts/predeploy-check.js",
-    "lock-signup": "bash scripts/lock-supabase-signup.sh"
+    "lock-signup": "bash scripts/lock-supabase-signup.sh",
+    "build": "node scripts/build.js"
   }
 }

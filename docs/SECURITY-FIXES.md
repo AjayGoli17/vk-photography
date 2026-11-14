@@ -51,3 +51,14 @@
 4. Turn off sign-ups in Supabase (Authentication > Sign In / Providers) or run `scripts/lock-supabase-signup.sh`.
 5. Razorpay: live webhook to `https://vkphotography.studio/.netlify/functions/webhook` (events `payment.captured`, `payment.failed`).
 6. Place one real small payment, one contact enquiry and one quote request.
+
+---
+# Round 3: Admin 2FA
+- `admin.html` / `js/admin.js`: after the password, the admin page asks for a 6-digit authenticator code (Supabase TOTP MFA). First login shows a QR code to set it up; later logins just ask for the code. Idle logout (20 min) stays.
+- `supabase/migrations/20261117000001_admin_require_mfa.sql`: `is_admin()` now requires an aal2 (2FA-verified) session, so a stolen password alone cannot read orders/leads/photos even by calling the API directly.
+
+## Do these in order
+1. Supabase dashboard > Authentication > Multi-Factor: make sure TOTP is enabled.
+2. Deploy, open `/admin.html`, sign in, scan the QR with Google Authenticator/Authy, enter the code.
+3. Only then run the migration above in the SQL editor.
+4. Keep a backup of the secret key shown under the QR (or add the code to two devices) in case you lose your phone.

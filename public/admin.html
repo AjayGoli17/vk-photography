@@ -150,7 +150,11 @@ main{padding:0 16px 40px}.me{display:none}.search kbd{display:none}h1{font-size:
 <div class="login" id="login" hidden><form id="lf"><div class="brand">VK <span>Photography</span></div><p>Admin sign in</p>
 <label>Email<input class="field" id="lem" type="email" autocomplete="username" required></label>
 <label>Password<input class="field" id="lpw" type="password" autocomplete="current-password" required></label>
-<div class="err" id="lerr" role="alert"></div><button class="btn pri full" id="lgo">Sign in</button></form></div>
+<div class="err" id="lerr" role="alert"></div><button class="btn pri full" id="lgo">Sign in</button></form>
+<form id="mf" hidden><div class="brand">VK <span>Photography</span></div><p id="mt">Two-step verification</p>
+<div id="mq" hidden style="text-align:center;margin-bottom:12px"><img id="mimg" alt="QR code for your authenticator app" width="170" height="170" style="background:#fff;border-radius:8px;padding:6px"><div style="font-size:12px;color:var(--mut);margin-top:6px">Can’t scan? Enter this key manually:<br><code id="msec" style="user-select:all;word-break:break-all"></code></div></div>
+<label>6-digit code<input class="field" id="mcode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required></label>
+<div class="err" id="merr" role="alert"></div><button class="btn pri full" id="mgo">Verify</button></form></div>
 <div class="app" id="app" hidden>
 <aside><div class="brand">VK <span>Photography</span></div><nav id="nav" aria-label="Main"></nav><div class="foot">Live data</div></aside>
 <main>

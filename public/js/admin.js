@@ -182,7 +182,34 @@ $('#q').oninput=e=>{q=e.target.value.trim().toLowerCase();if(!['orders','payment
 function setTheme(dark){document.documentElement.dataset.theme=dark?'dark':'light';$('#theme').textContent=dark?'Light mode':'Dark mode';try{localStorage.setItem('vk-theme',dark?'dark':'light')}catch(_){}}
 let saved=null;try{saved=localStorage.getItem('vk-theme')}catch(_){}
 setTheme(saved?saved=='dark':matchMedia('(prefers-color-scheme:dark)').matches);
-function showLogin(m){$('#app').hidden=true;$('#login').hidden=false;$('#lerr').textContent=m||'';$('#lpw').value=''}
+function showLogin(m){$('#app').hidden=true;$('#login').hidden=false;$('#lf').hidden=false;$('#mf').hidden=true;$('#mcode').value='';$('#lerr').textContent=m||'';$('#lpw').value=''}
+/* Two-step verification (TOTP authenticator app). Password alone only gives an aal1 session; is_admin() requires aal2. */
+let mfaId=null,mfaChallenge=null,mfaUser=null;
+function showMfa(title,qr){$('#lf').hidden=true;$('#mf').hidden=false;$('#mt').textContent=title;$('#mq').hidden=!qr;$('#merr').textContent='';$('#mcode').value='';$('#mcode').focus()}
+async function gate(user){mfaUser=user;
+const{data:a,error:ae}=await sb.auth.mfa.getAuthenticatorAssuranceLevel();
+if(ae){await sb.auth.signOut();return showLogin('Couldn’t check 2-step status: '+ae.message)}
+if(a.currentLevel=='aal2')return enter(user);
+const{data:f,error:fe}=await sb.auth.mfa.listFactors();
+if(fe){await sb.auth.signOut();return showLogin('Couldn’t load 2-step settings: '+fe.message)}
+const t=(f.totp||[])[0];
+if(t){mfaId=t.id;const{data:c,error:ce}=await sb.auth.mfa.challenge({factorId:mfaId});
+if(ce){await sb.auth.signOut();return showLogin('Couldn’t start 2-step check: '+ce.message)}
+mfaChallenge=c.id;return showMfa('Enter the code from your authenticator app',false)}
+/* No factor yet: enrol one (first login only). Drop abandoned unverified factors first. */
+for(const u of (f.all||[]))if(u.status!='verified')await sb.auth.mfa.unenroll({factorId:u.id});
+const{data:e,error:ee}=await sb.auth.mfa.enroll({factorType:'totp',friendlyName:'VK admin '+Date.now()});
+if(ee){await sb.auth.signOut();return showLogin('Couldn’t set up 2-step: '+ee.message)}
+mfaId=e.id;$('#mimg').src=e.totp.qr_code;$('#msec').textContent=e.totp.secret;
+const{data:c2,error:ce2}=await sb.auth.mfa.challenge({factorId:mfaId});
+if(ce2){await sb.auth.signOut();return showLogin('Couldn’t start 2-step setup: '+ce2.message)}
+mfaChallenge=c2.id;showMfa('Set up 2-step: scan this with Google Authenticator, Authy or similar, then enter the code',true)}
+$('#mf').onsubmit=async e=>{e.preventDefault();const b=$('#mgo');b.disabled=true;$('#merr').textContent='';
+const{error}=await sb.auth.mfa.verify({factorId:mfaId,challengeId:mfaChallenge,code:$('#mcode').value.trim()});b.disabled=false;
+if(error){$('#merr').textContent='That code didn’t work. Try the newest code.';$('#mcode').value='';
+/* a challenge is single-use: get a fresh one for the retry */
+const{data:c}=await sb.auth.mfa.challenge({factorId:mfaId});if(c)mfaChallenge=c.id;return}
+await enter(mfaUser)};
 async function enter(user){const{data,error}=await sb.rpc('is_admin');
 if(error||data!==true){await sb.auth.signOut();return showLogin(error?'Couldn’t verify access: '+error.message:'This account isn’t an admin. Add its user id to the admins table.')}
 me=user.email;$('#me').textContent=me;$('#login').hidden=true;$('#app').hidden=false;$('#view').innerHTML='<div class="empty">Loading…</div>';await refresh()}
@@ -194,10 +221,10 @@ finally{busy=false}}
 async function signOut(){await sb.auth.signOut();orders=[];leads=[];showLogin()}
 $('#lf').onsubmit=async e=>{e.preventDefault();const b=$('#lgo');b.disabled=true;$('#lerr').textContent='';
 const{data,error}=await sb.auth.signInWithPassword({email:$('#lem').value.trim(),password:$('#lpw').value});b.disabled=false;
-if(error){$('#lerr').textContent=error.status==400?'Incorrect email or password.':error.message;return}await enter(data.user)};
+if(error){$('#lerr').textContent=error.status==400?'Incorrect email or password.':error.message;return}await gate(data.user)};
 if(!cfg){showLogin('Add your Supabase URL and anon key at the top of the script in admin.html.');$('#lgo').disabled=true}
 else{sb.auth.onAuthStateChange(ev=>{if(ev=='SIGNED_OUT'&&!$('#app').hidden){orders=[];leads=[];showLogin()}});
-sb.auth.getSession().then(({data})=>data.session?enter(data.session.user):showLogin());
+sb.auth.getSession().then(({data})=>data.session?gate(data.session.user):showLogin());
 setInterval(()=>{if(!$('#app').hidden&&!document.hidden&&!$('#drawer').classList.contains('open'))refresh()},120000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!$('#app').hidden)refresh()})}
 

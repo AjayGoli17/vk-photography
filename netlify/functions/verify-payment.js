@@ -7,21 +7,33 @@
 "use strict";
 
 const crypto = require("crypto");
-const { respond, markOrderPaid } = require("./_lib/db");
+const Razorpay = require("razorpay");
+const { respond, markOrderPaid, allowRequest } = require("./_lib/db");
+
+const RZP_ID_RE = /^[A-Za-z0-9_]{6,64}$/;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return respond(405, { verified: false, error: "Method not allowed." });
+  if (String(event.body || "").length > 4000) return respond(413, { verified: false, error: "Request too large." });
+  if (!(await allowRequest(event, "verify-payment", 30, 600))) {
+    return respond(429, { verified: false, error: "Too many attempts. Please wait a few minutes." });
+  }
 
   let body;
   try { body = JSON.parse(event.body || "{}"); } catch { return respond(400, { verified: false, error: "Invalid request body." }); }
 
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderRef } = body;
-  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+  if (
+    typeof razorpay_order_id !== "string" || !RZP_ID_RE.test(razorpay_order_id) ||
+    typeof razorpay_payment_id !== "string" || !RZP_ID_RE.test(razorpay_payment_id) ||
+    typeof razorpay_signature !== "string" || razorpay_signature.length > 200
+  ) {
     return respond(400, { verified: false, error: "Missing payment details." });
   }
 
+  const keyId = process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
-  if (!keySecret) {
+  if (!keyId || !keySecret) {
     console.error("verify-payment: missing RAZORPAY_KEY_SECRET env var");
     return respond(500, { verified: false, error: "Payment verification is temporarily unavailable." });
   }
@@ -36,19 +48,25 @@ exports.handler = async (event) => {
     return respond(400, { verified: false, error: "Payment verification failed." });
   }
 
-  // The payment is genuine. Record it. If the database is briefly unavailable the
-  // customer's payment is still valid, and the Razorpay webhook will retry the update.
+  // The signature is genuine. Ask Razorpay what was actually paid so the amount can be checked
+  // against the saved order before it is marked paid. If Razorpay or the database is briefly
+  // unavailable the payment is still valid and the webhook will record it.
   try {
-    await markOrderPaid(razorpay_order_id, razorpay_payment_id);
+    const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
+    const payment = await razorpay.payments.fetch(razorpay_payment_id);
+    if (payment.order_id !== razorpay_order_id) {
+      console.warn("verify-payment: payment/order mismatch", { razorpay_order_id, razorpay_payment_id });
+      return respond(400, { verified: false, error: "Payment verification failed." });
+    }
+    await markOrderPaid(razorpay_order_id, razorpay_payment_id, payment.amount, payment.currency);
   } catch (err) {
-    console.error("verify-payment: could not mark order paid", err?.message || err);
+    console.error("verify-payment: could not record payment", err?.message || err);
   }
 
   return respond(200, {
     verified: true,
     razorpayOrderId: razorpay_order_id,
     razorpayPaymentId: razorpay_payment_id,
-    orderRef: orderRef || null,
     status: "paid",
   });
 };

@@ -27,6 +27,8 @@ exports.handler = async (event) => {
     return respond(500, { error: "Webhook is not configured." });
   }
 
+  if (String(event.body || "").length > 200000) return respond(413, { error: "Payload too large." });
+
   const rawBody = event.isBase64Encoded ? Buffer.from(event.body || "", "base64") : Buffer.from(event.body || "", "utf8");
   const expected = Buffer.from(crypto.createHmac("sha256", webhookSecret).update(rawBody).digest("hex"), "utf8");
   const received = Buffer.from(String(signature), "utf8");
@@ -51,7 +53,7 @@ exports.handler = async (event) => {
     }
 
     if (payload.event === "payment.captured" && payment?.order_id) {
-      await markOrderPaid(payment.order_id, payment.id);
+      await markOrderPaid(payment.order_id, payment.id, payment.amount, payment.currency);
     } else if (payload.event === "payment.failed" && payment?.order_id) {
       // Only an unpaid order can move to payment_failed; a paid order is never downgraded.
       const { error } = await supabase.from("orders").update({ status: "payment_failed" })
@@ -61,7 +63,13 @@ exports.handler = async (event) => {
 
     if (eventId) {
       const { error } = await supabase.from("webhook_events")
-        .upsert({ event_id: eventId, event_type: payload.event, payload }, { onConflict: "event_id", ignoreDuplicates: true });
+        // Keep only what is needed for auditing: the full Razorpay payload contains the
+        // customer's email, phone number and payment-method details.
+        .upsert({
+          event_id: eventId,
+          event_type: payload.event,
+          payload: payment ? { order_id: payment.order_id, payment_id: payment.id, amount: payment.amount, currency: payment.currency, status: payment.status } : null,
+        }, { onConflict: "event_id", ignoreDuplicates: true });
       if (error) throw error;
     }
   } catch (err) {

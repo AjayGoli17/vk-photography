@@ -2,6 +2,7 @@
    Justified-row gallery (every row fills the full width, no gaps),
    category filters, lightbox with swipe, scroll reveal. */
 document.addEventListener('DOMContentLoaded', async () => {
+    const escHtml = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const gallery = document.getElementById('gallery');
     const filterBar = document.getElementById('filters') || document.createElement('div');
 
@@ -42,8 +43,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         item.dataset.index = idx;
         item.dataset.cat = cat;
         item.innerHTML = `
-            <img src="${p.src}" width="${p.w}" height="${p.h}" loading="${idx < 4 ? 'eager' : 'lazy'}" decoding="async" alt="${title} - ${cat} photography">
-            <figcaption class="item-overlay"><span>${title}</span><small>${cat}</small></figcaption>`;
+            <img src="${escHtml(p.src)}" width="${Number(p.w) || 0}" height="${Number(p.h) || 0}" loading="${idx < 4 ? 'eager' : 'lazy'}" decoding="async" alt="${escHtml(title)} - ${escHtml(cat)} photography">
+            <figcaption class="item-overlay"><span>${escHtml(title)}</span><small>${escHtml(cat)}</small></figcaption>`;
         p.el = item;
         gallery.appendChild(item);
     });
@@ -53,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cats = ['All', ...Array.from(new Set(photos.map(p => p.cat)))
         .sort((a, b) => photos.filter(p => p.cat === b).length - photos.filter(p => p.cat === a).length)];
     filterBar.innerHTML = cats.map(c =>
-        `<button type="button" class="filter-btn${c === 'All' ? ' active' : ''}" data-cat="${c}">${c}</button>`).join('');
+        `<button type="button" class="filter-btn${c === 'All' ? ' active' : ''}" data-cat="${escHtml(c)}">${escHtml(c)}</button>`).join('');
     filterBar.addEventListener('click', e => {
         const b = e.target.closest('.filter-btn');
         if (!b || b.dataset.cat === active) return;
@@ -97,7 +98,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         cur = (i + order.length) % order.length;
         const p = order[cur];
         lbImg.src = p.src; lbImg.alt = p.title;
-        lbCap.innerHTML = `${p.title} <small>${p.cat}</small>`;
+        lbCap.textContent = `${p.title} `;
+        const capSmall = document.createElement('small');
+        capSmall.textContent = p.cat;
+        lbCap.appendChild(capSmall);
         lbCount.textContent = `${cur + 1} / ${order.length}`;
     };
     const open = p => {

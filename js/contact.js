@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.disabled = true;
 
         setTimeout(() => {
-            window.open(url, '_blank');
+            window.open(url, '_blank', 'noopener,noreferrer');
             submitButton.classList.remove('is-loading');
             submitButton.querySelector('.btn-label').textContent = 'Book your shoot';
             submitButton.disabled = false;

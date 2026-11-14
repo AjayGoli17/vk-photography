@@ -659,15 +659,15 @@
        container.innerHTML = `<div class="cart-empty">Your cart is empty.<br>Start by choosing a frame or a photo gift.</div>`;
      } else {
        container.innerHTML = cart.map((item) => `
-         <div class="cart-item" data-id="${item.id}">
-           <div class="cart-item-thumb"><img src="${item.photo}" alt="Your uploaded photo"></div>
+         <div class="cart-item" data-id="${escHtml(item.id)}">
+           <div class="cart-item-thumb"><img src="${safeImgSrc(item.photo)}" alt="Your uploaded photo"></div>
            <div class="cart-item-info">
              <h3>${itemTitle(item)}</h3>
              <div class="cart-item-specs">${itemSpecs(item, false)}</div>
              <div class="cart-item-foot">
                <div class="qty-stepper">
                  <button type="button" data-action="dec" aria-label="Decrease quantity">−</button>
-                 <span>${item.quantity}</span>
+                 <span>${safeQty(item.quantity)}</span>
                  <button type="button" data-action="inc" aria-label="Increase quantity">+</button>
                </div>
                <div class="cart-item-price">${formatINR(item.unitPrice * item.quantity)}</div>
@@ -742,13 +742,24 @@
   /* ============================================================
      CART ITEM LABELS — frames and photo gifts share one cart
      ============================================================ */
+  /* Cart/order data round-trips through localStorage, so treat it as untrusted text when it is
+     put into HTML: escape every string, and only allow image URLs that are data:/blob: URLs. */
+  function escHtml(v) {
+    return String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function safeImgSrc(v) {
+    const s = String(v ?? "");
+    return /^(data:image\/(png|jpe?g|webp|gif);base64,|blob:)/i.test(s) ? escHtml(s) : "";
+  }
+  function safeQty(v) { const n = Number(v); return Number.isInteger(n) && n > 0 && n < 1000 ? n : 1; }
+
   function itemTitle(item) {
-    return item.kind === "gift" ? item.productName : "Custom Photoframe";
+    return item.kind === "gift" ? escHtml(item.productName) : "Custom Photoframe";
   }
 
   function itemSpecs(item, withQty) {
-    if (item.kind === "gift") return `Printed with your photo${withQty ? ` · Qty ${item.quantity}` : ""}`;
-    return `${item.sizeLabel} · ${item.qualityName}<br>${item.frameName} · ${item.mountingName}${withQty ? ` · Qty ${item.quantity}` : ""}`;
+    if (item.kind === "gift") return `Printed with your photo${withQty ? ` · Qty ${safeQty(item.quantity)}` : ""}`;
+    return `${escHtml(item.sizeLabel)} · ${escHtml(item.qualityName)}<br>${escHtml(item.frameName)} · ${escHtml(item.mountingName)}${withQty ? ` · Qty ${safeQty(item.quantity)}` : ""}`;
   }
 
   /* ============================================================
@@ -1029,7 +1040,7 @@
    
      container.innerHTML = cart.map((item) => `
        <div class="cart-item" style="border-bottom:1px solid var(--line); padding-bottom:16px; margin-bottom:16px;">
-         <div class="cart-item-thumb"><img src="${item.photo}" alt="Your uploaded photo"></div>
+         <div class="cart-item-thumb"><img src="${safeImgSrc(item.photo)}" alt="Your uploaded photo"></div>
          <div class="cart-item-info">
            <h3>${itemTitle(item)}</h3>
            <div class="cart-item-specs">${itemSpecs(item, true)}</div>
@@ -1320,7 +1331,7 @@
          const res = await fetch(`${RAZORPAY_FN_BASE}/order-status?orderRef=${encodeURIComponent(order.orderId)}`);
          const data = await safeJson(res);
          if (data?.status === "paid") {
-           order.paymentStatus = "paid"; order.orderStatus = "confirmed"; order.razorpayPaymentId = data.razorpayPaymentId;
+           order.paymentStatus = "paid"; order.orderStatus = "confirmed"; 
            Store.setOrder(order); switchView("Confirmation"); showConfirmation(); return;
          }
        } catch (e) { /* retry */ }
@@ -1345,7 +1356,7 @@
      document.getElementById("confirmItems").innerHTML = order.items.map((item) => `
        <div class="confirm-card">
          <div class="confirm-card-top">
-           <div class="confirm-photo"><img src="${item.photo}" alt="Your uploaded photo"></div>
+           <div class="confirm-photo"><img src="${safeImgSrc(item.photo)}" alt="Your uploaded photo"></div>
            <div class="confirm-specs">
              <h3>${itemTitle(item)}</h3>
              <p>${itemSpecs(item, true)}</p>

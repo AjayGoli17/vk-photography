@@ -6,13 +6,18 @@
    ============================================================ */
 "use strict";
 
-const { db, respond, notifyTelegram } = require("./_lib/db");
+const { db, respond, notifyTelegram, allowRequest, oneLine } = require("./_lib/db");
 
 function str(v, max) { return typeof v === "string" ? v.trim().slice(0, max) : ""; }
 const orNull = (s) => (s ? s : null);
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return respond(405, { error: "Method not allowed." });
+  if (String(event.body || "").length > 60000) return respond(413, { error: "Request too large." });
+  // Public form: cap submissions per visitor so it can't be used to flood the database or Telegram.
+  if (!(await allowRequest(event, "save-lead", 8, 600))) {
+    return respond(429, { error: "Too many requests. Please try again in a few minutes." });
+  }
 
   let b;
   try { b = JSON.parse(event.body || "{}"); } catch { return respond(400, { error: "Invalid request body." }); }
@@ -51,10 +56,11 @@ exports.handler = async (event) => {
     return respond(500, { error: "Could not save your request." });
   }
 
+  // Visitor-supplied text is flattened to one line so it can't forge extra alert lines.
   await notifyTelegram(
     `New ${source === "quotation" ? "quote request" : "booking enquiry"}\n` +
-    `${row.name}${row.phone ? " · " + row.phone : ""}\n` +
-    `${row.service || ""}${row.event_date ? " · " + row.event_date : ""}${row.location ? " · " + row.location : ""}` +
+    `${oneLine(row.name)}${row.phone ? " · " + oneLine(row.phone, 30) : ""}\n` +
+    `${oneLine(row.service || "", 100)}${row.event_date ? " · " + row.event_date : ""}${row.location ? " · " + oneLine(row.location, 100) : ""}` +
     (row.estimated_total != null ? `\nEstimate ₹${row.estimated_total}` : "")
   );
 

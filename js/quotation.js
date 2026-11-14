@@ -496,9 +496,16 @@ function renderAddons() {
 
 // Builds a row for a labeled field inside a summary-list block.
 function summaryRow(label, value) {
+    // textContent, not innerHTML: label/value include what the visitor typed into the form.
     const row = document.createElement('div');
     row.className = 'summary-item';
-    row.innerHTML = `<span class="label">${label}</span><span class="value">${value}</span>`;
+    const l = document.createElement('span');
+    l.className = 'label';
+    l.textContent = label;
+    const v = document.createElement('span');
+    v.className = 'value';
+    v.textContent = value;
+    row.append(l, v);
     return row;
 }
 
@@ -549,8 +556,6 @@ function updateSummary() {
             const svc = stagePrices.find(s => s.name === name);
             if (svc) total += svc.price * qtyFor(stageKey, svc);
         });
-        const row = document.createElement('div');
-        row.className = 'summary-item';
         const serviceText = chosen.map(name => {
             const svc = stagePrices.find(s => s.name === name);
             if (!svc) return name;
@@ -560,8 +565,7 @@ function updateSummary() {
             }
             return `${name} (₹${svc.price.toLocaleString('en-IN')})`;
         }).join(', ');
-        row.innerHTML = `<span class="label">${stageData[stageKey].label}</span><span class="value">${serviceText}</span>`;
-        summaryServices.appendChild(row);
+        summaryServices.appendChild(summaryRow(stageData[stageKey].label, serviceText));
     });
 
     if (!anyService) {
@@ -574,10 +578,7 @@ function updateSummary() {
         selectedAddons.forEach(name => {
             const addon = addonData.find(a => a.name === name);
             total += addon.price;
-            const row = document.createElement('div');
-            row.className = 'summary-item';
-            row.innerHTML = `<span class="label">${addon.name}</span><span class="value">₹${addon.price.toLocaleString('en-IN')}</span>`;
-            summaryAddons.appendChild(row);
+            summaryAddons.appendChild(summaryRow(addon.name, `₹${addon.price.toLocaleString('en-IN')}`));
         });
     } else {
         summaryAddonsWrap.style.display = 'none';

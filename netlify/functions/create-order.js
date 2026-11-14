@@ -14,19 +14,26 @@ const Razorpay = require("razorpay");
 const {
   SHIPPING_FEE, MAX_QTY_PER_ITEM, MAX_ITEMS_PER_ORDER, SIZES, getItemUnitPrice,
 } = require("../../js/shop-pricing.js");
-const { db, respond, PHOTO_BUCKET } = require("./_lib/db");
+const { db, respond, allowRequest, PHOTO_BUCKET } = require("./_lib/db");
 
 const ID_RE = /^[A-Za-z0-9_-]{1,60}$/;
+// Same shape the browser generates (VK + 6 chars, no look-alikes). Refs are the only thing
+// protecting an order from being touched by someone else, so don't accept short/guessable ones.
+const ORDER_REF_RE = /^VK[A-HJ-NP-Z2-9]{6}$/;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return respond(405, { error: "Method not allowed." });
+  if (String(event.body || "").length > 100000) return respond(413, { error: "Request too large." });
+  if (!(await allowRequest(event, "create-order", 15, 600))) {
+    return respond(429, { error: "Too many attempts. Please wait a few minutes and try again." });
+  }
 
   let body;
   try { body = JSON.parse(event.body || "{}"); } catch { return respond(400, { error: "Invalid request body." }); }
 
   const { orderRef, items, customer } = body;
 
-  if (typeof orderRef !== "string" || !/^[A-Za-z0-9_-]{1,40}$/.test(orderRef)) {
+  if (typeof orderRef !== "string" || !ORDER_REF_RE.test(orderRef)) {
     return respond(400, { error: "Invalid order reference." });
   }
   if (!Array.isArray(items) || items.length === 0) return respond(400, { error: "Your cart is empty." });
@@ -38,6 +45,7 @@ exports.handler = async (event) => {
   // Price every line from the trusted catalog and build the rows to save.
   let subtotal = 0;
   const rows = [];
+  const seenItemIds = new Set();
   for (const item of items) {
     const quantity = item && item.quantity;
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QTY_PER_ITEM) {
@@ -46,9 +54,10 @@ exports.handler = async (event) => {
     const unitPrice = getItemUnitPrice(item);
     if (unitPrice == null) return respond(400, { error: "One of the items in your cart is no longer available." });
 
-    if (typeof item.itemId !== "string" || !ID_RE.test(item.itemId)) return respond(400, { error: "Invalid item." });
+    if (typeof item.itemId !== "string" || !ID_RE.test(item.itemId) || seenItemIds.has(item.itemId)) return respond(400, { error: "Invalid item." });
+    seenItemIds.add(item.itemId);
     const photoPath = item.photoPath;
-    if (typeof photoPath !== "string" || !new RegExp(`^${orderRef}/${item.itemId}\\.(jpg|png|webp)$`).test(photoPath)) {
+    if (typeof photoPath !== "string" || photoPath.length > 200 || !new RegExp(`^${orderRef}/${item.itemId}\\.(jpg|png|webp)$`).test(photoPath)) {
       return respond(400, { error: "Your photo wasn't uploaded. Please try again." });
     }
 

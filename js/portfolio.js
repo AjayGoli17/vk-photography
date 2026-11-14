@@ -4,7 +4,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const gallery = document.getElementById('gallery');
     const filterBar = document.getElementById('filters') || document.createElement('div');
-    const totalPhotos = 40; // portfolio/portfolio1 ... portfolio40 (missing numbers are skipped)
 
     const captions = {
         1:  ["Rooted in Love", "Maternity"],            2:  ["Golden Hour Promise", "Maternity"],
@@ -29,20 +28,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         40: ["Moments Worth Keeping", "Portrait"]
     };
 
-    /* ---------- load photos (real sizes) ---------- */
-    const exts = ['webp', 'jpg', 'jpeg', 'png'];
-    const loadPhoto = n => new Promise(resolve => {
-        const tryLoad = i => {
-            if (i >= exts.length) return resolve(null);
-            const im = new Image();
-            im.onload = () => resolve({ n, src: im.src, w: im.naturalWidth, h: im.naturalHeight });
-            im.onerror = () => tryLoad(i + 1);
-            im.src = `portfolio/portfolio${n}.${exts[i]}`;
-        };
-        tryLoad(0);
-    });
-    const photos = (await Promise.all(Array.from({ length: totalPhotos }, (_, k) => loadPhoto(k + 1))))
-        .filter(Boolean);
+    /* ---------- photos (sizes come from js/portfolio-data.js, no downloading just to measure) ---------- */
+    const sizes = window.PORTFOLIO_SIZES || {};
+    const photos = Object.keys(sizes).map(Number).sort((x, y) => x - y)
+        .map(n => ({ n, src: sizes[n][0], w: sizes[n][1], h: sizes[n][2] }));
 
     /* ---------- build items ---------- */
     photos.forEach((p, idx) => {
@@ -53,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         item.dataset.index = idx;
         item.dataset.cat = cat;
         item.innerHTML = `
-            <img src="${p.src}" width="${p.w}" height="${p.h}" loading="lazy" alt="${title} - ${cat} photography">
+            <img src="${p.src}" width="${p.w}" height="${p.h}" loading="${idx < 4 ? 'eager' : 'lazy'}" decoding="async" alt="${title} - ${cat} photography">
             <figcaption class="item-overlay"><span>${title}</span><small>${cat}</small></figcaption>`;
         p.el = item;
         gallery.appendChild(item);
@@ -73,57 +62,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         gallery.classList.add('is-switching');
         setTimeout(() => {
             photos.forEach(p => { p.el.hidden = !(active === 'All' || p.cat === active); });
-            layout();
             gallery.classList.remove('is-switching');
             observeItems();
         }, 250);
     });
 
-    /* ---------- justified layout ---------- */
-    const gapPx    = () => innerWidth <= 480 ? 6 : innerWidth <= 768 ? 10 : 16;
-    const targetH  = () => { const w = innerWidth; return w > 1400 ? 340 : w > 1000 ? 280 : w > 700 ? 220 : w > 480 ? 190 : 170; };
-
-    function layout() { return;
-        const list = photos.filter(p => !p.el.hidden);
-        const W = gallery.clientWidth;
-        if (!list.length || !W) return;
-        const gap = gapPx(), target = targetH();
-        gallery.style.gap = gap + 'px';
-
-        const rows = []; let row = [], sum = 0;
-        list.forEach(p => {
-            row.push(p); sum += p.ratio;
-            if (sum * target + gap * (row.length - 1) >= W) { rows.push(row); row = []; sum = 0; }
-        });
-        if (row.length) rows.push(row);
-
-        // last row too short to fill nicely -> fold it into the previous row
-        if (rows.length > 1) {
-            const last = rows[rows.length - 1];
-            const s = last.reduce((a, p) => a + p.ratio, 0);
-            if ((W - gap * (last.length - 1)) / s > target * 1.35) {
-                rows.pop();
-                rows[rows.length - 1] = rows[rows.length - 1].concat(last);
-            }
-        }
-
-        rows.forEach(r => {
-            const s = r.reduce((a, p) => a + p.ratio, 0);
-            const h = (W - gap * (r.length - 1)) / s;
-            let used = 0;
-            r.forEach((p, k) => {
-                const w = k === r.length - 1 ? W - used : Math.floor(p.ratio * h);
-                p.el.style.width = w + 'px';
-                p.el.style.height = h.toFixed(2) + 'px';
-                used += w + gap;
-            });
-        });
-    }
-    let rt;
-    const relayout = () => { clearTimeout(rt); rt = setTimeout(layout, 60); };
-    window.addEventListener('resize', relayout);
-    window.addEventListener('load', relayout);
-    layout();
 
     /* ---------- scroll reveal ---------- */
     const io = new IntersectionObserver((entries, obs) => {

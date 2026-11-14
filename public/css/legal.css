@@ -1,0 +1,108 @@
+/* =========================================================
+   LEGAL.CSS: privacy, terms, refund, shipping and the 404 page.
+   Uses the same shell as the rest of the site (nav, footer, fonts)
+   so these pages no longer look like a separate website.
+   ========================================================= */
+:root {
+    --bg-color: #FFFFFF;
+    --text-main: #2B2620;
+    --text-muted: #7A7566;
+    --accent: #B08D57;
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Montserrat', sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+h1, h2, h3 { font-family: var(--font-heading); font-weight: 400; }
+
+/* --- Hero (same look as the Contact page) --- */
+.legal-hero {
+    min-height: 34vh;
+    padding: 9rem 2rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+.legal-hero h1 {
+    font-size: clamp(2.25rem, 6vw, 4rem);
+    letter-spacing: -1px;
+    margin-bottom: 0.6rem;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: legalReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.15s;
+}
+.legal-hero p {
+    font-size: clamp(0.8rem, 1.8vw, 0.95rem);
+    color: var(--text-muted);
+    max-width: 520px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: legalReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.45s;
+}
+@keyframes legalReveal { to { opacity: 1; transform: translateY(0); } }
+
+/* --- Reading column --- */
+.legal-container { max-width: 760px; margin: 0 auto; padding: 1rem 1.5rem 5rem; }
+.legal-content { font-size: 0.97rem; line-height: 1.85; color: var(--text-main); }
+.legal-content h2 {
+    font-size: 1.5rem;
+    margin: 2.6rem 0 0.7rem;
+    padding-top: 1.6rem;
+    border-top: 1px solid rgba(43, 38, 32, 0.1);
+}
+.legal-content h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.legal-content p, .legal-content li { margin: 0.6rem 0; color: #433d34; }
+.legal-content ul, .legal-content ol { padding-left: 1.3rem; }
+.legal-content strong { color: var(--text-main); font-weight: 600; }
+.legal-content a { color: var(--text-main); text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 3px; transition: color 0.3s ease; }
+.legal-content a:hover { color: var(--accent); }
+
+.legal-nav {
+    margin-top: 3.5rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid rgba(43, 38, 32, 0.12);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.6rem;
+    font-size: 0.78rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+.legal-nav a { color: var(--text-muted); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 2px; transition: color 0.3s ease, border-color 0.3s ease; }
+.legal-nav a:hover, .legal-nav a[aria-current="page"] { color: var(--text-main); border-color: var(--accent); }
+
+/* --- 404 --- */
+.notfound-hero { min-height: 46vh; }
+.notfound-code { font-family: var(--font-heading); font-size: clamp(4rem, 14vw, 8rem) !important; letter-spacing: 0 !important; color: var(--accent) !important; line-height: 1; margin-bottom: 0.4rem; text-transform: none !important; }
+.notfound-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; padding-top: 0; }
+.vk-cta-solid, .vk-cta-line {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 1rem 2.4rem; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase;
+    text-decoration: none; border: 1px solid var(--text-main);
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+.vk-cta-solid { background: var(--text-main); color: #fff; }
+.vk-cta-solid:hover { background: #1A1712; }
+.vk-cta-line { background: transparent; color: var(--text-main); }
+.vk-cta-line:hover { background: var(--text-main); color: #fff; }
+
+@media (max-width: 640px) {
+    .legal-hero { padding-top: 7.5rem; }
+    .legal-container { padding: 0.5rem 1.25rem 4rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .legal-hero h1, .legal-hero p { animation: none; opacity: 1; transform: none; }
+}

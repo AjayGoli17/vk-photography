@@ -100,7 +100,7 @@
 <h1>Request Your Photography Quotation</h1>
 <p>Tell us about your story. We specialize in capturing the quiet, luxurious moments that define your most significant celebrations.</p>
 </section>
-<form id="quotation-form">
+<form id="quotation-form" novalidate>
 <!-- Section 1: Customer Details -->
 <div class="soft-card">
 <div class="card-header">
@@ -111,16 +111,19 @@
 </div>
 <div class="field-grid cols-2">
 <div class="field">
-<label>Full Name</label>
-<input class="input-field" id="customer-name" placeholder="Johnathan Doe" required type="text"/>
+<label for="customer-name">Full Name <span class="req" aria-hidden="true">*</span></label>
+<input class="input-field" id="customer-name" placeholder="Your full name" required type="text" autocomplete="name" aria-describedby="err-customer-name"/>
+<p class="field-error" id="err-customer-name" role="alert" hidden></p>
 </div>
 <div class="field">
-<label>Phone Number</label>
-<input class="input-field" id="customer-phone" placeholder="+1 (555) 000-0000" required type="tel"/>
+<label for="customer-phone">Phone Number <span class="req" aria-hidden="true">*</span></label>
+<input class="input-field" id="customer-phone" placeholder="+91 98765 43210" required type="tel" autocomplete="tel" inputmode="tel" aria-describedby="err-customer-phone"/>
+<p class="field-error" id="err-customer-phone" role="alert" hidden></p>
 </div>
 <div class="field span-2">
-<label>Email Address (Optional)</label>
-<input class="input-field" id="customer-email" placeholder="john@example.com" type="email"/>
+<label for="customer-email">Email Address <span class="req" aria-hidden="true">*</span></label>
+<input class="input-field" id="customer-email" placeholder="you@example.com" required type="email" autocomplete="email" aria-describedby="err-customer-email"/>
+<p class="field-error" id="err-customer-email" role="alert" hidden></p>
 </div>
 </div>
 </div>
@@ -236,6 +239,14 @@
 </div>
 </div>
 </div>
+<!-- Draft bar -->
+<div class="draft-bar" id="draft-bar">
+<div class="draft-actions">
+<button type="button" class="btn-draft" id="save-draft-btn">Save draft</button>
+<button type="button" class="btn-draft-clear" id="clear-draft-btn" hidden>Clear draft</button>
+</div>
+<p class="draft-status" id="draft-status" role="status" aria-live="polite">Your progress is also saved automatically on this device.</p>
+</div>
 <!-- Final CTA -->
 <div class="cta-wrap">
 <div id="cta-idle" class="cta-state">
@@ -244,6 +255,7 @@
                 Send quotation to studio
             </button>
 <p class="cta-hint">Your filled quotation is emailed to the studio as a PDF — no message typing needed.</p>
+<p class="field-error cta-error" id="form-error" role="alert" hidden></p>
 </div>
 <div id="cta-sending" class="cta-state" style="display:none;">
 <button class="btn-send btn-send-sending" type="button" disabled>

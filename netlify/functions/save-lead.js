@@ -42,7 +42,11 @@ exports.handler = async (event) => {
   const name = str(b.name, 120);
   const phone = str(b.phone, 30);
   if (!source || !name) return respond(400, { error: "Missing details." });
-  if (source === "contact" && !phone) return respond(400, { error: "Missing phone." });
+  // Every lead must be reachable: a real phone number, and (for quotes) a real email as well.
+  const phoneDigits = phone.replace(/[\s\-().]/g, "");
+  if (!/^(?:(?:\+?91|0)?[6-9]\d{9}|\+\d{8,15})$/.test(phoneDigits)) return respond(400, { error: "A valid phone number is required." });
+  const emailIn = str(b.email, 160);
+  if (source === "quotation" && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailIn)) return respond(400, { error: "A valid email address is required." });
 
   const eventDate = /^\d{4}-\d{2}-\d{2}$/.test(str(b.eventDate, 10)) ? str(b.eventDate, 10) : null;
   const guests = Number.isInteger(+b.guests) && +b.guests > 0 && +b.guests < 100000 ? +b.guests : null;

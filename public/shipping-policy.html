@@ -27,62 +27,163 @@
     <link rel="apple-touch-icon" href="favicon.jpg">
     <!-- SEO:END -->
 
-
-
-<style>
-  body { margin: 0; background: #faf8f5; color: #2b2620; font: 16px/1.7 Georgia, "Times New Roman", serif; }
-  main { max-width: 680px; margin: 0 auto; padding: 56px 22px 80px; }
-  h1 { font-size: 2rem; margin: 0 0 4px; }
-  h2 { font-size: 1.15rem; margin: 2rem 0 .4rem; }
-  p, li { margin: .5rem 0; }
-  a { color: #2b2620; }
-  .meta { color: #6b6256; font-size: .9rem; }
-  .legal-nav { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid #e3ddd3; font-size: .95rem; }
-  .legal-nav a { margin-right: 14px; }
-</style>
+<link rel="preload" href="fonts/montserrat-latin-wght-normal.a5ec5492.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/legal.css">
+<link rel="stylesheet" href="css/transition.css">
+<link rel="stylesheet" href="css/nav-glass.css">
+<link rel="stylesheet" href="css/sidebar-glass.css">
+<link rel="stylesheet" href="css/social-icons.css">
 </head>
 <body>
-<main>
-  <p><a href="index.html">&larr; Back to VK Photography</a></p>
+
+<div class="page-transition-overlay"></div>
+
+<nav class="vk-nav" id="mainNav">
+      <div class="vk-nav-brand">
+        <a href="index.html" class="vk-nav-logo-chip">
+      <video src="loading-video.mp4" autoplay muted loop playsinline></video>
+    </a>
+        <div class="vk-nav-brand-text"><b>VK</b> Photography</div>
+      </div>
+      <div class="vk-nav-right">
+        <div class="vk-nav-links">
+          <a href="index.html">Home</a>
+          <a href="portfolio.html">Portfolio</a>
+          <a href="service.html">Services</a>
+          <a href="shop.html">Shop</a>
+          <a href="quotation.html">Quotation</a>
+          <a href="contact.html">Contact</a>
+        </div>
+        <div class="vk-nav-cta">
+          <a href="quotation.html" class="vk-btn vk-btn-ghost">Get Quote</a>
+          <button class="vk-nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+        </div>
+      </div>
+    </nav>
+    <div class="vk-nav-mobile" id="navMobile">
+      <a href="index.html">Home</a>
+      <a href="portfolio.html">Portfolio</a>
+      <a href="service.html">Services</a>
+      <a href="shop.html">Shop</a>
+      <a href="quotation.html">Quotation</a>
+      <a href="contact.html">Contact</a>
+      <a href="quotation.html" class="vk-btn vk-btn-ghost vk-nav-mobile-cta">Get Quote</a>
+    </div>
+
+<section class="legal-hero">
   <h1>Shipping &amp; Delivery Policy</h1>
-  <p class="meta">Last updated: 10 November 2026</p>
+  <p>Last updated: 10 November 2026</p>
+</section>
 
-  <p>This policy covers delivery of products ordered from the VK Photography online shop.</p>
+<main class="legal-container">
+  <article class="legal-content">
+    <p>This policy covers delivery of products ordered from the VK Photography online shop.</p>
 
-  <h2>Where we deliver</h2>
-  <p>We deliver across India to any address that a courier can reach. We do not currently ship outside India.</p>
+    <h2>Where we deliver</h2>
+    <p>We deliver across India to any address that a courier can reach. We do not currently ship outside India.</p>
 
-  <h2>Shipping fee</h2>
-  <p>A flat shipping fee of <strong>&#8377;199</strong> is added to every order, however many items it contains. The fee is shown at checkout before you pay.</p>
+    <h2>Shipping fee</h2>
+    <p>A flat shipping fee of <strong>&#8377;199</strong> is added to every order, however many items it contains. The fee is shown at checkout before you pay.</p>
 
-  <h2>How long it takes</h2>
-  <ul>
+    <h2>How long it takes</h2>
+    <ul>
     <li><strong>Making your order:</strong> 3&ndash;5 working days after payment is confirmed, as each item is printed and prepared specially for you.</li>
     <li><strong>Courier delivery:</strong> usually 3&ndash;7 working days after dispatch, depending on your location.</li>
     <li><strong>Total:</strong> most orders arrive in about 6&ndash;12 working days from the date of payment.</li>
-  </ul>
-  <p>These are estimates, not guarantees. Festival seasons, weather, remote locations and courier delays can add time. If we expect a delay, we will let you know.</p>
+    </ul>
+    <p>These are estimates, not guarantees. Festival seasons, weather, remote locations and courier delays can add time. If we expect a delay, we will let you know.</p>
 
-  <h2>Tracking your order</h2>
-  <p>When your order is dispatched we send you the courier name and tracking number by WhatsApp or email, using the phone number and email you gave at checkout. You can also contact us any time with your order number for an update.</p>
+    <h2>Tracking your order</h2>
+    <p>When your order is dispatched we send you the courier name and tracking number by WhatsApp or email, using the phone number and email you gave at checkout. You can also contact us any time with your order number for an update.</p>
 
-  <h2>Delivery address</h2>
-  <p>Please check your address, pincode and phone number before paying. We are not responsible for delays or non-delivery caused by an incorrect or incomplete address. If a parcel comes back to us because of a wrong address, you may need to pay the shipping fee again for us to resend it.</p>
+    <h2>Delivery address</h2>
+    <p>Please check your address, pincode and phone number before paying. We are not responsible for delays or non-delivery caused by an incorrect or incomplete address. If a parcel comes back to us because of a wrong address, you may need to pay the shipping fee again for us to resend it.</p>
 
-  <h2>Receiving your order</h2>
-  <p>Please open the parcel soon after it arrives. If it is damaged or the wrong item, follow the steps in our <a href="refund-policy.html">Refund &amp; Cancellation Policy</a>, and contact us within 48 hours of delivery.</p>
+    <h2>Receiving your order</h2>
+    <p>Please open the parcel soon after it arrives. If it is damaged or the wrong item, follow the steps in our <a href="refund-policy.html">Refund &amp; Cancellation Policy</a>, and contact us within 48 hours of delivery.</p>
 
-  <h2>Contact us</h2>
-  <p><strong>VK Photography</strong> (operating from VK Colour Lab Digital Photo Studio), Rampally, Hyderabad, Telangana, India.<br>
-  Phone / WhatsApp: <a href="tel:+917207046157">+91 72070 46157</a> &middot; Email: <a href="mailto:vkphotography263@gmail.com">vkphotography263@gmail.com</a><br>
-  Studio hours: Mon&ndash;Sat, 10:00 AM &ndash; 8:30 PM</p>
+    <h2>Contact us</h2>
+    <p><strong>VK Photography</strong> (operating from VK Colour Lab Digital Photo Studio), Rampally, Hyderabad, Telangana, India.<br>
+    Phone / WhatsApp: <a href="tel:+917207046157">+91 72070 46157</a> &middot; Email: <a href="mailto:vkphotography263@gmail.com">vkphotography263@gmail.com</a><br>
+    Studio hours: Mon&ndash;Sat, 10:00 AM &ndash; 8:30 PM</p>
 
-  <div class="legal-nav">
-    <a href="privacy.html">Privacy Policy</a>
-    <a href="terms.html">Terms of Service</a>
-    <a href="refund-policy.html">Refund &amp; Cancellation</a>
-    <a href="shipping-policy.html">Shipping &amp; Delivery</a>
-  </div>
+
+  </article>
+  <nav class="legal-nav" aria-label="Policies"><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a><a href="/refund-policy">Refund &amp; Cancellation</a><a href="/shipping-policy" aria-current="page">Shipping &amp; Delivery</a></nav>
 </main>
+
+<footer class="site-footer">
+<div class="footer-top">
+<div class="footer-brand">
+<a href="index.html" class="logo">
+<span class="logo-text">VK Photography</span>
+</a>
+<p class="footer-tagline">A studio built around light, story and craft — capturing moments that last a lifetime.</p>
+<p class="footer-address">Rampally Main Rd, opp. Universe Bakers, Rampally, Hyderabad 501301</p>
+<div class="footer-social">
+<a href="https://www.instagram.com/vkphotography_58/" aria-label="Instagram">
+<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="0.6" fill="currentColor"/></svg>
+</a>
+<a href="https://wa.me/917207046157" aria-label="WhatsApp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"/><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"/></svg></a>
+<a href="https://www.youtube.com/@vkphotography1601" aria-label="YouTube" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="4.2"/><path d="M10.2 9.4v5.2l4.6-2.6z"/></svg></a>
+</div>
+</div>
+<div class="footer-col">
+<h4>Navigate</h4>
+<nav class="footer-links">
+<a href="index.html">Home</a>
+<a href="portfolio.html">Portfolio</a>
+<a href="service.html">Services</a>
+<a href="index.html#testimonials">Testimonials</a>
+<a href="contact.html">Contact</a>
+</nav>
+</div>
+<div class="footer-col">
+<h4>Services</h4>
+<nav class="footer-links">
+<a href="service.html">Wedding &amp; Pre-Wedding Shoots</a>
+<a href="service.html">Haldi Photography</a>
+<a href="service.html">Birthday Photography</a>
+<a href="service.html">Couple &amp; Anniversary Shoots</a>
+<a href="service.html">Housewarming Photography</a>
+<a href="service.html">Personal Reels &amp; Portraits</a>
+</nav>
+</div>
+<div class="footer-col">
+<h4>Get in touch</h4>
+<div class="contact-card">
+<div class="contact-row">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+<span>Rampally, Hyderabad</span>
+</div>
+<div class="contact-row">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 3a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.5c1 .3 2 .5 3 .7a2 2 0 0 1 1.7 2z"></path></svg>
+<a href="tel:+917207046157">+91 72070 46157</a>
+</div>
+<div class="contact-row">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg>
+<span>Mon&ndash;Sat, 10:00 AM &ndash; 8:30 PM</span>
+</div>
+<a href="https://www.google.com/maps/place/VK+COLOUR+LAB+DIGITAL+PHOTO+STUDIO/@17.4668031,78.6435291,17z/data=!4m6!3m5!1s0x3bcb9d49e08a1e95:0xf1be58ca2323458f!8m2!3d17.4668031!4d78.6435291!16s%2Fg%2F11vrlqt1f4" target="_blank" rel="noopener" class="contact-directions-btn">
+Get Directions
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+</a>
+</div>
+</div>
+</div>
+<div class="footer-bottom">
+<p>&copy; <span id="footerYear"></span> VK Photography. All rights reserved.</p>
+<div class="footer-legal">
+<a href="privacy.html">Privacy Policy</a>
+<a href="terms.html">Terms of Service</a><a href="refund-policy.html">Refund &amp; Cancellation</a><a href="shipping-policy.html">Shipping &amp; Delivery</a>
+</div>
+</div>
+</footer>
+
+<script src="js/nav-toggle.js"></script>
+<script src="js/transition.js"></script>
+<script src="js/cursor.js"></script>
 </body>
 </html>

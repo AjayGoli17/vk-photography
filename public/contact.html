@@ -247,21 +247,23 @@
 
         <section class="form-panel">
             <h2 class="reveal">Book your shoot</h2>
-            <form id="bookingForm">
+            <form id="bookingForm" novalidate>
                 <div class="field-row">
                     <div class="field reveal">
                         <label for="name">Name</label>
-                        <input type="text" id="name" name="name" placeholder="Your full name" required>
+                        <input type="text" id="name" aria-describedby="err-name" name="name" placeholder="Your full name" required>
+                    <p class="field-error" id="err-name" role="alert" hidden></p>
                     </div>
                     <div class="field reveal">
                         <label for="phone">Phone number</label>
-                        <input type="tel" id="phone" name="phone" placeholder="+91 00000 00000" required>
+                        <input type="tel" id="phone" aria-describedby="err-phone" name="phone" placeholder="+91 00000 00000" required>
+                    <p class="field-error" id="err-phone" role="alert" hidden></p>
                     </div>
                 </div>
                 <div class="field-row">
                     <div class="field reveal">
                         <label for="service">Service</label>
-                        <select id="service" name="service" required>
+                        <select id="service" name="service" aria-describedby="err-service" required>
                             <option value="" disabled selected>Select a service</option>
                             <option>Wedding & Pre Wedding Shoots</option>
                             <option>Haldi Shoots</option>
@@ -271,15 +273,18 @@
                             <option>House Warming</option>
                             <option>Naming Ceremony</option>
                         </select>
+                    <p class="field-error" id="err-service" role="alert" hidden></p>
                     </div>
                     <div class="field reveal">
                         <label for="event-date">Event date</label>
-                        <input type="date" id="event-date" name="event-date" required>
+                        <input type="date" id="event-date" aria-describedby="err-event-date" name="event-date" required>
+                    <p class="field-error" id="err-event-date" role="alert" hidden></p>
                     </div>
                 </div>
                 <div class="field reveal">
                     <label for="location">Location</label>
-                    <input type="text" id="location" name="location" placeholder="Venue / city" required>
+                    <input type="text" id="location" aria-describedby="err-location" name="location" placeholder="Venue / city" required>
+                    <p class="field-error" id="err-location" role="alert" hidden></p>
                 </div>
                 <div class="field reveal">
                     <label for="message">Message</label>
@@ -290,7 +295,7 @@
                     <span class="btn-spinner"></span>
                     <span class="btn-label">Book your shoot</span>
                 </button>
-                <p id="formStatus" class="form-status" role="status" aria-live="polite" hidden></p>
+                <p id="formStatus" class="form-status" role="status" aria-live="polite" tabindex="-1" hidden></p>
             </form>
         </section>
 

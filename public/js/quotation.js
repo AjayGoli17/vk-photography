@@ -474,7 +474,7 @@ function renderAddons() {
     addonsGrid.innerHTML = '';
     addonData.forEach(addon => {
         const card = document.createElement('div');
-        card.className = 'addon-card';
+        card.className = 'addon-card' + (selectedAddons.has(addon.name) ? ' selected' : '');
         card.dataset.addon = addon.name;
         card.innerHTML = `
             <span class="icon">${ICONS[addon.icon]}</span>
@@ -585,6 +585,7 @@ function updateSummary() {
     }
 
     summaryTotal.textContent = '₹' + total.toLocaleString('en-IN');
+    if (typeof scheduleDraftSave === 'function') scheduleDraftSave();
 }
 
 saveBtn.addEventListener('click', () => {
@@ -613,10 +614,131 @@ eventCategorySelect.addEventListener('change', (e) => {
         if (el) el.addEventListener('input', updateSummary);
     });
 
+// ---- Draft: save / restore / clear (stays on this device, in localStorage) ----
+const DRAFT_KEY = 'vk-quote-draft-v1';
+const DRAFT_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+const DRAFT_FIELD_IDS = ['customer-name', 'customer-phone', 'customer-email', 'event-date', 'event-location', 'event-guests', 'special-requirements'];
+const draftStatusEl = document.getElementById('draft-status');
+const clearDraftBtn = document.getElementById('clear-draft-btn');
+let draftTimer = null;
+let draftRestoring = true;      // no autosave until the first restore attempt has finished
+
+function draftStore(action, value) {
+    try {
+        if (action === 'get') return window.localStorage.getItem(DRAFT_KEY);
+        if (action === 'set') { window.localStorage.setItem(DRAFT_KEY, value); return true; }
+        if (action === 'del') { window.localStorage.removeItem(DRAFT_KEY); return true; }
+    } catch (err) { /* private mode or storage full: drafts are a convenience, never block the form */ }
+    return false;
+}
+
+function setDraftStatus(text, ok) {
+    if (!draftStatusEl) return;
+    draftStatusEl.textContent = text;
+    draftStatusEl.classList.toggle('is-ok', !!ok);
+}
+
+function hasDraftContent(d) {
+    const anyField = Object.values(d.fields).some(v => String(v || '').trim());
+    const anyPick = Object.values(d.selections).some(a => a.length) || d.addons.length > 0;
+    return anyField || anyPick;
+}
+
+function buildDraft() {
+    const fields = {};
+    DRAFT_FIELD_IDS.forEach(id => { const el = document.getElementById(id); fields[id] = el ? el.value : ''; });
+    const sel = {};
+    Object.keys(selections).forEach(k => { if (selections[k].size) sel[k] = Array.from(selections[k]); });
+    return {
+        v: 1, savedAt: Date.now(),
+        category: currentCategory, stage: currentStage,
+        fields, selections: sel, addons: Array.from(selectedAddons), sheetQty
+    };
+}
+
+function saveDraftNow(announce) {
+    const d = buildDraft();
+    if (!hasDraftContent(d)) {
+        draftStore('del');
+        if (clearDraftBtn) clearDraftBtn.hidden = true;
+        if (announce) setDraftStatus('Nothing to save yet. Fill in a few details first.', false);
+        return false;
+    }
+    const ok = draftStore('set', JSON.stringify(d));
+    if (clearDraftBtn) clearDraftBtn.hidden = !ok;
+    if (announce) {
+        const t = new Date().toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
+        setDraftStatus(ok ? 'Draft saved at ' + t + '. You can close this page and come back to it on this device.'
+                          : 'Could not save a draft in this browser. Your details are still on screen.', ok);
+    }
+    return ok;
+}
+
+function scheduleDraftSave() {
+    if (draftRestoring) return;
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(() => saveDraftNow(false), 600);
+}
+
+function restoreDraft() {
+    let d = null;
+    try { d = JSON.parse(draftStore('get') || 'null'); } catch (err) { d = null; }
+    if (!d || d.v !== 1 || !d.fields || !d.selections || Date.now() - (d.savedAt || 0) > DRAFT_MAX_AGE_MS) {
+        if (d) draftStore('del');
+        return false;
+    }
+    DRAFT_FIELD_IDS.forEach(id => { const el = document.getElementById(id); if (el && typeof d.fields[id] === 'string') el.value = d.fields[id]; });
+    if (categoryData[d.category]) {
+        currentCategory = d.category;
+        eventCategorySelect.value = d.category;
+        summaryCategory.textContent = d.category;
+        currentStage = (categoryData[d.category].stages.includes(d.stage) ? d.stage : categoryData[d.category].stages[0]);
+    }
+    Object.keys(d.selections).forEach(k => {
+        if (!selections[k] || !Array.isArray(d.selections[k])) return;
+        const valid = new Set(stageData[k].services.map(sv => sv.name));
+        d.selections[k].forEach(n => { if (valid.has(n)) selections[k].add(n); });
+    });
+    (Array.isArray(d.addons) ? d.addons : []).forEach(n => { if (addonData.some(a => a.name === n)) selectedAddons.add(n); });
+    if (d.sheetQty && typeof d.sheetQty === 'object') {
+        Object.keys(d.sheetQty).forEach(k => {
+            if (!stageData[k] || typeof d.sheetQty[k] !== 'object') return;
+            Object.keys(d.sheetQty[k]).forEach(n => {
+                const q = parseInt(d.sheetQty[k][n], 10);
+                if (q >= 1 && q <= 500) (sheetQty[k] = sheetQty[k] || {})[n] = q;
+            });
+        });
+    }
+    return true;
+}
+
+function clearDraft(message) {
+    clearTimeout(draftTimer);
+    draftStore('del');
+    if (clearDraftBtn) clearDraftBtn.hidden = true;
+    setDraftStatus(message || 'Your progress is also saved automatically on this device.', false);
+}
+
+const saveDraftBtn = document.getElementById('save-draft-btn');
+if (saveDraftBtn) saveDraftBtn.addEventListener('click', () => { clearTimeout(draftTimer); saveDraftNow(true); });
+if (clearDraftBtn) clearDraftBtn.addEventListener('click', () => {
+    if (!window.confirm('Clear everything you have entered and selected?')) return;
+    clearDraft('Draft cleared.');
+    window.location.reload();
+});
+eventCategorySelect.addEventListener('change', scheduleDraftSave);
+
+const draftWasRestored = restoreDraft();
+
 renderStagesList();
 renderServiceGrid();
 renderAddons();
 updateSummary();
+draftRestoring = false;
+if (draftWasRestored) {
+    if (clearDraftBtn) clearDraftBtn.hidden = false;
+    setDraftStatus('Welcome back. We restored your saved draft.', true);
+}
 
 const WHATSAPP_NUMBER = '917207046157'; // country code 91 + 7207046157
 const STUDIO_NAME = 'VK Photography';
@@ -958,6 +1080,7 @@ async function sendQuotePDFByEmail() {
         const mailed = mailRes.status === 'fulfilled' && mailRes.value === true;
         if (!mailed) console.error('Quote email was not sent', mailRes);
         if (!saved) console.error('Quote was not saved', leadRes);
+        if (saved || mailed) clearDraft();
         setCtaState(saved || mailed ? 'success' : 'error');
     } catch (err) {
         console.error('Quote send failed:', err);
@@ -965,8 +1088,62 @@ async function sendQuotePDFByEmail() {
     }
 }
 
+// ---- Required contact details: name, phone AND email, checked before anything is sent ----
+const QUOTE_PHONE_RE = /^(?:(?:\+?91|0)?[6-9]\d{9}|\+\d{8,15})$/;
+const QUOTE_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const quoteRules = {
+    'customer-name': (v) => (v.length < 2 ? 'Please enter your full name.' : ''),
+    'customer-phone': (v) => !v ? 'Please enter your phone number so the studio can reach you.'
+        : (QUOTE_PHONE_RE.test(v.replace(/[\s\-().]/g, '')) ? '' : 'Enter a valid phone number, e.g. 98765 43210.'),
+    'customer-email': (v) => !v ? 'Please enter your email address.'
+        : (QUOTE_EMAIL_RE.test(v) ? '' : 'Enter a valid email address, e.g. you@example.com.')
+};
+
+function setQuoteFieldError(id, message) {
+    const input = document.getElementById(id);
+    const err = document.getElementById('err-' + id);
+    if (!input || !err) return;
+    err.textContent = message;
+    err.hidden = !message;
+    input.classList.toggle('has-error', !!message);
+    if (message) input.setAttribute('aria-invalid', 'true'); else input.removeAttribute('aria-invalid');
+}
+
+function validateQuoteField(id) {
+    const message = quoteRules[id](document.getElementById(id).value.trim());
+    setQuoteFieldError(id, message);
+    return !message;
+}
+
+const formErrorEl = document.getElementById('form-error');
+function validateQuoteForm() {
+    let firstBad = null;
+    Object.keys(quoteRules).forEach(id => {
+        if (!validateQuoteField(id) && !firstBad) firstBad = document.getElementById(id);
+    });
+    if (formErrorEl) {
+        formErrorEl.textContent = firstBad ? 'Please fix the highlighted details above so the studio can contact you.' : '';
+        formErrorEl.hidden = !firstBad;
+    }
+    return firstBad;
+}
+
+Object.keys(quoteRules).forEach(id => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.addEventListener('blur', () => { if (input.value.trim() || input.classList.contains('has-error')) validateQuoteField(id); });
+    input.addEventListener('input', () => { if (input.classList.contains('has-error')) validateQuoteField(id); });
+});
+
 document.getElementById('quotation-form').addEventListener('submit', (e) => {
     e.preventDefault();
+    const firstBad = validateQuoteForm();
+    if (firstBad) {
+        saveDraftNow(false);                     // never lose what they typed because a field was wrong
+        firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstBad.focus({ preventScroll: true });
+        return;
+    }
     sendQuotePDFByEmail();
 });
 

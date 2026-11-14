@@ -39,7 +39,8 @@ exports.handler = async (event) => {
   const file_name = oneLine(b.file_name, 100);
   const pdf = typeof b.pdf_base64 === "string" ? b.pdf_base64 : "";
   if (!customer_name) return respond(400, { status: "error", message: "Missing name." });
-  if (customer_email && customer_email !== "N/A" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer_email)) return respond(400, { status: "error", message: "Invalid email." });
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(customer_email)) return respond(400, { status: "error", message: "A valid email is required." });
+  if (!/^(?:(?:\+?91|0)?[6-9]\d{9}|\+\d{8,15})$/.test(oneLine(b.customer_phone, 30).replace(/[\s\-().]/g, ""))) return respond(400, { status: "error", message: "A valid phone number is required." });
   if (!/^[A-Za-z0-9._-]{1,100}\.pdf$/.test(file_name)) return respond(400, { status: "error", message: "Invalid file name." });
   // Must be a real (small) PDF: base64 of "%PDF-" always starts with "JVBERi0".
   if (!pdf || pdf.length > 2000000 || !/^[A-Za-z0-9+/]+={0,2}$/.test(pdf) || !pdf.startsWith("JVBERi0")) {

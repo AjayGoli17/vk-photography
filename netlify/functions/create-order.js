@@ -1,12 +1,10 @@
 /* ============================================================
    POST /.netlify/functions/create-order
-   1. Validates the customer + cart and prices it from js/shop-pricing.js
+   1. Validates the customer + cart and prices it from public/js/shop-pricing.js
       (nothing the browser sends about prices is ever trusted).
-   2. Saves the pending order + items to Supabase.
-   3. Creates the Razorpay Order and stores its id on the saved order.
-
-   The photos were already uploaded by the browser (see upload-photo-url);
-   this function checks they actually exist before taking payment.
+   2. Confirms the caller owns the order ref (secret orderToken), saves the pending order + items.
+   3. Re-uses the customer's existing Razorpay order on a retry (same amount), otherwise creates a
+      new one and records it, so a payment on ANY earlier attempt still matches this order.
    ============================================================ */
 "use strict";
 
@@ -14,14 +12,13 @@ const crypto = require("crypto");
 const Razorpay = require("razorpay");
 const {
   SHIPPING_FEE, MAX_QTY_PER_ITEM, MAX_ITEMS_PER_ORDER, SIZES, getItemUnitPrice,
-} = require("../../js/shop-pricing.js");
-const { db, respond, allowRequest, PHOTO_BUCKET } = require("./_lib/db");
+} = require("../../public/js/shop-pricing.js");
+const { db, respond, allowRequest, claimOrderRef, PHOTO_BUCKET } = require("./_lib/db");
 
 const ID_RE = /^[A-Za-z0-9_-]{1,60}$/;
-// Same shape the browser generates (VK + 6 chars, no look-alikes). Refs are the only thing
-// protecting an order from being touched by someone else, so don't accept short/guessable ones.
 const ORDER_REF_RE = /^VK[A-HJ-NP-Z2-9]{6}$/;
 const TOKEN_RE = /^[A-Za-z0-9]{32,64}$/;
+const OPEN = ["awaiting_payment", "payment_failed"];
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return respond(405, { error: "Method not allowed." });
@@ -39,9 +36,7 @@ exports.handler = async (event) => {
   }
   const tokenHash = crypto.createHash("sha256").update(orderToken).digest("hex");
 
-  if (typeof orderRef !== "string" || !ORDER_REF_RE.test(orderRef)) {
-    return respond(400, { error: "Invalid order reference." });
-  }
+  if (typeof orderRef !== "string" || !ORDER_REF_RE.test(orderRef)) return respond(400, { error: "Invalid order reference." });
   if (!Array.isArray(items) || items.length === 0) return respond(400, { error: "Your cart is empty." });
   if (items.length > MAX_ITEMS_PER_ORDER) return respond(400, { error: "Too many items in this order." });
 
@@ -101,20 +96,25 @@ exports.handler = async (event) => {
     console.error("create-order: missing RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET env vars");
     return respond(500, { error: "Payments are temporarily unavailable. Please try again shortly." });
   }
+  // Go-live safety switch: set REQUIRE_LIVE_KEYS=true in Netlify and test keys can never take an order.
+  if (process.env.REQUIRE_LIVE_KEYS === "true" && keyId.startsWith("rzp_test_")) {
+    console.error("create-order: REQUIRE_LIVE_KEYS is on but RAZORPAY_KEY_ID is a TEST key");
+    return respond(503, { error: "Online payments are not switched on yet. Please contact the studio." });
+  }
 
   try {
     const supabase = db();
 
-    // Don't take a second payment for an order that's already paid.
-    const { data: existing, error: exErr } = await supabase
-      .from("orders").select("id, status, token_hash").eq("order_ref", orderRef).maybeSingle();
-    if (exErr) throw exErr;
-    if (existing && !["awaiting_payment", "payment_failed"].includes(existing.status)) {
-      return respond(409, { error: "This order has already been paid." });
-    }
-    // An unpaid order can only be changed by the browser that created it.
-    if (existing && existing.token_hash && existing.token_hash !== tokenHash) {
+    // Only the browser that owns this order ref may touch it.
+    if (!(await claimOrderRef(orderRef, orderToken))) {
       return respond(403, { error: "This order reference is already in use. Please refresh and try again." });
+    }
+
+    const { data: existing, error: exErr } = await supabase
+      .from("orders").select("id, status, total, razorpay_order_id").eq("order_ref", orderRef).maybeSingle();
+    if (exErr) throw exErr;
+    if (existing && !OPEN.includes(existing.status)) {
+      return respond(409, { error: "This order has already been paid." });
     }
 
     // Make sure every photo really reached storage before charging.
@@ -125,26 +125,46 @@ exports.handler = async (event) => {
       return respond(400, { error: "Your photo wasn't uploaded. Please try again." });
     }
 
-    // Save (or refresh, on a retry) the pending order.
-    const { data: order, error: orderErr } = await supabase
-      .from("orders")
-      .upsert({
-        order_ref: orderRef,
-        status: "awaiting_payment",
-        customer_name: cust.name, customer_phone: cust.phone, customer_email: cust.email,
-        address: cust.address, city: cust.city, state: cust.state, pincode: cust.pincode,
-        subtotal, shipping: SHIPPING_FEE, total, token_hash: tokenHash,
-      }, { onConflict: "order_ref" })
-      .select("id").single();
-    if (orderErr) throw orderErr;
+    // Save (or refresh, on a retry) the pending order. The update only succeeds while the order is
+    // still unpaid, so a payment that lands in the meantime can never be reset to "awaiting".
+    const fields = {
+      status: "awaiting_payment",
+      customer_name: cust.name, customer_phone: cust.phone, customer_email: cust.email,
+      address: cust.address, city: cust.city, state: cust.state, pincode: cust.pincode,
+      subtotal, shipping: SHIPPING_FEE, total, token_hash: tokenHash,
+    };
+    let orderId;
+    if (existing) {
+      const { data: upd, error: updErr } = await supabase.from("orders").update(fields).eq("id", existing.id).in("status", OPEN).select("id");
+      if (updErr) throw updErr;
+      if (!upd || upd.length === 0) return respond(409, { error: "This order has already been paid." });
+      orderId = existing.id;
+    } else {
+      const { data: ins, error: insErr } = await supabase.from("orders").insert({ order_ref: orderRef, ...fields }).select("id").single();
+      if (insErr) throw insErr;
+      orderId = ins.id;
+    }
 
-    const { error: delErr } = await supabase.from("order_items").delete().eq("order_id", order.id);
+    const { error: delErr } = await supabase.from("order_items").delete().eq("order_id", orderId);
     if (delErr) throw delErr;
-    const { error: itemsErr } = await supabase.from("order_items").insert(rows.map((r) => ({ ...r, order_id: order.id })));
+    const { error: itemsErr } = await supabase.from("order_items").insert(rows.map((r) => ({ ...r, order_id: orderId })));
     if (itemsErr) throw itemsErr;
 
-    // Create the Razorpay order and remember its id.
     const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
+
+    // Retry with the same amount: hand back the Razorpay order the customer already has, so a
+    // payment still in flight on it (slow UPI) can't be orphaned by a second order.
+    if (existing && existing.razorpay_order_id && existing.total === total) {
+      try {
+        const prev = await razorpay.orders.fetch(existing.razorpay_order_id);
+        if (prev && prev.amount === amountInPaise && prev.status !== "paid") {
+          return respond(200, { keyId, razorpayOrderId: prev.id, amount: prev.amount, currency: prev.currency, orderRef });
+        }
+      } catch (err) {
+        console.warn("create-order: could not reuse the previous Razorpay order", err?.message || err);
+      }
+    }
+
     const razorpayOrder = await razorpay.orders.create({
       amount: amountInPaise,
       currency: "INR",
@@ -152,8 +172,11 @@ exports.handler = async (event) => {
       notes: { orderRef, customerName: cust.name, customerEmail: cust.email, customerPhone: cust.phone },
     });
 
-    const { error: updErr } = await supabase.from("orders").update({ razorpay_order_id: razorpayOrder.id }).eq("id", order.id);
-    if (updErr) throw updErr;
+    const { error: rzpErr } = await supabase.from("orders").update({ razorpay_order_id: razorpayOrder.id }).eq("id", orderId);
+    if (rzpErr) throw rzpErr;
+    // Remember every Razorpay order made for this order (non-fatal if the round-2 migration is missing).
+    const { error: linkErr } = await supabase.from("razorpay_order_links").upsert({ razorpay_order_id: razorpayOrder.id, order_id: orderId }, { onConflict: "razorpay_order_id", ignoreDuplicates: true });
+    if (linkErr) console.error("create-order: could not record Razorpay order link (run the round-2 migration)", linkErr.message);
 
     return respond(200, {
       keyId, // public key id, safe for the browser

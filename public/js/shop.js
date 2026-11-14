@@ -1254,6 +1254,7 @@
       short-lived signed URL. Already-uploaded photos are skipped, so retrying
       after a cancelled or failed payment doesn't upload everything again. */
    async function uploadOrderPhotos(order) {
+     if (!order.orderToken) { order.orderToken = generateOrderToken(); Store.setOrder(order); }
      for (const item of order.items) {
        if (item.photoPath) continue;
 
@@ -1261,7 +1262,7 @@
        const urlRes = await fetch(`${RAZORPAY_FN_BASE}/upload-photo-url`, {
          method: "POST",
          headers: { "Content-Type": "application/json" },
-         body: JSON.stringify({ orderRef: order.orderId, itemId: item.id, contentType: blob.type }),
+         body: JSON.stringify({ orderRef: order.orderId, itemId: item.id, contentType: blob.type, orderToken: order.orderToken }),
        });
        if (!urlRes.ok) {
          const err = await safeJson(urlRes);
@@ -1330,7 +1331,7 @@
      setPaymentState("loading", "Checking your payment…");
      for (let i = 0; i < 8; i++) {
        try {
-         const res = await fetch(`${RAZORPAY_FN_BASE}/order-status?orderRef=${encodeURIComponent(order.orderId)}`);
+         const res = await fetch(`${RAZORPAY_FN_BASE}/order-status?orderRef=${encodeURIComponent(order.orderId)}`, { headers: { "x-order-token": order.orderToken || "" } });
          const data = await safeJson(res);
          if (data?.status === "paid") {
            order.paymentStatus = "paid"; order.orderStatus = "confirmed"; 

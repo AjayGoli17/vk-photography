@@ -888,7 +888,7 @@ function generateQuotePDF() {
 // ---- Google Apps Script config ----
 // After deploying your Apps Script as a Web App (see setup notes), paste the
 // resulting /exec URL here.
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxuJuUjff-6oI631EXlCKCIRaCmJi3Pxf4xi_YO8_QeaEPzDC-geTa-BQrbkkimqb_Y/exec';
+const QUOTE_FN_URL = '/.netlify/functions/send-quote';  // server forwards to Apps Script with a secret
 
 // ---- CTA state machine: idle -> sending -> success | error ----
 function setCtaState(state) {
@@ -928,12 +928,12 @@ async function sendQuotePDFByEmail() {
         file_name: fileName
     };
 
-    // Also keep a record in the studio database (does not affect the email below).
-    fetch('/.netlify/functions/save-lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        keepalive: true,
-        body: JSON.stringify({
+    try {
+        // Email and saved record go out together. The enquiry counts as received if EITHER works,
+        // and only if both fail does the customer see the error screen (with retry / call buttons).
+        payload.formToken = await window.VKLead.prefetch();
+
+        const leadJob = window.VKLead.send({
             source: 'quotation',
             name: data.name,
             phone: data.phone,
@@ -944,27 +944,23 @@ async function sendQuotePDFByEmail() {
             guests: data.guests,
             estimatedTotal: data.total,
             message: data.requirements,
-            details: { quoteNumber, items: data.items }
-        })
-    }).catch(() => {});
-
-    try {
-        const res = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            // Apps Script doPost reads the raw body regardless of content-type;
-            // using text/plain avoids a CORS preflight that application/json would trigger.
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(payload)
+            details: { quoteNumber, items: data.items },
+            website: ''
         });
+        const mailJob = fetch(QUOTE_FN_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then((r) => r.json()).then((j) => !!(j && j.status === 'success'));
 
-        const result = await res.json();
-        if (result && result.status === 'success') {
-            setCtaState('success');
-        } else {
-            throw new Error((result && result.message) || 'Unknown error from Apps Script');
-        }
+        const [leadRes, mailRes] = await Promise.allSettled([leadJob, mailJob]);
+        const saved = leadRes.status === 'fulfilled' && !!(leadRes.value && leadRes.value.ok);
+        const mailed = mailRes.status === 'fulfilled' && mailRes.value === true;
+        if (!mailed) console.error('Quote email was not sent', mailRes);
+        if (!saved) console.error('Quote was not saved', leadRes);
+        setCtaState(saved || mailed ? 'success' : 'error');
     } catch (err) {
-        console.error('Apps Script send failed:', err);
+        console.error('Quote send failed:', err);
         setCtaState('error');
     }
 }

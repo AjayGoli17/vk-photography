@@ -30,7 +30,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitButton = bookingForm.querySelector('.submit-button');
     const whatsappNumber = '917207046157';
 
-    bookingForm.addEventListener('submit', (e) => {
+    const statusEl = document.getElementById('formStatus');
+    const dateInput = document.getElementById('event-date');
+    if (dateInput) {
+        const t = new Date();
+        t.setMinutes(t.getMinutes() - t.getTimezoneOffset());
+        dateInput.min = t.toISOString().slice(0, 10);   // no dates in the past
+    }
+
+    function showStatus(message, isError, linkUrl) {
+        if (!statusEl) return;
+        statusEl.textContent = message;
+        statusEl.classList.toggle('is-error', !!isError);
+        if (linkUrl) {
+            statusEl.appendChild(document.createTextNode(' '));
+            const a = document.createElement('a');
+            a.href = linkUrl; a.target = '_blank'; a.rel = 'noopener';
+            a.textContent = 'Open WhatsApp';
+            statusEl.appendChild(a);
+        }
+        statusEl.hidden = false;
+    }
+
+    bookingForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         if (!bookingForm.checkValidity()) {
@@ -44,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const eventDate = document.getElementById('event-date').value;
         const location = document.getElementById('location').value.trim();
         const message = document.getElementById('message').value.trim();
+        const honeypot = (bookingForm.elements['website'] || {}).value || '';
 
         const formattedDate = eventDate
             ? new Date(eventDate + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -61,24 +84,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
 
-        // Also keep a record in the studio database (does not affect WhatsApp).
-        fetch('/.netlify/functions/save-lead', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            keepalive: true,
-            body: JSON.stringify({ source: 'contact', name, phone, service, eventDate, location, message })
-        }).catch(() => {});
+        // Open WhatsApp right now, inside the tap: phones block pop-ups opened after a delay.
+        let waWindow = null;
+        try { waWindow = window.open(url, '_blank'); if (waWindow) waWindow.opener = null; } catch (err) { waWindow = null; }
 
         submitButton.classList.add('is-loading');
-        submitButton.querySelector('.btn-label').textContent = 'Opening whatsapp';
+        submitButton.querySelector('.btn-label').textContent = 'Sending';
         submitButton.disabled = true;
+        showStatus('Sending your request…', false);
 
-        setTimeout(() => {
-            window.open(url, '_blank', 'noopener,noreferrer');
-            submitButton.classList.remove('is-loading');
-            submitButton.querySelector('.btn-label').textContent = 'Book your shoot';
-            submitButton.disabled = false;
-        }, 500);
+        let saved = false;
+        try {
+            const r = await window.VKLead.send({ source: 'contact', name, phone, service, eventDate, location, message, website: honeypot });
+            saved = !!(r && r.ok);
+        } catch (err) { saved = false; }
+
+        submitButton.classList.remove('is-loading');
+        submitButton.querySelector('.btn-label').textContent = 'Book your shoot';
+        submitButton.disabled = false;
+
+        if (saved && waWindow) {
+            showStatus('Thank you! Your request is saved and WhatsApp is open. Please send the message to confirm your booking.', false);
+        } else if (saved) {
+            showStatus('Thank you! Your request is saved. Your phone blocked WhatsApp from opening, so please tap here:', false, url);
+        } else {
+            showStatus('We could not save your request online. Please send it on WhatsApp or call +91 72070 46157 so we do not miss it.', true, waWindow ? null : url);
+        }
     });
 });
 // Mobile sidebar: opens from the side when the hamburger button is

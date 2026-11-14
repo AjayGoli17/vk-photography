@@ -1,13 +1,13 @@
 /* ============================================================
    POST /.netlify/functions/upload-photo-url
-   Body: { orderRef, itemId, contentType }
-   Returns a short-lived signed upload URL so the browser can send the
-   customer's photo straight to the PRIVATE order-photos bucket (photos
-   can be up to 10 MB, more than a Netlify Function request can carry).
+   Body: { orderRef, itemId, contentType, orderToken }
+   Returns a short-lived signed upload URL so the browser can send the customer's photo straight
+   to the PRIVATE order-photos bucket. The order ref is "owned" by the first browser that uses it
+   (secret orderToken), so nobody else can overwrite its photos.
    ============================================================ */
 "use strict";
 
-const { db, respond, allowRequest, PHOTO_BUCKET } = require("./_lib/db");
+const { db, respond, allowRequest, claimOrderRef, PHOTO_BUCKET } = require("./_lib/db");
 
 const EXT = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 const ID_RE = /^[A-Za-z0-9_-]{1,60}$/;
@@ -24,7 +24,7 @@ exports.handler = async (event) => {
   let body;
   try { body = JSON.parse(event.body || "{}"); } catch { return respond(400, { error: "Invalid request body." }); }
 
-  const { orderRef, itemId, contentType } = body;
+  const { orderRef, itemId, contentType, orderToken } = body;
   if (typeof orderRef !== "string" || !ORDER_REF_RE.test(orderRef)) return respond(400, { error: "Invalid order reference." });
   if (typeof itemId !== "string" || !ID_RE.test(itemId)) return respond(400, { error: "Invalid item id." });
   const ext = EXT[contentType];
@@ -34,8 +34,11 @@ exports.handler = async (event) => {
   try {
     const supabase = db();
 
-    // Once an order has been paid (or is being fulfilled) its photos are frozen: otherwise anyone
-    // who knew the order ref could overwrite the photo we are about to print.
+    if (!(await claimOrderRef(orderRef, orderToken))) {
+      return respond(403, { error: "This order reference is already in use. Please refresh the page and try again." });
+    }
+
+    // Once an order has been paid (or is being fulfilled) its photos are frozen.
     const { data: existing, error: exErr } = await supabase
       .from("orders").select("status").eq("order_ref", orderRef).maybeSingle();
     if (exErr) throw exErr;

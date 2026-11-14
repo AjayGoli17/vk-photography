@@ -29,3 +29,25 @@
 - Unpaid order photos stay in storage forever; add a scheduled cleanup if storage cost matters.
 - `script-src` still allows `'unsafe-inline'` on public pages because they use inline scripts and `onmouseover` handlers. Moving those to files would let you drop it.
 - Longer term, publish only a `public/` folder instead of the repo root.
+
+---
+# Round 2 (client handover)
+
+| # | Problem | Fix |
+|---|---|---|
+| 1 | Retrying checkout created a second Razorpay order; a payment on the first one looked "unknown" | `create-order` re-uses the open Razorpay order (same amount) and records every Razorpay order id in `razorpay_order_links`; `markOrderPaid` finds the order through any of them. A paid order can no longer be reset to "awaiting" by a late retry. |
+| 2 | Photo upload / order status protected only by a short order code | The browser's secret `orderToken` now owns the order ref from the first upload (`order_claims`). `upload-photo-url`, `create-order` and `order-status` all require it. A wrong ref and a wrong token look identical (404). |
+| 3 | No spam protection on forms | Signed form token with minimum age (`form-token`), hidden honeypot field, allowed-origin check, per-IP + shared global rate limits, duplicate suppression (one lead + one Telegram alert per person per 10 min). |
+| 4 | Public Google Apps Script URL could send mail as the studio | The browser now calls `send-quote`, which validates everything and forwards to Apps Script with a secret. `apps-script/Code.gs` rejects calls without the secret, checks the PDF, mails only the studio, and caps sends per day. The URL is gone from the browser code and the CSP. |
+| 5 | Admin: password only, no idle logout | Auto sign-out after 20 idle minutes; admin page no longer carries SEO/OG tags; `scripts/lock-supabase-signup.sh` turns off public sign-ups via the Supabase API. (Enable MFA in the Supabase dashboard too.) |
+| 6 | Internal files served from the site root | The site now lives in `public/` and `netlify.toml` publishes only that. Docs, SQL, scripts and function source are not reachable by URL. CSP no longer allows images from any host. |
+| 7 | Silent lead loss, WhatsApp blocked by pop-up blockers | WhatsApp opens inside the tap; the save is awaited with timeout + one retry; the visitor sees an honest result message with a fallback "Open WhatsApp" link. Quote: email and saved record go together; error screen only if both fail. |
+| 8 | Test keys could go live | `REQUIRE_LIVE_KEYS=true` makes `create-order` refuse test keys and makes a production build fail on test keys / missing settings (`scripts/predeploy-check.js`). |
+
+## Do these after deploying
+1. Run `supabase/migrations/20261115000001_security_round2.sql` in the Supabase SQL editor.
+2. Netlify env vars: `FORM_TOKEN_SECRET`, `APPS_SCRIPT_SECRET`, (optional `APPS_SCRIPT_URL`), live `RAZORPAY_*` keys, then `REQUIRE_LIVE_KEYS=true`.
+3. Paste `apps-script/Code.gs` into the Apps Script project, set the two constants, Deploy > New version.
+4. Turn off sign-ups in Supabase (Authentication > Sign In / Providers) or run `scripts/lock-supabase-signup.sh`.
+5. Razorpay: live webhook to `https://vkphotography.studio/.netlify/functions/webhook` (events `payment.captured`, `payment.failed`).
+6. Place one real small payment, one contact enquiry and one quote request.

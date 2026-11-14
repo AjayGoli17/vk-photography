@@ -199,3 +199,8 @@ else{sb.auth.onAuthStateChange(ev=>{if(ev=='SIGNED_OUT'&&!$('#app').hidden){orde
 sb.auth.getSession().then(({data})=>data.session?enter(data.session.user):showLogin());
 setInterval(()=>{if(!$('#app').hidden&&!document.hidden&&!$('#drawer').classList.contains('open'))refresh()},120000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!$('#app').hidden)refresh()})}
+
+/* Auto sign-out after 20 minutes without activity (shared or stolen laptop protection). */
+(function(){var IDLE=20*60*1000,last=Date.now();
+['click','keydown','pointerdown','touchstart','scroll'].forEach(function(t){document.addEventListener(t,function(){last=Date.now()},{passive:true})});
+setInterval(function(){if(!$('#app').hidden&&Date.now()-last>IDLE){signOut().then(function(){setTimeout(function(){$('#lerr').textContent='Signed out after 20 minutes of inactivity.'},400)})}},30000)})();

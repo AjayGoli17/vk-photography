@@ -287,10 +287,12 @@
                     <label for="message">Message</label>
                     <textarea id="message" name="message" placeholder="Describe your vision..."></textarea>
                 </div>
+                <div class="hp-field" aria-hidden="true"><label for="website">Leave this field empty</label><input type="text" id="website" name="website" tabindex="-1" autocomplete="off"></div>
                 <button type="submit" class="submit-button reveal">
                     <span class="btn-spinner"></span>
                     <span class="btn-label">Book your shoot</span>
                 </button>
+                <p id="formStatus" class="form-status" role="status" aria-live="polite" hidden></p>
             </form>
         </section>
 
@@ -410,6 +412,7 @@ Get Directions
 </div>
 </footer>
 
+    <script src="js/lead-client.js"></script>
     <script src="js/contact.js"></script>
     <script src="js/nav-toggle.js"></script>
     <script src="js/transition.js"></script>

@@ -58,7 +58,15 @@ exports.handler = async (event) => {
       console.warn("verify-payment: payment/order mismatch", { razorpay_order_id, razorpay_payment_id });
       return respond(400, { verified: false, error: "Payment verification failed." });
     }
-    await markOrderPaid(razorpay_order_id, razorpay_payment_id, payment.amount, payment.currency);
+    const result = await markOrderPaid(razorpay_order_id, razorpay_payment_id, payment.amount, payment.currency);
+    if (result && (result.reason === "amount_mismatch" || result.reason === "unknown_order")) {
+      // Money was taken but the order could not be matched: never show a normal success screen.
+      return respond(409, {
+        verified: false,
+        review: true,
+        error: "We received your payment but need to check it manually. Please WhatsApp us your order number. Do not pay again.",
+      });
+    }
   } catch (err) {
     console.error("verify-payment: could not record payment", err?.message || err);
   }

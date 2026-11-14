@@ -1,12 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://vkphotography.studio/</loc><lastmod>2026-11-14</lastmod></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url><loc>https://vkphotography.studio/</loc><lastmod>2026-11-14</lastmod>
+    <image:image><image:loc>https://vkphotography.studio/portfolio1.jpg</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/portfolio2.jpg</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/portfolio3.jpg</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/portfolio4.jpg</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/portfolio5.jpg</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/portfolio6.jpg</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/portfolio7.jpg</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/017.jpg</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/portfolio9.jpg</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/portfolio10.jpg</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/portfolio11.jpg</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/founder.jpg</image:loc></image:image>
+  </url>
   <url><loc>https://vkphotography.studio/contact</loc><lastmod>2026-11-14</lastmod></url>
   <url><loc>https://vkphotography.studio/portfolio</loc><lastmod>2026-11-14</lastmod></url>
   <url><loc>https://vkphotography.studio/privacy</loc><lastmod>2026-11-14</lastmod></url>
   <url><loc>https://vkphotography.studio/quotation</loc><lastmod>2026-11-14</lastmod></url>
   <url><loc>https://vkphotography.studio/refund-policy</loc><lastmod>2026-11-14</lastmod></url>
-  <url><loc>https://vkphotography.studio/service</loc><lastmod>2026-11-14</lastmod></url>
+  <url><loc>https://vkphotography.studio/service</loc><lastmod>2026-11-14</lastmod>
+    <image:image><image:loc>https://vkphotography.studio/portfolio/portfolio7.webp</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/portfolio/portfolio27.webp</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/birthday.jpg</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/portfolio/portfolio14.webp</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/portfolio/portfolio19.webp</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/housewarming.jpg</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/naming.jpg</image:loc></image:image>
+    <image:image><image:loc>https://vkphotography.studio/portfolio/portfolio32.webp</image:loc></image:image>
+  </url>
   <url><loc>https://vkphotography.studio/shipping-policy</loc><lastmod>2026-11-14</lastmod></url>
   <url><loc>https://vkphotography.studio/shop</loc><lastmod>2026-11-14</lastmod></url>
   <url><loc>https://vkphotography.studio/terms</loc><lastmod>2026-11-14</lastmod></url>

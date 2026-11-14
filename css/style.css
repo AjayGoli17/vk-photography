@@ -477,3 +477,9 @@
 
 
 .footer-legal{flex-wrap:wrap;gap:10px 26px}
+
+/* SEO-GEO:START - Rampally location lines */
+.geo-line{margin-top:12px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--gray,#8a8a8a);font-weight:500}
+.geo-note{margin-top:12px;font-size:14px;line-height:1.7;color:var(--gray,#8a8a8a);max-width:640px}
+.footer-address{font-size:13px;line-height:1.7;color:var(--gray,#8a8a8a);max-width:280px;margin:-12px 0 24px}
+/* SEO-GEO:END */

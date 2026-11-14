@@ -1186,11 +1186,13 @@
        await uploadOrderPhotos(order);
        setPaymentState("loading", "Preparing secure checkout…");
  
+       if (!order.orderToken) { order.orderToken = generateOrderToken(); Store.setOrder(order); }
        const createRes = await fetch(`${RAZORPAY_FN_BASE}/create-order`, {
          method: "POST",
          headers: { "Content-Type": "application/json" },
          body: JSON.stringify({
            orderRef: order.orderId,
+           orderToken: order.orderToken,
            items: order.items.map((i) => {
              const common = { itemId: i.id, quantity: i.quantity, photoPath: i.photoPath, photoW: i.photoW, photoH: i.photoH, crop: i.crop };
              return i.kind === "gift"
@@ -1298,7 +1300,7 @@
  
        const result = await safeJson(verifyRes);
        if (!verifyRes.ok || !result?.verified) {
-         setPaymentState("failed", "We couldn't verify this payment. If money was deducted, it will be refunded automatically — please try again.");
+         setPaymentState("failed", result?.review ? result.error : "We couldn't verify this payment. If money was deducted, it will be refunded automatically — please try again.");
          return;
        }
  
@@ -1389,6 +1391,12 @@
       UTILITIES
       ============================================================ */
    function formatINR(amount) { return "₹" + Math.round(amount).toLocaleString("en-IN"); }
+   function generateOrderToken() {
+     // Private 192-bit secret kept only in this browser; the server stores just its hash.
+     const bytes = new Uint8Array(24);
+     crypto.getRandomValues(bytes);
+     return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+   }
    function generateOrderId() {
      // VK + 6 random characters (no look-alikes) so two customers never share an order ref.
      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";

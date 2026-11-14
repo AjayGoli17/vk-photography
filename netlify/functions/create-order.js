@@ -10,6 +10,7 @@
    ============================================================ */
 "use strict";
 
+const crypto = require("crypto");
 const Razorpay = require("razorpay");
 const {
   SHIPPING_FEE, MAX_QTY_PER_ITEM, MAX_ITEMS_PER_ORDER, SIZES, getItemUnitPrice,
@@ -20,6 +21,7 @@ const ID_RE = /^[A-Za-z0-9_-]{1,60}$/;
 // Same shape the browser generates (VK + 6 chars, no look-alikes). Refs are the only thing
 // protecting an order from being touched by someone else, so don't accept short/guessable ones.
 const ORDER_REF_RE = /^VK[A-HJ-NP-Z2-9]{6}$/;
+const TOKEN_RE = /^[A-Za-z0-9]{32,64}$/;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return respond(405, { error: "Method not allowed." });
@@ -31,7 +33,11 @@ exports.handler = async (event) => {
   let body;
   try { body = JSON.parse(event.body || "{}"); } catch { return respond(400, { error: "Invalid request body." }); }
 
-  const { orderRef, items, customer } = body;
+  const { orderRef, items, customer, orderToken } = body;
+  if (typeof orderToken !== "string" || !TOKEN_RE.test(orderToken)) {
+    return respond(400, { error: "Invalid request. Please refresh the page and try again." });
+  }
+  const tokenHash = crypto.createHash("sha256").update(orderToken).digest("hex");
 
   if (typeof orderRef !== "string" || !ORDER_REF_RE.test(orderRef)) {
     return respond(400, { error: "Invalid order reference." });
@@ -101,10 +107,14 @@ exports.handler = async (event) => {
 
     // Don't take a second payment for an order that's already paid.
     const { data: existing, error: exErr } = await supabase
-      .from("orders").select("id, status").eq("order_ref", orderRef).maybeSingle();
+      .from("orders").select("id, status, token_hash").eq("order_ref", orderRef).maybeSingle();
     if (exErr) throw exErr;
     if (existing && !["awaiting_payment", "payment_failed"].includes(existing.status)) {
       return respond(409, { error: "This order has already been paid." });
+    }
+    // An unpaid order can only be changed by the browser that created it.
+    if (existing && existing.token_hash && existing.token_hash !== tokenHash) {
+      return respond(403, { error: "This order reference is already in use. Please refresh and try again." });
     }
 
     // Make sure every photo really reached storage before charging.
@@ -123,7 +133,7 @@ exports.handler = async (event) => {
         status: "awaiting_payment",
         customer_name: cust.name, customer_phone: cust.phone, customer_email: cust.email,
         address: cust.address, city: cust.city, state: cust.state, pincode: cust.pincode,
-        subtotal, shipping: SHIPPING_FEE, total,
+        subtotal, shipping: SHIPPING_FEE, total, token_hash: tokenHash,
       }, { onConflict: "order_ref" })
       .select("id").single();
     if (orderErr) throw orderErr;

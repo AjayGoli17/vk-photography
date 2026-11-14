@@ -420,3 +420,4 @@ a {
         height: 34vh;
     }
 }
+.maps-link:hover{color:var(--text-main)!important;border-color:var(--text-main)!important}

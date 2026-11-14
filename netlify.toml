@@ -108,7 +108,7 @@
     # Public pages still use a few inline scripts/styles and inline event handlers, hence
     # 'unsafe-inline'. Everything else is locked to the hosts the site really talks to
     # (Razorpay, Google Fonts/Maps/Apps Script, Supabase storage, the pincode lookup).
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://checkout.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob:; connect-src 'self' data: blob: https://api.postalpincode.in https://script.google.com https://script.googleusercontent.com https://*.supabase.co https://*.razorpay.com; frame-src https://*.razorpay.com https://www.google.com https://maps.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://*.razorpay.com; frame-ancestors 'self'; upgrade-insecure-requests"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' https://checkout.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob:; connect-src 'self' data: blob: https://api.postalpincode.in https://script.google.com https://script.googleusercontent.com https://*.supabase.co https://*.razorpay.com; frame-src https://*.razorpay.com https://www.google.com https://maps.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://*.razorpay.com; frame-ancestors 'self'; upgrade-insecure-requests"
 
 # The admin page has no inline script (js/admin.js), so it gets a strict script policy.
 # It is enforced together with the policy above, i.e. the stricter of the two wins.
@@ -132,3 +132,36 @@
   for = "/.netlify/functions/*"
   [headers.values]
     Cache-Control = "no-store"
+
+# SEO-PERF:START - browser caching for media (30 days). Rename a file when you replace it.
+[[headers]]
+  for = "/*.webp"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"
+
+[[headers]]
+  for = "/*.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"
+
+[[headers]]
+  for = "/*.jpeg"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"
+
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"
+
+[[headers]]
+  for = "/*.mp4"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"
+
+[[headers]]
+  for = "/*.ico"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"
+
+# SEO-PERF:END

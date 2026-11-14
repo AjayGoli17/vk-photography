@@ -5,7 +5,7 @@ let orders=[],leads=[],products=[],pm={},rev=[],hook={n:0,last:null},store=true,
 const dk=d=>new Date(d).toLocaleDateString('en-CA');
 const tel=p=>'tel:'+String(p||'').replace(/[^\d+]/g,'');
 const itemDesc=i=>{const n=id=>pm[id]?.name||id||'Item';return i.kind=='gift'?`${n(i.product_id)} × ${i.quantity}`:[n(i.frame_id)+' frame',i.size_label,i.quality_id,i.mounting_id&&'mounting: '+i.mounting_id,'qty '+i.quantity].filter(Boolean).join(', ')};
-const mapOrder=r=>({id:r.id,ref:r.order_ref,name:r.customer_name,phone:r.customer_phone,email:r.customer_email,city:r.city,addr:[r.address,r.city,r.state].filter(Boolean).join(', ')+(r.pincode?' '+r.pincode:''),total:r.total,status:r.status,date:dk(r.created_at),paidAt:r.paid_at||r.created_at,pay:r.razorpay_payment_id||'',track:r.tracking_number||'',shippedAt:r.shipped_at,lines:(r.order_items||[]).map(i=>({...i,desc:itemDesc(i)})),items:(r.order_items||[]).map(itemDesc)});
+const mapOrder=r=>({id:r.id,ref:r.order_ref,name:r.customer_name,phone:r.customer_phone,email:r.customer_email,city:r.city,addr:[r.address,r.city,r.state].filter(Boolean).join(', ')+(r.pincode?' '+r.pincode:''),total:r.total,status:r.status,date:dk(r.created_at),paidAt:r.paid_at||r.created_at,pay:r.razorpay_payment_id||'',track:r.tracking_number||'',shippedAt:r.shipped_at,photosDeleted:r.photos_deleted_at||'',keep:!!r.keep_photos,lines:(r.order_items||[]).map(i=>({...i,desc:itemDesc(i)})),items:(r.order_items||[]).map(itemDesc)});
 const mapLead=r=>({id:r.id,src:r.source,name:r.name,phone:r.phone||'',service:r.service||'',date:r.event_date||'',loc:r.location||'',guests:r.guests||0,total:r.estimated_total||0,msg:r.message||'',status:r.status,details:r.details});
 async function loadAll(){
 const[o,l,p,w,st]=await Promise.all([sb.from('orders').select('*, order_items(*)').order('created_at',{ascending:false}).limit(1000),sb.from('leads').select('*').order('created_at',{ascending:false}).limit(1000),sb.from('products').select('*').order('sort_order'),sb.from('webhook_events').select('received_at',{count:'exact'}).order('received_at',{ascending:false}).limit(1),sb.storage.from(BUCKET).list('',{limit:1})]);
@@ -122,6 +122,7 @@ ${nx?`<button class="btn pri full" style="margin-top:16px" data-act="next" data-
 <h3>Photos</h3><div id="photos">Loading…</div>
 <h3>Update</h3><label>Status<select id="st">${OS.map(s=>`<option value="${s}" ${s==o.status?'selected':''}>${cap(lab(s))}</option>`).join('')}</select></label>
 <label>Tracking number<input class="field" id="tr" value="${esc(o.track||'')}" placeholder="Add a tracking number"></label>
+<label style="display:flex;gap:8px;align-items:center;margin:12px 0"><input type="checkbox" id="kp" ${o.keep?'checked':''}> Keep photos (never auto-delete)</label>
 <button class="btn pri full" data-act="save">Save changes</button>`,from);loadPhotos(o)}
 function openLead(id,from){const l=leads.find(x=>x.id==id);cur=id;
 openDrawer(`<div class="dh"><div><h2>${esc(l.name)}</h2><p class="sub">${l.src=='quotation'?'Quote request':'Contact enquiry'}</p>${badge(l.status)}</div><button class="btn x" data-act="close" aria-label="Close">×</button></div>
@@ -132,13 +133,13 @@ ${l.details?`<h3>Request details</h3>${det(l.details)}`:''}<h3>Status</h3><selec
 
 async function save(o,p){const{data,error}=await sb.from('orders').update(p).eq('id',o.id).select('id');
 if(error||!data.length){toast('Couldn’t save: '+(error?.message||'not allowed'));return false}
-if('status'in p)o.status=p.status;if('tracking_number'in p)o.track=p.tracking_number||'';if('shipped_at'in p)o.shippedAt=p.shipped_at;return true}
+if('status'in p)o.status=p.status;if('tracking_number'in p)o.track=p.tracking_number||'';if('shipped_at'in p)o.shippedAt=p.shipped_at;if('keep_photos'in p)o.keep=p.keep_photos;return true}
 async function setStatus(o,s,msg,x={}){const pv={status:o.status,tracking_number:o.track||null,shipped_at:o.shippedAt||null},p={status:s,...x};
 if(s=='shipped'&&!o.shippedAt)p.shipped_at=new Date().toISOString();
 if(!await save(o,p))return false;render();
 toast(msg||`Order ${o.ref} marked ${lab(s)}`,async()=>{if(await save(o,pv)){render();if(cur==o.ref)openOrder(o.ref,opener);toast('Change undone')}});return true}
 async function loadPhotos(o){const box=$('#photos'),ls=o.lines.filter(l=>l.photo_path);
-if(!ls.length){box.textContent='No photos attached.';return}
+if(o.photosDeleted){box.textContent='Photos removed automatically on '+new Date(o.photosDeleted).toLocaleDateString('en-IN')+'.';return}if(!ls.length){box.textContent='No photos attached.';return}
 const ps=ls.map(l=>l.photo_path),bk=sb.storage.from(BUCKET),[a,b]=await Promise.all([bk.createSignedUrls(ps,900),bk.createSignedUrls(ps,900,{download:true})]);
 if(cur!=o.ref||!$('#photos'))return;if(a.error){box.textContent='Couldn’t load photos: '+a.error.message;return}
 const u=(r,p)=>r.data?.find(x=>x.path==p)?.signedUrl||'';
@@ -156,7 +157,7 @@ else if(a=='refresh')refresh().then(()=>toast('Updated'));
 else if(a=='out')signOut();
 else if(a=='copy'){try{navigator.clipboard.writeText(d.copy).then(()=>toast('Copied'),()=>toast('Couldn’t copy'))}catch(_){toast('Couldn’t copy')}}
 else if(a=='next'){const o=orders.find(x=>x.ref==cur);setStatus(o,d.to).then(k=>k&&openOrder(o.ref,opener))}
-else if(a=='save'){const o=orders.find(x=>x.ref==cur),s=$('#st').value,tr=$('#tr').value.trim(),x=tr!=o.track?{tracking_number:tr||null}:{};
+else if(a=='save'){const o=orders.find(x=>x.ref==cur),s=$('#st').value,tr=$('#tr').value.trim(),x=tr!=o.track?{tracking_number:tr||null}:{};{const kp=$('#kp');if(kp&&kp.checked!==o.keep)x.keep_photos=kp.checked};
 (s!=o.status?setStatus(o,s,'Changes saved',x):Object.keys(x).length?save(o,x).then(r=>r&&(render(),toast('Changes saved'),true)):Promise.resolve(true)).then(r=>r&&closeDrawer())}
 else if(a=='csv'){const f=v=>{let t=String(v??'');if(/^[=+\-@\t\r]/.test(t))t="'"+t;return`"${t.replace(/"/g,'""')}"`},r=['Order,Name,Phone,Email,Address,Total,Status,Tracking,Payment,Date',...orders.map(o=>[o.ref,o.name,o.phone,o.email,o.addr,o.total,o.status,o.track,o.pay,o.date].map(f).join(','))];const x=document.createElement('a');x.href=URL.createObjectURL(new Blob(['\ufeff'+r.join('\n')],{type:'text/csv'}));x.download='orders.csv';x.click();toast('Orders exported')}
 return}

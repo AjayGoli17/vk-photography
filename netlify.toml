@@ -96,3 +96,7 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 # HTML keeps Netlify's default (always revalidate), so a deploy shows up immediately and points at the new /assets files.
+
+# Daily photo cleanup: 03:00 IST = 21:30 UTC (see docs/PHOTO-CLEANUP.md)
+[functions."cleanup-photos"]
+  schedule = "30 21 * * *"

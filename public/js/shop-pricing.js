@@ -157,6 +157,15 @@
         tip: "Bright, high-contrast photos look best through sequins.",
         minResolution: { w: 1000, h: 1200 },
       },
+      {
+        // TEST PRICE: Rs 2 + free shipping so you can test a real payment. Set the real price and remove freeShipping when done.
+        id: "illuminated-frame", name: "Illuminated Photo Frame", pageTitle: "Create your illuminated frame", price: 2, freeShipping: true,
+        image: "gifts/illuminated-photo-frame.webp",
+        description: "Wooden LED photo frame, 5 × 7 in. Your photo is printed and lit from below.",
+        note: "5 × 7 inch landscape print inside a wooden frame with a warm LED base. Drag and zoom to choose what shows.",
+        tip: "Bright, sharp photos look best when lit.",
+        minResolution: { w: 1050, h: 750 },
+      },
     ];
   
     const SHIPPING_FEE = 199;
@@ -207,9 +216,18 @@
       return getUnitPrice(item);
     }
   
+    /* Shipping: normally SHIPPING_FEE, but 0 when every item in the cart is a product marked freeShipping. */
+    function getShippingFee(items) {
+      if (!Array.isArray(items) || !items.length) return 0;
+      const allFree = items.every((i) => {
+        const p = i && i.productId !== undefined ? PRODUCTS.find((x) => x.id === i.productId) : null;
+        return p && p.freeShipping === true;
+      });
+      return allFree ? 0 : SHIPPING_FEE;
+    }
     return {
       FRAMES, SIZES, ORIENTATIONS, MOUNTINGS, QUALITIES, PRINT_PRICES, PRODUCTS,
       SHIPPING_FEE, CURRENCY, MAX_QTY_PER_ITEM, MAX_ITEMS_PER_ORDER,
-      getPrintPrice, getUnitPrice, getProductPrice, getItemUnitPrice, getMountingPrice, MOUNTING_SIZE_PRICES,
+      getShippingFee, getPrintPrice, getUnitPrice, getProductPrice, getItemUnitPrice, getMountingPrice, MOUNTING_SIZE_PRICES,
     };
   });

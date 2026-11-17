@@ -10,7 +10,7 @@
    Razorpay order-creation function always agree on prices.
    Change prices/add frames/sizes in js/shop-pricing.js only.
    ------------------------------------------------------------ */
-   const { FRAMES, SIZES, ORIENTATIONS, MOUNTINGS, QUALITIES, PRODUCTS, SHIPPING_FEE, MAX_QTY_PER_ITEM, getPrintPrice, getMountingPrice } = window.VKPricing;
+   const { FRAMES, SIZES, ORIENTATIONS, MOUNTINGS, QUALITIES, PRODUCTS, SHIPPING_FEE, MAX_QTY_PER_ITEM, getPrintPrice, getMountingPrice, getShippingFee } = window.VKPricing;
 
    /* Razorpay Checkout — the public Key ID is safe to expose to the
       browser and is returned by the create-order function on each
@@ -1049,9 +1049,9 @@
      `).join("");
    
      const productTotal = cart.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
-     const total = productTotal + (cart.length ? SHIPPING_FEE : 0);
+     const total = productTotal + getShippingFee(cart);
      document.getElementById("coProduct").textContent = formatINR(productTotal);
-     document.getElementById("coShipping").textContent = formatINR(cart.length ? SHIPPING_FEE : 0);
+     document.getElementById("coShipping").textContent = formatINR(getShippingFee(cart));
      document.getElementById("coTotal").textContent = formatINR(total);
    }
    
@@ -1090,7 +1090,7 @@
    
        const cart = Store.getCart();
        const productTotal = cart.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
-       const shipping = SHIPPING_FEE;
+       const shipping = getShippingFee(cart);
        const total = productTotal + shipping;
    
        const order = {

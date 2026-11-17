@@ -11,7 +11,7 @@
 const crypto = require("crypto");
 const Razorpay = require("razorpay");
 const {
-  SHIPPING_FEE, MAX_QTY_PER_ITEM, MAX_ITEMS_PER_ORDER, SIZES, getItemUnitPrice,
+  SHIPPING_FEE, MAX_QTY_PER_ITEM, MAX_ITEMS_PER_ORDER, SIZES, getItemUnitPrice, getShippingFee,
 } = require("../../public/js/shop-pricing.js");
 const { db, respond, allowRequest, claimOrderRef, PHOTO_BUCKET } = require("./_lib/db");
 
@@ -84,7 +84,8 @@ exports.handler = async (event) => {
     });
   }
 
-  const total = subtotal + SHIPPING_FEE;
+  const shippingFee = getShippingFee(items);
+  const total = subtotal + shippingFee;
   const amountInPaise = Math.round(total * 100);
   if (!Number.isFinite(amountInPaise) || amountInPaise <= 0) {
     return respond(400, { error: "Could not calculate a valid order amount." });
@@ -131,7 +132,7 @@ exports.handler = async (event) => {
       status: "awaiting_payment",
       customer_name: cust.name, customer_phone: cust.phone, customer_email: cust.email,
       address: cust.address, city: cust.city, state: cust.state, pincode: cust.pincode,
-      subtotal, shipping: SHIPPING_FEE, total, token_hash: tokenHash,
+      subtotal, shipping: shippingFee, total, token_hash: tokenHash,
     };
     let orderId;
     if (existing) {

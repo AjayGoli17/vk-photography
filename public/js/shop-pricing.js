@@ -158,8 +158,7 @@
         minResolution: { w: 1000, h: 1200 },
       },
       {
-        // TEST PRICE: Rs 2 + free shipping so you can test a real payment. Set the real price and remove freeShipping when done.
-        id: "illuminated-frame", name: "Illuminated Photo Frame", pageTitle: "Create your illuminated frame", price: 2, freeShipping: true,
+        id: "illuminated-frame", name: "Illuminated Photo Frame", pageTitle: "Create your illuminated frame", price: 1100,
         image: "gifts/illuminated-photo-frame.webp",
         description: "Wooden LED photo frame, 5 × 7 in. Your photo is printed and lit from below.",
         note: "5 × 7 inch landscape print inside a wooden frame with a warm LED base. Drag and zoom to choose what shows.",
